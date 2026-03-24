@@ -1,3 +1,49 @@
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# AI / Agent Tooling
+# =========================
+
+# Claude
+.claude/
+.claude.json
+claude.log
+
+# Codex
+.codex/
+.codex.json
+codex.log
+
+# Antigravity
+.antigravity/
+.antigravity.json
+antigravity.log
+
+# Generic AI / Agent scratch
+.ai/
+.agent/
+.agents/
+*.agent.log
+
+# =========================
+# Editor / IDE State
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# =========================
+# Build / Generated Artifacts
+# =========================
+
 # Prerequisites
 *.d
 
@@ -41,6 +87,7 @@
 *.su
 *.idb
 *.pdb
+*.dwo
 
 # Kernel Module Compile Results
 *.mod*
@@ -51,5 +98,11 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# debug information files
-*.dwo
+# =========================
+# Temporary / Local Output
+# =========================
+tmp/
+temp/
+.cache/
+build/
+dist/

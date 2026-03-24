@@ -3,13 +3,10 @@
 <!-- Logo -->
 <img src="kernul-logo.png" alt="KERNUL Logo" width="160" />
 
-# KERNUL
-
 **A modern operating system for people who care how things work.**
 
 Clear. Open. Deterministic.  
-Built from first principles with respect for the machine and the user.
-
+Build from UNIX-like principles with respect for the machine and the user.
 </div>
 
 ---

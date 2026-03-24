@@ -22,6 +22,7 @@ CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -Werror \
 # Phase 0-4 kernel sources
 SRCS = arch/stub/arch.c  \
        core/assert.c     \
+       core/process.c    \
        core/syscall_dispatch.c \
        core/spinlock.c   \
        init/boot.c       \
@@ -48,6 +49,8 @@ all: $(OBJS)
 test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/test_runq tests/test_sched_api.o tests/test_sched \
        tests/test_cpu_state_api.o tests/test_idle \
+       tests/process/test_process_contract_compile.o \
+       tests/process/test_process_link \
        tests/syscall/test_syscall_contract_compile.o \
        tests/syscall/test_sys_dispatch_link \
        tests/arch/x86_64/test_arch_syscall_enter_link \
@@ -61,6 +64,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/test_sched    && echo "test_sched:         passed." || echo "test_sched:         FAILED."
 	@echo "test_cpu_state_api:  compile-check passed."
 	./tests/test_idle     && echo "test_idle:          passed." || echo "test_idle:          FAILED."
+	@echo "test_process_contract_compile: compile-check passed."
+	./tests/process/test_process_link && echo "test_process_link:  passed." || echo "test_process_link:  FAILED."
 	@echo "test_syscall_contract_compile: compile-check passed."
 	./tests/syscall/test_sys_dispatch_link && echo "test_sys_dispatch_link: passed." || echo "test_sys_dispatch_link: FAILED."
 	./tests/arch/x86_64/test_arch_syscall_enter_link && echo "test_arch_syscall_enter_link(x86_64): passed." || echo "test_arch_syscall_enter_link(x86_64): FAILED."
@@ -97,6 +102,13 @@ tests/test_idle: tests/test_idle.c sched/idle.c sched/sched.c \
                  core/spinlock.c core/assert.c arch/stub/arch.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+# Compile-only: verifies process contract declarations and visible struct layout.
+tests/process/test_process_contract_compile.o: tests/process/test_process_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/process/test_process_link: tests/process/test_process_link.c core/process.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 # Compile-only: verifies syscall.h declarations and types.
 tests/syscall/test_syscall_contract_compile.o: tests/syscall/test_syscall_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
@@ -116,6 +128,8 @@ clean:
 	rm -f $(OBJS) tests/test_boot tests/test_list tests/test_spinlock \
 	      tests/test_thread tests/test_runq tests/test_sched_api.o \
 	      tests/test_sched tests/test_cpu_state_api.o tests/test_idle \
+	      tests/process/test_process_contract_compile.o \
+	      tests/process/test_process_link \
 	      tests/syscall/test_syscall_contract_compile.o \
 	      tests/syscall/test_sys_dispatch_link \
 	      tests/arch/x86_64/test_arch_syscall_enter_link \

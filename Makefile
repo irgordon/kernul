@@ -1,0 +1,94 @@
+# KERNUL — Phases 0-2 build
+#
+# Sources: only files in scope for phases 0, 1, and 2.
+# Out-of-scope files are not listed here, even if they exist in the tree.
+# See docs/ROADMAP.md.
+#
+# Architecture include path:
+#   -Iarch/stub resolves <cpu_state.h> to arch/stub/cpu_state.h.
+#   Replace with -Iarch/<target> when building for real hardware.
+#   Source files never embed the literal target path. See CODING_STANDARD §15.
+#
+# Test build: `make test` compiles and runs tests/test_boot.c against
+#   the hosted stdlib. The kernel build uses -ffreestanding -nostdlib.
+
+CC      = gcc
+CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -Werror \
+          -ffreestanding -nostdlib                   \
+          -Iinclude                                  \
+          -Iarch/stub                                \
+          -DKERNUL_STUB_TARGET
+
+# Phase 0-4 kernel sources
+SRCS = arch/stub/arch.c  \
+       core/assert.c     \
+       core/spinlock.c   \
+       init/boot.c       \
+       mm/mm.c           \
+       sched/sched.c     \
+       sched/idle.c
+
+OBJS = $(SRCS:.c=.o)
+
+# Test build uses hosted stdlib so tests can call exit(), etc.
+TEST_CFLAGS = -std=c11 -Wall -Wextra -Werror \
+              -Iinclude                        \
+              -Iarch/stub                      \
+              -DKERNUL_STUB_TARGET
+
+.PHONY: all test clean
+
+all: $(OBJS)
+	@echo "Phase 0-2 build: all objects compiled."
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
+      tests/test_runq tests/test_sched_api.o tests/test_sched \
+      tests/test_cpu_state_api.o tests/test_idle
+	./tests/test_boot     && echo "test_boot:          passed." || echo "test_boot:          FAILED."
+	./tests/test_list     && echo "test_list:          passed." || echo "test_list:          FAILED."
+	./tests/test_spinlock && echo "test_spinlock:      passed." || echo "test_spinlock:      FAILED."
+	./tests/test_thread   && echo "test_thread:        passed." || echo "test_thread:        FAILED."
+	./tests/test_runq     && echo "test_runq:          passed." || echo "test_runq:          FAILED."
+	@echo "test_sched_api:      compile-check passed."
+	./tests/test_sched    && echo "test_sched:         passed." || echo "test_sched:         FAILED."
+	@echo "test_cpu_state_api:  compile-check passed."
+	./tests/test_idle     && echo "test_idle:          passed." || echo "test_idle:          FAILED."
+
+tests/test_boot: tests/test_boot.c arch/stub/arch.c core/assert.c init/boot.c mm/mm.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/test_list: tests/test_list.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/test_spinlock: tests/test_spinlock.c core/spinlock.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/test_thread: tests/test_thread.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/test_runq: tests/test_runq.c core/spinlock.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+# Compile-only: verifies sched.h signature consistency. Linked binary
+# is test_sched below.
+tests/test_sched_api.o: tests/test_sched_api.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/test_sched: tests/test_sched.c sched/sched.c core/spinlock.c core/assert.c arch/stub/arch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+# Compile-only: verifies context-switch contract declarations and types.
+tests/test_cpu_state_api.o: tests/test_cpu_state_api.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/test_idle: tests/test_idle.c sched/idle.c sched/sched.c \
+                 core/spinlock.c core/assert.c arch/stub/arch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+clean:
+	rm -f $(OBJS) tests/test_boot tests/test_list tests/test_spinlock \
+	      tests/test_thread tests/test_runq tests/test_sched_api.o \
+	      tests/test_sched tests/test_cpu_state_api.o tests/test_idle

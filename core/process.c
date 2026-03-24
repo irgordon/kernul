@@ -24,15 +24,26 @@ struct process *process_get(struct process *proc)
     if (proc == NULL)
         return NULL;
 
-    proc->refcount++;
+    (void)__atomic_add_fetch(&proc->refcount, 1U, __ATOMIC_ACQ_REL);
     return proc;
 }
 
 void process_put(struct process *proc)
 {
+    u32 prev;
+
     if (proc == NULL)
         return;
 
-    if (proc->refcount > 0)
-        proc->refcount--;
+    prev = __atomic_load_n(&proc->refcount, __ATOMIC_ACQUIRE);
+    while (prev != 0U) {
+        if (__atomic_compare_exchange_n(&proc->refcount,
+                                        &prev,
+                                        prev - 1U,
+                                        false,
+                                        __ATOMIC_ACQ_REL,
+                                        __ATOMIC_ACQUIRE)) {
+            break;
+        }
+    }
 }

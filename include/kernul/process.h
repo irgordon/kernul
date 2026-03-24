@@ -74,7 +74,8 @@ struct process *process_alloc(void);
  * CONTEXT: any.
  * SLEEP: no.
  * ALLOC: no.
- * LOCKS: caller must synchronize concurrent lifetime transitions.
+ * LOCKS: none required for refcount increment; concurrent increments are
+ *        atomic. Caller still owns publication and object-graph locking.
  * OWNERSHIP: returns the same pointer with one additional reference.
  * FAILURE: NULL input returns NULL.
  */
@@ -86,7 +87,8 @@ struct process *process_get(struct process *proc);
  * CONTEXT: any.
  * SLEEP: no.
  * ALLOC: no.
- * LOCKS: caller must synchronize concurrent lifetime transitions.
+ * LOCKS: none required for refcount decrement; concurrent decrements are
+ *        atomic. Caller still owns publication and object-graph locking.
  * OWNERSHIP: drops one reference; final-release reclamation may be stubbed.
  * FAILURE: NULL input is ignored.
  */

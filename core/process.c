@@ -9,6 +9,7 @@
  */
 
 #include <kernul/process.h>
+#include <kernul/assert.h>
 
 struct process *process_alloc(void)
 {
@@ -36,6 +37,8 @@ void process_put(struct process *proc)
         return;
 
     prev = __atomic_load_n(&proc->refcount, __ATOMIC_ACQUIRE);
+    ASSERT(prev != 0U);
+
     while (prev != 0U) {
         if (__atomic_compare_exchange_n(&proc->refcount,
                                         &prev,

@@ -106,7 +106,7 @@ tests/test_idle: tests/test_idle.c sched/idle.c sched/sched.c \
 tests/process/test_process_contract_compile.o: tests/process/test_process_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
-tests/process/test_process_link: tests/process/test_process_link.c core/process.c
+tests/process/test_process_link: tests/process/test_process_link.c core/process.c core/assert.c arch/stub/arch.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 # Compile-only: verifies syscall.h declarations and types.

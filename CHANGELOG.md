@@ -223,6 +223,28 @@ This step defines boundary shape only. It does not implement userspace
 execution, ABI compatibility claims, syscall dispatch policy, real trap
 handling, or return-to-userspace behavior.
 
+#### Phase 5 boundary step — Kernel process structure contract
+
+- `include/kernul/process.h` — kernel-internal process structure contract
+  defining structural process identity (`process_id_t`, `PROCESS_ID_INVALID`),
+  structural lifecycle states (`PROCESS_STATE_CREATED`, `PROCESS_STATE_ALIVE`,
+  `PROCESS_STATE_ZOMBIE`, `PROCESS_STATE_DEAD`), shared lifetime model
+  (`refcount`), and structural relationships (`parent`, `threads`,
+  `address_space`, `children`)
+- `core/process.c` — deterministic lifecycle helper stubs:
+  `process_alloc()` (fixed NULL failure stub), `process_get()` (reference
+  acquisition), `process_put()` (reference release)
+- `tests/process/test_process_contract_compile.c` — compile-check translation
+  unit validating declaration visibility, helper signatures, and visible
+  process struct field layout in kernel code
+- `tests/process/test_process_link.c` — link-check for process lifecycle helper
+  symbol presence
+
+This step defines structural process identity only as a Phase 5 boundary.
+It does not implement address-space management, scheduling behavior, userspace
+execution semantics, process creation policy, IPC, signals, or file descriptor
+semantics.
+
 ---
 
 ### Changed — Phase 3

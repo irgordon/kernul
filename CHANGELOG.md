@@ -245,6 +245,28 @@ It does not implement address-space management, scheduling behavior, userspace
 execution semantics, process creation policy, IPC, signals, or file descriptor
 semantics.
 
+#### Phase 5 boundary step — Address-space ownership contract
+
+- `include/kernul/address_space.h` — kernel-internal address-space contract
+  defining ownership and association shape: structural identity
+  (`address_space_id_t`), structural initialization state
+  (`ADDRESS_SPACE_STATE_UNINITIALIZED`, `ADDRESS_SPACE_STATE_INITIALIZED`),
+  shared lifetime model (`refcount`), optional owning process association
+  (`owner`, nullable during early lifecycle), and architecture-specific opaque
+  handle reference (`arch_handle`)
+- `core/address_space.c` — deterministic lifecycle helper stubs:
+  `address_space_alloc()` (fixed NULL failure stub), `address_space_get()`
+  (reference acquisition), `address_space_put()` (reference release)
+- `tests/address_space/test_address_space_contract_compile.c` — compile-check
+  translation unit validating contract declaration visibility, helper
+  signatures, and visible struct field layout in kernel code
+- `tests/address_space/test_address_space_link.c` — link-check for
+  address-space lifecycle helper symbol presence
+
+This step defines ownership and process-association boundaries only as a
+Phase 5 contract surface. It does not implement VM policy, mapping behavior,
+paging behavior, MMU enablement, loader logic, or userspace memory semantics.
+
 ---
 
 ### Changed — Phase 3

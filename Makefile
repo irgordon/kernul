@@ -22,6 +22,7 @@ CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -Werror \
 # Phase 0-4 kernel sources
 SRCS = arch/stub/arch.c  \
        core/assert.c     \
+       core/syscall_dispatch.c \
        core/spinlock.c   \
        init/boot.c       \
        mm/mm.c           \
@@ -45,8 +46,12 @@ all: $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
-      tests/test_runq tests/test_sched_api.o tests/test_sched \
-      tests/test_cpu_state_api.o tests/test_idle
+       tests/test_runq tests/test_sched_api.o tests/test_sched \
+       tests/test_cpu_state_api.o tests/test_idle \
+       tests/syscall/test_syscall_contract_compile.o \
+       tests/syscall/test_sys_dispatch_link \
+       tests/arch/x86_64/test_arch_syscall_enter_link \
+       tests/arch/aarch64/test_arch_syscall_enter_link
 	./tests/test_boot     && echo "test_boot:          passed." || echo "test_boot:          FAILED."
 	./tests/test_list     && echo "test_list:          passed." || echo "test_list:          FAILED."
 	./tests/test_spinlock && echo "test_spinlock:      passed." || echo "test_spinlock:      FAILED."
@@ -56,6 +61,10 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/test_sched    && echo "test_sched:         passed." || echo "test_sched:         FAILED."
 	@echo "test_cpu_state_api:  compile-check passed."
 	./tests/test_idle     && echo "test_idle:          passed." || echo "test_idle:          FAILED."
+	@echo "test_syscall_contract_compile: compile-check passed."
+	./tests/syscall/test_sys_dispatch_link && echo "test_sys_dispatch_link: passed." || echo "test_sys_dispatch_link: FAILED."
+	./tests/arch/x86_64/test_arch_syscall_enter_link && echo "test_arch_syscall_enter_link(x86_64): passed." || echo "test_arch_syscall_enter_link(x86_64): FAILED."
+	./tests/arch/aarch64/test_arch_syscall_enter_link && echo "test_arch_syscall_enter_link(aarch64): passed." || echo "test_arch_syscall_enter_link(aarch64): FAILED."
 
 tests/test_boot: tests/test_boot.c arch/stub/arch.c core/assert.c init/boot.c mm/mm.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
@@ -88,7 +97,26 @@ tests/test_idle: tests/test_idle.c sched/idle.c sched/sched.c \
                  core/spinlock.c core/assert.c arch/stub/arch.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+# Compile-only: verifies syscall.h declarations and types.
+tests/syscall/test_syscall_contract_compile.o: tests/syscall/test_syscall_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/syscall/test_sys_dispatch_link: tests/syscall/test_sys_dispatch_link.c core/syscall_dispatch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/arch/x86_64/test_arch_syscall_enter_link: tests/arch/x86_64/test_arch_syscall_enter_link.c \
+                                                 arch/x86_64/arch_syscall_enter.c arch/stub/arch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/arch/aarch64/test_arch_syscall_enter_link: tests/arch/aarch64/test_arch_syscall_enter_link.c \
+                                                  arch/aarch64/arch_syscall_enter.c arch/stub/arch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 clean:
 	rm -f $(OBJS) tests/test_boot tests/test_list tests/test_spinlock \
 	      tests/test_thread tests/test_runq tests/test_sched_api.o \
-	      tests/test_sched tests/test_cpu_state_api.o tests/test_idle
+	      tests/test_sched tests/test_cpu_state_api.o tests/test_idle \
+	      tests/syscall/test_syscall_contract_compile.o \
+	      tests/syscall/test_sys_dispatch_link \
+	      tests/arch/x86_64/test_arch_syscall_enter_link \
+	      tests/arch/aarch64/test_arch_syscall_enter_link

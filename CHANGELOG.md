@@ -197,6 +197,32 @@ physical hardware at this version.
   bootstrap complete), `THREAD_ID_IDLE ≠ THREAD_ID_INVALID`, priority
   ordering against all other defined levels
 
+#### Phase 5 boundary step — Syscall entry contract surface
+
+- `include/kernul/syscall.h` — first controlled userspace-to-kernel boundary
+  contract surface; declares architecture-owned `arch_syscall_enter()` and
+  common-owned `sys_dispatch()` with explicit calling context, ownership, and
+  kernel-internal ABI-boundary statement
+- `core/syscall_dispatch.c` — deterministic `sys_dispatch()` stub that returns
+  fixed `KERN_ENOSYS` for all inputs; no syscall table, no registration
+  mechanism, no per-syscall handlers
+- `arch/x86_64/arch_syscall_enter.c` — x86_64 architecture-owned
+  `arch_syscall_enter()` stub that unconditionally terminates via `arch_halt()`
+- `arch/aarch64/arch_syscall_enter.c` — AArch64 architecture-owned
+  `arch_syscall_enter()` stub that unconditionally terminates via `arch_halt()`
+- `tests/syscall/test_syscall_contract_compile.c` — compile-check translation
+  unit validating syscall contract declaration presence and signatures
+- `tests/syscall/test_sys_dispatch_link.c` — link-check for `sys_dispatch`
+  symbol presence
+- `tests/arch/x86_64/test_arch_syscall_enter_link.c` — link-check for x86_64
+  `arch_syscall_enter` symbol presence
+- `tests/arch/aarch64/test_arch_syscall_enter_link.c` — link-check for AArch64
+  `arch_syscall_enter` symbol presence
+
+This step defines boundary shape only. It does not implement userspace
+execution, ABI compatibility claims, syscall dispatch policy, real trap
+handling, or return-to-userspace behavior.
+
 ---
 
 ### Changed — Phase 3

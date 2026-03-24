@@ -89,10 +89,6 @@ Bad:
 - `stuff`
 - `tmp2`
 
-Add the following section **directly under section `4. Naming`** in `docs/CODING_STANDARD.md`.
-This update formalizes the new guideline: **no mandatory project prefix**, prefix only when it serves a technical purpose.
-The language is written to be enforceable during review and consistent with kernel conventions.
-
 ## 4.3 Prefixing and Namespace Discipline
 
 Project-wide prefixes are not required for internal kernel symbols.

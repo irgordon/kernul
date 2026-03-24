@@ -28,7 +28,9 @@ Build from UNIX-like principles with respect for the machine and the user.
 
 KERNUL is a modern, open-source operating system built for people who want **clarity instead of complexity.** Most systems are a "black box"—you use them, but you don't really know what they’re doing behind the scenes. KERNUL is different. It’s built on a single, powerful idea: **The system should never hide what it’s doing or who is in control.**
 
-### **Intentional by Design.** ### **Total Transparency.** ### **Zero Bloat. All Performance.**
+### **Intentional by Design.** 
+### **Total Transparency.** 
+### **Zero Bloat. All Performance.**
 
 KERNUL is intentionally lean and easy to follow. Whether you're a curious learner, a professional creator, or a researcher, you can finally trust your system because you can actually understand it.
 

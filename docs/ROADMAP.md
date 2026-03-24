@@ -116,7 +116,7 @@ Core kernel primitives exist and are mechanically reviewable.
 
 # Phase 4 — Execution and scheduling foundations
 
-**Status:** In Progress
+**Status:** Complete
 
 **Purpose:**  
 Define execution structure before introducing scheduling policy.
@@ -128,10 +128,7 @@ Define execution structure before introducing scheduling policy.
 - run queue structure  
 - scheduler public interface  
 - scheduler initialization stub  
-- enqueue and dequeue stubs  
-
-**Remaining deliverables:**
-
+- enqueue and dequeue stubs
 - context-switch contract surface  
 - idle thread contract  
 

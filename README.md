@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Logo -->
-<img src="kernul-logo.png" alt="KERNUL Logo" width="160" />
+<a href="https://kernul.org"><img src="kernul-logo.png" alt="KERNUL Logo" width="160" /></a>
 
 **A modern operating system for people who care how things work.**
 

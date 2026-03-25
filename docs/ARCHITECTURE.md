@@ -464,6 +464,82 @@ Bootstrap completion occurs only after the first context switch.
 This boundary is explicit and must not be bypassed.
 
 ---
+# 6.1 Init transition boundary
+
+Purpose:
+
+Define the single deterministic kernel boundary that composes the first process,
+address space, and executable image before userspace execution.
+
+This boundary is implemented by:
+
+core/init.c  
+include/kernul/init.h
+
+This surface is the canonical init transition boundary.
+
+It is not a helper.
+
+It is not a boot convenience.
+
+It is the first structural userspace launch composition point.
+
+---
+
+Sequence performed by the init boundary:
+
+1. process allocated
+2. address space allocated
+3. structural ownership associations established
+4. ELF image allocated
+5. ELF image structurally validated
+6. deterministic stop condition reached
+
+The boundary intentionally stops before:
+
+- userspace execution
+- context switch into userspace
+- ELF mapping
+- relocation
+- paging or MMU behavior
+- scheduling policy
+- ABI compatibility guarantees
+
+This boundary defines composition only.
+
+It does not define execution.
+
+---
+
+Failure behavior:
+
+The init boundary must return deterministic status codes:
+
+KERN_ENOMEM
+
+If any allocation fails.
+
+KERN_ENOSYS
+
+After successful structural composition and validation.
+
+This return value explicitly marks the phase boundary.
+
+It is not an error.
+
+It is a stop condition.
+
+---
+
+Architectural rule:
+
+Only one init transition boundary may exist.
+
+Future init-related work must layer around this surface.
+
+It must not bypass or replace it.
+
+---
 
 # 7. Concurrency model
 

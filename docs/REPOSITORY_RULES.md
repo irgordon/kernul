@@ -49,7 +49,8 @@ Examples:
 - Scheduler policy must not appear before scheduler structure exists.
 - Context switching must not appear before the context-switch contract exists.
 - Idle-thread behavior must not imply power management or timer policy.
-- Userspace behavior must not appear before the syscall boundary exists.
+- Userspace behavior must not appear before the userspace transition boundary exists.
+- File descriptor or filesystem behavior must not appear before Phase 6 begins.
 
 Violations of phase discipline must be rejected.
 
@@ -75,6 +76,84 @@ A task must not:
 - expand subsystem responsibilities prematurely
 
 This rule preserves reviewability and prevents architectural drift.
+
+---
+
+# Init Transition Boundary Rule
+
+The init transition boundary defines the first structural userspace launch composition point.
+
+This boundary is implemented by:
+
+include/kernul/init.h  
+core/init.c
+
+This surface is the canonical init boundary.
+
+It is not a helper.
+
+It is not an early boot utility.
+
+It is the single structural transition point between kernel initialization
+and userspace execution readiness.
+
+---
+
+Required behavior of the init boundary:
+
+The boundary must:
+
+- allocate a process
+- allocate an address space
+- associate the address space with the process
+- allocate an ELF image
+- associate the ELF image with the process and address space
+- perform structural validation of the image
+- stop deterministically
+
+The boundary must not:
+
+- perform userspace execution
+- perform context switching into userspace
+- perform ELF mapping
+- perform relocation
+- perform paging or MMU behavior
+- introduce scheduler policy
+- introduce userspace compatibility claims
+
+---
+
+Deterministic stop condition:
+
+After structural composition and validation:
+
+init_launch() must return:
+
+KERN_ENOSYS
+
+This return value is a phase boundary marker.
+
+It is not an error.
+
+It is a correctness signal.
+
+---
+
+Architectural constraint:
+
+Only one init transition boundary may exist.
+
+Future init-related behavior must:
+
+- layer around this boundary
+- extend behavior after this boundary
+- respect its deterministic stop condition
+
+Future code must not:
+
+- duplicate init logic
+- bypass this boundary
+- redefine process launch sequencing
 
 ---
 
@@ -112,13 +191,9 @@ Common code must never:
 
 All CPU execution state must flow through:
 
-```
-
-arch_cpu_state
-arch_cpu_state_init()
+arch_cpu_state  
+arch_cpu_state_init()  
 arch_cpu_state_switch()
-
-```
 
 These are the only valid context-switch surfaces.
 

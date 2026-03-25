@@ -59,12 +59,12 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/address_space/test_address_space_contract_compile.o \
        tests/address_space/test_address_space_link \
        tests/fd/test_fd_table_contract_compile.o \
-        tests/fd/test_fd_table_link \
-        tests/vfs/test_vfs_contract_compile.o \
-        tests/vfs/test_vfs_link \
-        tests/process/test_process_contract_compile.o \
-        tests/process/test_process_link \
-        tests/elf/test_elf_loader_contract_compile.o \
+       tests/fd/test_fd_table_link \
+       tests/vfs/test_vfs_contract_compile.o \
+       tests/vfs/test_vfs_link \
+       tests/process/test_process_contract_compile.o \
+       tests/process/test_process_link \
+       tests/elf/test_elf_loader_contract_compile.o \
        tests/elf/test_elf_loader_link \
        tests/syscall/test_syscall_contract_compile.o \
        tests/syscall/test_sys_dispatch_link \

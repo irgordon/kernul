@@ -15,6 +15,8 @@
  *
  * Signal identity rules:
  *   Signals are identified by small integer IDs only.
+ *   signal_id_t value 0 is invalid and reserved as "no signal".
+ *   Valid signal IDs in this phase are 1..(SIGNAL_MAX_IDS - 1).
  *   No POSIX numbering guarantees are provided.
  *   No reserved semantics beyond identity are defined.
  *   No default actions are defined in this phase.

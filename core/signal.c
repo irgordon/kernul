@@ -24,7 +24,7 @@ static bool signal_id_valid(signal_id_t sig)
 static void signal_set_clear_all(struct signal_set *set)
 {
     u32 i;
-    u32 nwords = (u32)(sizeof(set->bits) / sizeof(set->bits[0]));
+    u32 nwords = sizeof(set->bits) / sizeof(set->bits[0]);
 
     for (i = 0U; i < nwords; i++)
         set->bits[i] = 0U;

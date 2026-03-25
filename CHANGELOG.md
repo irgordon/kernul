@@ -396,6 +396,26 @@ It does not implement signal delivery or execution interruption semantics.
 It does not implement scheduler, terminal, or job-control integration.
 It does not imply POSIX numbering or compatibility guarantees.
 
+#### Phase 6 boundary step — Session and process group contract surface
+
+- `include/kernul/session.h` — kernel-internal session/process-group contract
+  defining structural identity (`session_id_t`, `process_group_id_t`),
+  identity containers (`struct session`, `struct process_group`), borrowed
+  leader/session associations, and explicit ownership/lifetime boundaries
+- `core/session.c` — deterministic bounded creation stubs:
+  `session_create()`/`process_group_create()` for identity containers only and
+  structural ID accessors `session_id()`/`process_group_id()`
+- `tests/session/test_session_contract_compile.c` — compile-check translation
+  unit validating declaration visibility, signatures, and visible session and
+  process-group struct field layout
+- `tests/session/test_session_link.c` — link-check for session/process-group
+  contract symbol presence
+
+This Phase 6 boundary step is kernel-internal only and is not a userspace ABI.
+It defines identity and grouping structure only.
+It does not implement signal routing, terminal behavior, or job-control behavior.
+It does not imply POSIX numbering or compatibility guarantees.
+
 ---
 
 ### Changed — Phase 3

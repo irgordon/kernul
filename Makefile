@@ -27,6 +27,7 @@ SRCS = arch/stub/arch.c  \
        core/fd_table.c    \
        core/init.c       \
        core/process.c    \
+       core/vfs.c        \
        core/syscall_dispatch.c \
        core/spinlock.c   \
        init/boot.c       \
@@ -58,10 +59,12 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/address_space/test_address_space_contract_compile.o \
        tests/address_space/test_address_space_link \
        tests/fd/test_fd_table_contract_compile.o \
-       tests/fd/test_fd_table_link \
-       tests/process/test_process_contract_compile.o \
-       tests/process/test_process_link \
-       tests/elf/test_elf_loader_contract_compile.o \
+        tests/fd/test_fd_table_link \
+        tests/vfs/test_vfs_contract_compile.o \
+        tests/vfs/test_vfs_link \
+        tests/process/test_process_contract_compile.o \
+        tests/process/test_process_link \
+        tests/elf/test_elf_loader_contract_compile.o \
        tests/elf/test_elf_loader_link \
        tests/syscall/test_syscall_contract_compile.o \
        tests/syscall/test_sys_dispatch_link \
@@ -82,6 +85,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/address_space/test_address_space_link && echo "test_address_space_link: passed." || echo "test_address_space_link: FAILED."
 	@echo "test_fd_table_contract_compile: compile-check passed."
 	./tests/fd/test_fd_table_link && echo "test_fd_table_link: passed." || echo "test_fd_table_link: FAILED."
+	@echo "test_vfs_contract_compile: compile-check passed."
+	./tests/vfs/test_vfs_link && echo "test_vfs_link:      passed." || echo "test_vfs_link:      FAILED."
 	@echo "test_process_contract_compile: compile-check passed."
 	./tests/process/test_process_link && echo "test_process_link:  passed." || echo "test_process_link:  FAILED."
 	@echo "test_elf_loader_contract_compile: compile-check passed."
@@ -145,6 +150,13 @@ tests/fd/test_fd_table_contract_compile.o: tests/fd/test_fd_table_contract_compi
 tests/fd/test_fd_table_link: tests/fd/test_fd_table_link.c core/fd_table.c core/assert.c arch/stub/arch.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+# Compile-only: verifies vfs contract declarations and visible struct layout.
+tests/vfs/test_vfs_contract_compile.o: tests/vfs/test_vfs_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/vfs/test_vfs_link: tests/vfs/test_vfs_link.c core/vfs.c core/assert.c arch/stub/arch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 # Compile-only: verifies process contract declarations and visible struct layout.
 tests/process/test_process_contract_compile.o: tests/process/test_process_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
@@ -184,6 +196,8 @@ clean:
 	      tests/address_space/test_address_space_link \
 	      tests/fd/test_fd_table_contract_compile.o \
 	      tests/fd/test_fd_table_link \
+	      tests/vfs/test_vfs_contract_compile.o \
+	      tests/vfs/test_vfs_link \
 	      tests/process/test_process_contract_compile.o \
 	      tests/process/test_process_link \
 	      tests/elf/test_elf_loader_contract_compile.o \

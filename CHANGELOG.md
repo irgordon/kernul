@@ -292,6 +292,23 @@ This Phase 5 step defines loader shape, ownership, and validation-state
 boundaries only. It does not implement ELF parsing, mapping behavior, paging
 behavior, relocation handling, or executable start/userspace execution.
 
+#### Phase 5 completion boundary step — Init process launch path contract
+
+- `include/kernul/init.h` — kernel-internal `init_launch()` contract defining
+  deterministic init launch attempt sequencing, explicit calling context
+  boundaries, ownership/borrowed-pointer rules, and explicit non-goals
+- `core/init.c` — deterministic composition stub that performs fixed structural
+  sequence only: process object attempt, address-space association, ELF image
+  association, and deterministic validation call
+- `tests/init/test_init_contract_compile.c` — compile-check translation unit
+  validating init launch contract declaration visibility and signature
+- `tests/init/test_init_link.c` — link-check for `init_launch` symbol presence
+
+This Phase 5 completion boundary step is deterministic composition only.
+It does not implement userspace execution/resume behavior, VM behavior
+(mapping/paging/MMU), or loader execution.
+It does not claim init-process execution or userspace compatibility.
+
 ---
 
 ### Changed — Phase 3

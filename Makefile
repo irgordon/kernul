@@ -24,6 +24,7 @@ SRCS = arch/stub/arch.c  \
        core/assert.c     \
        core/address_space.c \
        core/elf_loader.c \
+       core/fd_table.c    \
        core/init.c       \
        core/process.c    \
        core/syscall_dispatch.c \
@@ -56,6 +57,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/init/test_init_link \
        tests/address_space/test_address_space_contract_compile.o \
        tests/address_space/test_address_space_link \
+       tests/fd/test_fd_table_contract_compile.o \
+       tests/fd/test_fd_table_link \
        tests/process/test_process_contract_compile.o \
        tests/process/test_process_link \
        tests/elf/test_elf_loader_contract_compile.o \
@@ -77,6 +80,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/init/test_init_link && echo "test_init_link:     passed." || echo "test_init_link:     FAILED."
 	@echo "test_address_space_contract_compile: compile-check passed."
 	./tests/address_space/test_address_space_link && echo "test_address_space_link: passed." || echo "test_address_space_link: FAILED."
+	@echo "test_fd_table_contract_compile: compile-check passed."
+	./tests/fd/test_fd_table_link && echo "test_fd_table_link: passed." || echo "test_fd_table_link: FAILED."
 	@echo "test_process_contract_compile: compile-check passed."
 	./tests/process/test_process_link && echo "test_process_link:  passed." || echo "test_process_link:  FAILED."
 	@echo "test_elf_loader_contract_compile: compile-check passed."
@@ -133,6 +138,13 @@ tests/address_space/test_address_space_contract_compile.o: tests/address_space/t
 tests/address_space/test_address_space_link: tests/address_space/test_address_space_link.c core/address_space.c core/assert.c arch/stub/arch.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+# Compile-only: verifies fd-table contract declarations and visible struct layout.
+tests/fd/test_fd_table_contract_compile.o: tests/fd/test_fd_table_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/fd/test_fd_table_link: tests/fd/test_fd_table_link.c core/fd_table.c core/assert.c arch/stub/arch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 # Compile-only: verifies process contract declarations and visible struct layout.
 tests/process/test_process_contract_compile.o: tests/process/test_process_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
@@ -170,6 +182,8 @@ clean:
 	      tests/init/test_init_link \
 	      tests/address_space/test_address_space_contract_compile.o \
 	      tests/address_space/test_address_space_link \
+	      tests/fd/test_fd_table_contract_compile.o \
+	      tests/fd/test_fd_table_link \
 	      tests/process/test_process_contract_compile.o \
 	      tests/process/test_process_link \
 	      tests/elf/test_elf_loader_contract_compile.o \

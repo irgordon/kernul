@@ -309,6 +309,28 @@ It does not implement userspace execution/resume behavior, VM behavior
 (mapping/paging/MMU), or loader execution.
 It does not claim init-process execution or userspace compatibility.
 
+#### Phase 6 boundary step — File descriptor table contract
+
+- `include/kernul/fd_table.h` — kernel-internal file descriptor table
+  contract defining descriptor identity and ownership shape only: `fd_t`
+  as integer descriptor identity, shared lifetime model (`refcount`),
+  borrowed owning-process association (`owner`), and bounded descriptor slot
+  state container (`slots`) with occupied/free representation
+- `core/fd_table.c` — deterministic lifecycle helper stubs:
+  `fd_table_alloc()` (single bounded internal slot allocation stub with
+  all slots initialized `FD_SLOT_FREE`), `fd_table_get()` (reference
+  acquisition), and `fd_table_put()` (reference release)
+- `tests/fd/test_fd_table_contract_compile.c` — compile-check translation
+  unit validating declaration visibility, helper signatures, and visible
+  fd-table struct field layout in kernel code
+- `tests/fd/test_fd_table_link.c` — link-check for fd-table lifecycle helper
+  symbol presence
+
+This Phase 6 boundary step defines descriptor identity, ownership, and
+process association shape only.
+It does not implement Unix I/O behavior, filesystem behavior, device behavior,
+pipes, terminals, or read/write semantics.
+
 ---
 
 ### Changed — Phase 3

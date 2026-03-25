@@ -267,6 +267,31 @@ This step defines ownership and process-association boundaries only as a
 Phase 5 contract surface. It does not implement VM policy, mapping behavior,
 paging behavior, MMU enablement, loader logic, or userspace memory semantics.
 
+#### Phase 5 boundary step — Kernel-internal ELF loader contract
+
+- `include/kernul/elf_loader.h` — kernel-internal ELF loader contract
+  defining ELF image shape and ownership boundaries: structural image
+  generation (`elf_image_generation_t`), deterministic non-success validation
+  state model (`ELF_IMAGE_STATE_UNVALIDATED`, `ELF_IMAGE_STATE_UNSUPPORTED`,
+  `ELF_IMAGE_STATE_INVALID`), shared lifetime model (`refcount`), borrowed
+  process association (`owner`), borrowed address-space association
+  (`address_space`), and architecture-specific opaque handle reference
+  (`arch_handle`)
+- `core/elf_loader.c` — deterministic lifecycle/helper stubs: `elf_image_alloc()`
+  (single-slot allocation stub with `ELF_IMAGE_STATE_UNVALIDATED` initialization),
+  `elf_image_get()` (reference acquisition), `elf_image_put()` (reference
+  release), and `elf_image_validate()` (state-only transition from
+  `ELF_IMAGE_STATE_UNVALIDATED` to `ELF_IMAGE_STATE_UNSUPPORTED`)
+- `tests/elf/test_elf_loader_contract_compile.c` — compile-check translation
+  unit validating contract declaration visibility, helper signatures, and
+  visible struct field layout in kernel code
+- `tests/elf/test_elf_loader_link.c` — link-check for ELF loader helper symbol
+  presence
+
+This Phase 5 step defines loader shape, ownership, and validation-state
+boundaries only. It does not implement ELF parsing, mapping behavior, paging
+behavior, relocation handling, or executable start/userspace execution.
+
 ---
 
 ### Changed — Phase 3

@@ -23,6 +23,7 @@ CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -Werror \
 SRCS = arch/stub/arch.c  \
        core/assert.c     \
        core/address_space.c \
+       core/elf_loader.c \
        core/process.c    \
        core/syscall_dispatch.c \
        core/spinlock.c   \
@@ -54,6 +55,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/address_space/test_address_space_link \
        tests/process/test_process_contract_compile.o \
        tests/process/test_process_link \
+       tests/elf/test_elf_loader_contract_compile.o \
+       tests/elf/test_elf_loader_link \
        tests/syscall/test_syscall_contract_compile.o \
        tests/syscall/test_sys_dispatch_link \
        tests/arch/x86_64/test_arch_syscall_enter_link \
@@ -71,6 +74,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/address_space/test_address_space_link && echo "test_address_space_link: passed." || echo "test_address_space_link: FAILED."
 	@echo "test_process_contract_compile: compile-check passed."
 	./tests/process/test_process_link && echo "test_process_link:  passed." || echo "test_process_link:  FAILED."
+	@echo "test_elf_loader_contract_compile: compile-check passed."
+	./tests/elf/test_elf_loader_link && echo "test_elf_loader_link: passed." || echo "test_elf_loader_link: FAILED."
 	@echo "test_syscall_contract_compile: compile-check passed."
 	./tests/syscall/test_sys_dispatch_link && echo "test_sys_dispatch_link: passed." || echo "test_sys_dispatch_link: FAILED."
 	./tests/arch/x86_64/test_arch_syscall_enter_link && echo "test_arch_syscall_enter_link(x86_64): passed." || echo "test_arch_syscall_enter_link(x86_64): FAILED."
@@ -121,6 +126,13 @@ tests/process/test_process_contract_compile.o: tests/process/test_process_contra
 tests/process/test_process_link: tests/process/test_process_link.c core/process.c core/assert.c arch/stub/arch.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+# Compile-only: verifies ELF loader contract declarations and visible struct layout.
+tests/elf/test_elf_loader_contract_compile.o: tests/elf/test_elf_loader_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/elf/test_elf_loader_link: tests/elf/test_elf_loader_link.c core/elf_loader.c core/assert.c arch/stub/arch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 # Compile-only: verifies syscall.h declarations and types.
 tests/syscall/test_syscall_contract_compile.o: tests/syscall/test_syscall_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
@@ -144,6 +156,8 @@ clean:
 	      tests/address_space/test_address_space_link \
 	      tests/process/test_process_contract_compile.o \
 	      tests/process/test_process_link \
+	      tests/elf/test_elf_loader_contract_compile.o \
+	      tests/elf/test_elf_loader_link \
 	      tests/syscall/test_syscall_contract_compile.o \
 	      tests/syscall/test_sys_dispatch_link \
 	      tests/arch/x86_64/test_arch_syscall_enter_link \

@@ -1,31 +1,32 @@
 # KERNUL Roadmap
 
-**Status:** Pre-Alpha  
-**Scope:** Bootstrap through early compatibility milestones  
-**Purpose:** Define implementation order and stop-safe priorities
+Status: Pre-Alpha  
+Scope: Bootstrap through early compatibility milestones  
+Purpose: Define implementation order and stop-safe priorities
 
 ---
 
 # Phase 0 — Foundation
 
-**Status:** Complete
+Status: Complete
 
-**Deliver:**
+Deliver:
 
-- repository structure  
-- architecture guide  
-- coding standard  
-- commenting guide  
-- ABI strategy  
-- baseline build system  
-- baseline test harness  
-- boot contract (`boot_info`)  
-- panic path implementation  
-- kernel entry validation path (`kernel_main`)  
-- architecture doctrine updates  
-- memory ordering doctrine (`MEMORY_ORDERING.md`)  
+- repository structure
+- architecture guide
+- coding standard
+- commenting guide
+- ABI strategy
+- baseline build system
+- baseline test harness
+- boot contract (boot_info)
+- panic path implementation
+- kernel entry validation path (kernel_main)
+- architecture doctrine updates
+- memory ordering doctrine (MEMORY_ORDERING.md)
 
-**Phase completion rule:**  
+Phase completion rule:
+
 The kernel must have a deterministic bootstrap entry path and documented architectural laws.  
 No hardware-specific behavior is required.
 
@@ -33,292 +34,303 @@ No hardware-specific behavior is required.
 
 # Phase 1 — Architecture boundary stabilization
 
-**Purpose:**  
+Status: Complete
+
+Purpose:
+
 Freeze the smallest real hardware-dependent boundaries before expanding behavior.  
-This phase prevents architectural drift and ensures portability across `x86_64` and `AArch64`.
+This phase prevents architectural drift and ensures portability across x86_64 and AArch64.
 
-**Deliver:**
+Deliver:
 
-- architecture boundary header  
-- `arch_halt()` contract  
-- `arch_early_init()` contract  
-- `arch_cpu_state` placeholder type  
-- minimal `x86_64` `arch_halt()` implementation  
-- minimal `AArch64` `arch_halt()` implementation  
-- minimal `arch_early_init()` stubs  
-- panic path redirected to `arch_halt()`  
+- architecture boundary header
+- arch_halt() contract
+- arch_early_init() contract
+- arch_cpu_state placeholder type
+- minimal x86_64 arch_halt() implementation
+- minimal AArch64 arch_halt() implementation
+- minimal arch_early_init() stubs
+- panic path redirected to arch_halt()
 
-**Constraints:**
+Constraints:
 
-- no interrupt handling yet  
-- no MMU enablement  
-- no scheduler assumptions  
-- no device initialization  
-- no platform discovery logic  
+- no interrupt handling yet
+- no MMU enablement
+- no scheduler assumptions
+- no device initialization
+- no platform discovery logic
 
-**Phase completion rule:**  
+Phase completion rule:
+
 All terminal execution passes through a defined architecture boundary.
 
 ---
 
 # Phase 2 — Memory and ordering foundations
 
-**Purpose:**  
+Status: Complete
+
+Purpose:
+
 Establish deterministic memory and synchronization vocabulary before real runtime behavior expands.
 
-**Deliver:**
+Deliver:
 
-- `atomic.h` contract surface  
-- `barrier.h` contract surface  
-- physical memory region structure  
-- memory map handoff contract  
-- PMM public interface  
-- PMM initialization stub  
-- deterministic memory structure tests  
+- atomic.h contract surface
+- barrier.h contract surface
+- physical memory region structure
+- memory map handoff contract
+- PMM public interface
+- PMM initialization stub
+- deterministic memory structure tests
 
-**Constraints:**
+Constraints:
 
-- no complex allocation yet  
-- no paging policy  
-- no SMP behavior  
-- no performance tuning  
+- no complex allocation yet
+- no paging policy
+- no SMP behavior
+- no performance tuning
 
-**Phase completion rule:**  
+Phase completion rule:
+
 Memory representation and ordering semantics are frozen before runtime complexity grows.
 
 ---
 
 # Phase 3 — Core runtime primitives
 
-**Purpose:**  
+Status: Complete
+
+Purpose:
+
 Create the smallest stable internal vocabulary required by all later subsystems.
 
-**Deliver:**
+Deliver:
 
-- `types.h`  
-- `errors.h`  
-- `assert.h`  
-- `assert_fail()` implementation  
-- intrusive list structure  
-- minimal spinlock contract  
-- deterministic primitive tests  
+- types.h
+- errors.h
+- assert.h
+- assert_fail() implementation
+- intrusive list structure
+- minimal spinlock contract
+- deterministic primitive tests
 
-**Constraints:**
+Constraints:
 
-- no lockless algorithms  
-- no scheduler logic  
-- no advanced synchronization patterns  
+- no lockless algorithms
+- no scheduler logic
+- no advanced synchronization patterns
 
-**Phase completion rule:**  
+Phase completion rule:
+
 Core kernel primitives exist and are mechanically reviewable.
 
 ---
 
 # Phase 4 — Execution and scheduling foundations
 
-**Status:** Complete
+Status: Complete
 
-**Purpose:**  
+Purpose:
+
 Define execution structure before introducing scheduling policy.
 
-**Completed surfaces:**
+Completed surfaces:
 
-- thread structure  
-- thread state model  
-- run queue structure  
-- scheduler public interface  
-- scheduler initialization stub  
+- thread structure
+- thread state model
+- run queue structure
+- scheduler public interface
+- scheduler initialization stub
 - enqueue and dequeue stubs
-- context-switch contract surface  
-- idle thread contract  
+- context-switch contract surface
+- idle thread contract
 
----
+Constraints:
 
-## Context-switch contract surface
+- no advanced scheduling policy
+- no load balancing
+- no performance tuning
+- no preemption
+- no SMP behavior
 
-Defines the architecture-visible interface required to transfer execution state between threads.
+Scheduler bootstrap boundary:
 
-This task declares the contract only.  
-It does not implement hardware switching logic beyond minimal stubs.
-
-**Required elements:**
-
-- `arch_cpu_state_init()` declaration  
-- `arch_cpu_state_switch()` declaration  
-- documented calling context and ownership rules  
-- explicit statement of what state is preserved across a switch  
-- stub implementations for the active architecture target  
-- compile-time verification of contract presence  
-
-**Not included:**
-
-- preemption  
-- interrupt-driven scheduling  
-- SMP coordination  
-- performance tuning  
-
----
-
-## Idle thread contract
-
-Defines the structural role of the idle thread once scheduling and switching surfaces exist.
-
-**Required elements:**
-
-- idle thread identity and lifetime rules  
-- initialization contract  
-- relationship to scheduler start sequence  
-- explicit statement that idle execution is not scheduling policy  
-
-**Not included:**
-
-- power management behavior  
-- CPU sleep policy  
-- load balancing  
-- timer-driven scheduling  
-
----
-
-**Constraints:**
-
-- no advanced scheduling policy  
-- no load balancing  
-- no performance tuning  
-- no preemption  
-- no SMP behavior  
-
-**Scheduler bootstrap boundary:**  
 The initial current thread is established by the context-switch bootstrap path defined in the context-switch contract surface.  
 No scheduler behavior may assume a valid current thread before that boundary is executed.
 
-**Phase completion rule:**  
+Phase completion rule:
+
 Thread lifecycle, scheduler entry points, and context-switch surfaces exist and are mechanically reviewable without policy complexity.
 
 ---
 
 # Phase 5 — Userspace transition
 
-**Purpose:**  
+Status: Complete
+
+Purpose:
+
 Create the first controlled boundary between kernel and userspace.
 
-**Deliver:**
+Completed surfaces:
 
-- syscall entry contract  
-- process structure  
-- address space ownership contract  
-- syscall dispatch stub  
-- ELF loader contract  
-- init process launch path  
+- syscall entry contract
+- syscall dispatch stub
+- process structure
+- address space ownership contract
+- ELF loader contract
+- init process launch path
 
-**Constraints:**
+Deterministic init transition boundary:
 
-- no compatibility claims yet  
-- no complex process management  
-- no performance optimization  
+The userspace transition boundary is implemented by:
 
-**Phase completion rule:**  
+- include/kernul/init.h
+- core/init.c
+
+This boundary composes:
+
+- process allocation
+- address-space allocation
+- structural ownership association
+- ELF image allocation
+- ELF image validation
+
+and then stops deterministically.
+
+Failure behavior:
+
+- KERN_ENOMEM — allocation failure
+- KERN_ENOSYS — deterministic phase boundary stop
+
+Execution of userspace is intentionally not implemented at this phase.
+
+Constraints:
+
+- no compatibility claims
+- no userspace execution
+- no paging behavior
+- no loader execution semantics
+- no process policy
+- no performance optimization
+
+Phase completion rule:
+
 A deterministic userspace entry boundary exists.
 
 ---
 
 # Phase 6 — Unix base semantics
 
-**Purpose:**  
+Status: Not Started
+
+Purpose:
+
 Establish the structural foundation required for Unix-style process and I/O behavior.
 
-**Deliver:**
+Deliver:
 
-- file descriptor table  
-- VFS core contract  
-- pipe contract  
-- signal contract  
-- session and process group structures  
-- terminal and PTY contract surfaces  
+- file descriptor table
+- VFS core contract
+- pipe contract
+- signal contract
+- session and process group structures
+- terminal and PTY contract surfaces
 
-**Constraints:**
+Constraints:
 
-- no filesystem feature breadth  
-- no networking behavior expansion  
-- no compatibility claims  
+- no filesystem feature breadth
+- no networking behavior expansion
+- no compatibility claims
 
-**Phase completion rule:**  
+Phase completion rule:
+
 Core Unix semantics exist structurally and are testable.
 
 ---
 
 # Phase 7 — Shell viability
 
-**Purpose:**  
+Status: Not Started
+
+Purpose:
+
 Enable interactive shell behavior through minimal, deterministic kernel support.
 
-**Deliver:**
+Deliver:
 
-- interactive console path  
-- terminal control behavior  
-- job control support  
-- process signal integration  
-- regression tests for shell-critical behavior  
+- interactive console path
+- terminal control behavior
+- job control support
+- process signal integration
+- regression tests for shell-critical behavior
 
-**Constraints:**
+Constraints:
 
-- no advanced userland tooling  
-- no feature expansion beyond shell requirements  
+- no advanced userland tooling
+- no feature expansion beyond shell requirements
 
-**Phase completion rule:**  
+Phase completion rule:
+
 The kernel supports a functional interactive shell path.
 
 ---
 
 # Phase 8 — Compatibility expansion
 
-**Purpose:**  
+Status: Not Started
+
+Purpose:
+
 Gradually increase userspace compatibility based on verified behavior.
 
-**Deliver:**
+Deliver:
 
-- additional syscall coverage  
-- filesystem compatibility improvements  
-- device and driver expansion  
-- compatibility regression testing  
-- performance tuning based on measurement  
+- additional syscall coverage
+- filesystem compatibility improvements
+- device and driver expansion
+- compatibility regression testing
+- performance tuning based on measurement
 
-**Constraints:**
+Constraints:
 
-- no compatibility claims without test evidence  
-- no premature optimization  
+- no compatibility claims without test evidence
+- no premature optimization
 
-**Phase completion rule:**  
+Phase completion rule:
+
 Compatibility is demonstrated through measurable behavior, not assumption.
 
 ---
 
 # Global engineering rules
 
-**Rule 1 — One task, one surface**  
+Rule 1 — One task, one surface  
 Each task must modify only one subsystem surface.
 
-**Rule 2 — Shape before behavior**  
+Rule 2 — Shape before behavior  
 Define structures before implementing policy.
 
-**Rule 3 — Behavior before optimization**  
+Rule 3 — Behavior before optimization  
 Optimize only after correctness is established.
 
-**Rule 4 — Real hardware boundaries only**  
+Rule 4 — Real hardware boundaries only  
 Keep a boundary only when the hardware is genuinely different.  
 If the boundary exists only to make code look cleaner, reject it.
 
-**Rule 5 — Common code may not assume architectural behavior not explicitly stated in a contract.**
+Rule 5 — Common code may not assume architectural behavior not explicitly stated in a contract.
 
-**Rule 6 — No speculative expansion**  
+Rule 6 — No speculative expansion  
 Do not add fields, helpers, or abstractions until the next task requires them.
 
-**Rule 7 — Deterministic stop condition**  
+Rule 7 — Deterministic stop condition  
 At the end of each task, the repository must remain:
 
-- buildable  
-- reviewable  
-- deterministic  
-- scope-bounded  
+- buildable
+- reviewable
+- deterministic
+- scope-bounded
 
 ---
 
@@ -328,13 +340,13 @@ A stub provides the minimal behavior required to satisfy a declared interface an
 
 A stub may:
 
-- return fixed values  
-- perform structural state transitions  
-- enforce contract assertions  
+- return fixed values
+- perform structural state transitions
+- enforce contract assertions
 
 A stub must not:
 
-- introduce policy decisions  
-- introduce timing behavior  
-- introduce performance assumptions  
+- introduce policy decisions
+- introduce timing behavior
+- introduce performance assumptions
 - depend on concurrency not yet defined

@@ -331,6 +331,27 @@ process association shape only.
 It does not implement Unix I/O behavior, filesystem behavior, device behavior,
 pipes, terminals, or read/write semantics.
 
+#### Phase 6 boundary step — VFS core contract surface
+
+- `include/kernul/vfs.h` — kernel-internal VFS core contract defining minimal
+  refcounted open-file object shape (`struct vfs_file`) and operation attachment
+  vocabulary (`struct vfs_ops`) with structural identity (`vfs_file_id_t`),
+  ownership/lifetime rules, and explicit non-ABI scope boundary
+- `core/vfs.c` — deterministic VFS core stubs: bounded single-slot
+  `vfs_file_alloc()`/`vfs_file_get()`/`vfs_file_put()` lifecycle helpers and
+  fixed `KERN_ENOSYS` return behavior for `vfs_init()`, `vfs_open()`,
+  `vfs_close()`, `vfs_read()`, and `vfs_write()`
+- `tests/vfs/test_vfs_contract_compile.c` — compile-check translation unit
+  validating VFS declaration visibility, signatures, and visible `struct vfs_file`
+  field layout
+- `tests/vfs/test_vfs_link.c` — link-check for VFS core lifecycle and VFS entry
+  point symbol presence
+
+This Phase 6 boundary step is kernel-internal only and is not a userspace ABI.
+It does not implement path lookup/resolution, filesystem behavior, device
+behavior, pipe or terminal integration, or read/write semantics beyond
+deterministic `KERN_ENOSYS` stubs.
+
 ---
 
 ### Changed — Phase 3

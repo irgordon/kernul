@@ -376,6 +376,26 @@ It does not implement scheduler interaction or wakeup behavior.
 It does not implement signal or terminal integration.
 It does not implement VFS attachment or fd-table wiring.
 
+#### Phase 6 boundary step — Signal contract surface
+
+- `include/kernul/signal.h` — kernel-internal signal contract defining minimal
+  signal identity (`signal_id_t`), bounded signal-set membership representation
+  (`struct signal_set`), and per-process signal-state container shape
+  (`struct signal_state`) with explicit ownership/lifetime scope
+- `core/signal.c` — deterministic signal state stubs:
+  `signal_state_alloc()`/`signal_state_free()` lifecycle helpers and structural
+  `signal_send()`/`signal_block()`/`signal_unblock()` state updates only
+- `tests/signal/test_signal_contract_compile.c` — compile-check translation
+  unit validating signal declaration visibility, signatures, and visible signal
+  struct field layout
+- `tests/signal/test_signal_link.c` — link-check for signal contract symbol
+  presence
+
+This Phase 6 boundary step is kernel-internal only and is not a userspace ABI.
+It does not implement signal delivery or execution interruption semantics.
+It does not implement scheduler, terminal, or job-control integration.
+It does not imply POSIX numbering or compatibility guarantees.
+
 ---
 
 ### Changed — Phase 3

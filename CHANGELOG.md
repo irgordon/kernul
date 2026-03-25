@@ -352,6 +352,30 @@ It does not implement path lookup/resolution, filesystem behavior, device
 behavior, pipe or terminal integration, or read/write semantics beyond
 deterministic `KERN_ENOSYS` stubs.
 
+
+#### Phase 6 boundary step — Pipe contract surface
+
+- `include/kernul/pipe.h` — kernel-internal pipe contract defining minimal
+  refcounted shared pipe object shape (`struct pipe_object`) and directional
+  endpoint vocabulary (`struct pipe_end`) with structural identity (`pipe_id_t`),
+  endpoint role identity (`pipe_end_kind_t`), ownership/lifetime rules, and
+  explicit non-ABI scope boundary
+- `core/pipe.c` — deterministic pipe contract stubs: bounded single-slot
+  `pipe_alloc()`/`pipe_get()`/`pipe_put()` lifecycle helpers and structural
+  `pipe_open_pair()` endpoint initialization for one read endpoint and one write
+  endpoint only
+- `tests/pipe/test_pipe_contract_compile.c` — compile-check translation unit
+  validating pipe declaration visibility, signatures, and visible struct field
+  layout
+- `tests/pipe/test_pipe_link.c` — link-check for pipe lifecycle and open-pair
+  symbol presence
+
+This Phase 6 boundary step is kernel-internal only and is not a userspace ABI.
+It does not implement buffering or read/write transfer semantics.
+It does not implement scheduler interaction or wakeup behavior.
+It does not implement signal or terminal integration.
+It does not implement VFS attachment or fd-table wiring.
+
 ---
 
 ### Changed — Phase 3

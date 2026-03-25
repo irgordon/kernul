@@ -25,15 +25,20 @@ int init_launch(void)
         return KERN_ENOMEM;
 
     as = address_space_alloc();
-    if (as == NULL)
+    if (as == NULL) {
+        process_put(proc);
         return KERN_ENOMEM;
+    }
 
     proc->address_space = as;
     as->owner = proc;
 
     img = elf_image_alloc();
-    if (img == NULL)
+    if (img == NULL) {
+        address_space_put(as);
+        process_put(proc);
         return KERN_ENOMEM;
+    }
 
     img->owner = proc;
     img->address_space = as;

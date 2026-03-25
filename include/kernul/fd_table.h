@@ -4,7 +4,7 @@
 /*
  * include/kernul/fd_table.h
  *
- * Kernel-internal file descriptor table contract. Phase 6 boundary definition.
+ * kernel-internal file descriptor table contract. Phase 6 boundary definition.
  *
  * This header defines descriptor identity, ownership, and process-association
  * shape only.

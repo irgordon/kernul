@@ -26,6 +26,7 @@ SRCS = arch/stub/arch.c  \
        core/elf_loader.c \
        core/fd_table.c    \
        core/signal.c      \
+       core/session.c     \
        core/pipe.c        \
        core/init.c       \
        core/process.c    \
@@ -64,6 +65,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/fd/test_fd_table_link \
        tests/signal/test_signal_contract_compile.o \
        tests/signal/test_signal_link \
+       tests/session/test_session_contract_compile.o \
+       tests/session/test_session_link \
        tests/vfs/test_vfs_contract_compile.o \
        tests/vfs/test_vfs_link \
        tests/pipe/test_pipe_contract_compile.o \
@@ -93,6 +96,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/fd/test_fd_table_link && echo "test_fd_table_link: passed." || echo "test_fd_table_link: FAILED."
 	@echo "test_signal_contract_compile: compile-check passed."
 	./tests/signal/test_signal_link && echo "test_signal_link:   passed." || echo "test_signal_link:   FAILED."
+	@echo "test_session_contract_compile: compile-check passed."
+	./tests/session/test_session_link && echo "test_session_link:  passed." || echo "test_session_link:  FAILED."
 	@echo "test_vfs_contract_compile: compile-check passed."
 	./tests/vfs/test_vfs_link && echo "test_vfs_link:      passed." || echo "test_vfs_link:      FAILED."
 	@echo "test_pipe_contract_compile: compile-check passed."
@@ -167,6 +172,13 @@ tests/signal/test_signal_contract_compile.o: tests/signal/test_signal_contract_c
 tests/signal/test_signal_link: tests/signal/test_signal_link.c core/signal.c core/assert.c arch/stub/arch.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+# Compile-only: verifies session contract declarations and visible struct layout.
+tests/session/test_session_contract_compile.o: tests/session/test_session_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/session/test_session_link: tests/session/test_session_link.c core/session.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 # Compile-only: verifies vfs contract declarations and visible struct layout.
 tests/vfs/test_vfs_contract_compile.o: tests/vfs/test_vfs_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
@@ -222,6 +234,8 @@ clean:
 	      tests/fd/test_fd_table_link \
 	      tests/signal/test_signal_contract_compile.o \
 	      tests/signal/test_signal_link \
+	      tests/session/test_session_contract_compile.o \
+	      tests/session/test_session_link \
 	      tests/vfs/test_vfs_contract_compile.o \
 	      tests/vfs/test_vfs_link \
 	      tests/process/test_process_contract_compile.o \

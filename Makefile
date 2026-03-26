@@ -29,6 +29,7 @@ SRCS = arch/stub/arch.c  \
        core/session.c     \
        core/pipe.c        \
        core/terminal.c    \
+       core/controlling_terminal.c \
        core/init.c       \
        core/process.c    \
        core/vfs.c        \
@@ -74,6 +75,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/pipe/test_pipe_link \
        tests/terminal/test_terminal_contract_compile.o \
        tests/terminal/test_terminal_link \
+       tests/terminal/test_controlling_terminal_contract_compile.o \
+       tests/terminal/test_controlling_terminal_link \
        tests/process/test_process_contract_compile.o \
        tests/process/test_process_link \
        tests/elf/test_elf_loader_contract_compile.o \
@@ -107,6 +110,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/pipe/test_pipe_link && echo "test_pipe_link:     passed." || echo "test_pipe_link:     FAILED."
 	@echo "test_terminal_contract_compile: compile-check passed."
 	./tests/terminal/test_terminal_link && echo "test_terminal_link: passed." || echo "test_terminal_link: FAILED."
+	@echo "test_controlling_terminal_contract_compile: compile-check passed."
+	./tests/terminal/test_controlling_terminal_link && echo "test_controlling_terminal_link: passed." || echo "test_controlling_terminal_link: FAILED."
 	@echo "test_process_contract_compile: compile-check passed."
 	./tests/process/test_process_link && echo "test_process_link:  passed." || echo "test_process_link:  FAILED."
 	@echo "test_elf_loader_contract_compile: compile-check passed."
@@ -205,6 +210,13 @@ tests/terminal/test_terminal_contract_compile.o: tests/terminal/test_terminal_co
 tests/terminal/test_terminal_link: tests/terminal/test_terminal_link.c core/terminal.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+# Compile-only: verifies controlling-terminal attachment declarations and visible struct layout.
+tests/terminal/test_controlling_terminal_contract_compile.o: tests/terminal/test_controlling_terminal_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/terminal/test_controlling_terminal_link: tests/terminal/test_controlling_terminal_link.c core/controlling_terminal.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 # Compile-only: verifies process contract declarations and visible struct layout.
 tests/process/test_process_contract_compile.o: tests/process/test_process_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
@@ -254,6 +266,8 @@ clean:
 	      tests/pipe/test_pipe_link \
 	      tests/terminal/test_terminal_contract_compile.o \
 	      tests/terminal/test_terminal_link \
+	      tests/terminal/test_controlling_terminal_contract_compile.o \
+	      tests/terminal/test_controlling_terminal_link \
 	      tests/process/test_process_contract_compile.o \
 	      tests/process/test_process_link \
 	      tests/elf/test_elf_loader_contract_compile.o \

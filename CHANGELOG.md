@@ -416,6 +416,29 @@ It defines identity and grouping structure only.
 It does not implement signal routing, terminal behavior, or job-control behavior.
 It does not imply POSIX numbering or compatibility guarantees.
 
+#### Phase 6 boundary step — Terminal and PTY contract surfaces
+
+- `include/kernul/terminal.h` — kernel-internal terminal/PTY contract defining
+  structural terminal identity (`terminal_id_t`), structural PTY identity
+  (`pty_id_t`), minimal identity containers (`struct terminal`,
+  `struct pty_master`, `struct pty_pair`), and structural session/process-group
+  attachment points only
+- `core/terminal.c` — deterministic bounded single-slot creation stubs:
+  `terminal_create()`/`pty_master_create()`/`pty_pair_create()` and structural
+  ID accessors `terminal_id()`/`pty_master_id()`/`pty_pair_id()`
+- `tests/terminal/test_terminal_contract_compile.c` — compile-check translation
+  unit validating declaration visibility, signatures, required ID constants, and
+  visible terminal/PTY struct field layout
+- `tests/terminal/test_terminal_link.c` — link-check for terminal/PTY contract
+  symbol presence
+
+This Phase 6 boundary step is kernel-internal only and is not a userspace ABI.
+It defines identity and attachment only.
+It does not implement terminal I/O semantics.
+It does not implement line discipline.
+It does not implement signal or job-control integration.
+It does not implement VFS or fd-table wiring.
+
 ---
 
 ### Changed — Phase 3

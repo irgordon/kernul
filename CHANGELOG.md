@@ -484,6 +484,36 @@ It does not implement terminal I/O semantics.
 It does not implement job-control or signal behavior.
 It does not implement scheduler or VFS interaction.
 
+#### Phase 7 boundary step — Interactive process activation path
+
+- `include/kernul/interactive_activation.h` — kernel-internal interactive
+  activation contract defining `struct interactive_activation` with borrowed
+  interactive-console/process-group associations only, explicit ownership and
+  lifetime boundaries, explicit activation state constants
+  (`INTERACTIVE_ACTIVATION_STATE_PENDING`,
+  `INTERACTIVE_ACTIVATION_STATE_RECORDED`), routing dependency chain
+  documentation (`session -> controlling_terminal -> interactive_console ->
+  interactive_activation`), and single activation-intent/idempotence invariant
+  documentation
+- `core/interactive_activation.c` — deterministic bounded single-slot
+  activation-intent stubs for `interactive_activation_create()` and
+  `interactive_activation_state()` with identical-input idempotence
+- `tests/console/test_interactive_activation_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  activation state constants, signatures, and visible interactive activation
+  struct field layout
+- `tests/console/test_interactive_activation_link.c` — link-check for
+  interactive activation contract symbol presence
+
+This Phase 7 boundary step is kernel-internal only and is not a userspace ABI.
+It defines activation intent only.
+It enforces the routing dependency chain through interactive console
+associations.
+It defines idempotent activation behavior for identical inputs.
+It does not invoke the scheduler or process wakeups.
+It does not implement signal or job-control behavior.
+It does not implement terminal I/O behavior.
+
 ---
 
 ### Changed — Phase 3

@@ -460,6 +460,30 @@ It does not implement job-control or signal semantics.
 It does not implement terminal I/O behavior.
 It does not implement VFS or fd-table wiring.
 
+#### Phase 7 boundary step — Interactive console path contract
+
+- `include/kernul/interactive_console.h` — kernel-internal interactive console
+  path contract defining `struct interactive_console` with borrowed
+  controlling-terminal/session/process-group associations only, explicit
+  ownership and lifetime boundaries, and one-to-one routing invariant
+  documentation
+- `core/interactive_console.c` — deterministic bounded single-slot routing
+  designation stubs for `interactive_console_attach()` and
+  `interactive_console_consumer()`
+- `tests/console/test_interactive_console_contract_compile.c` — compile-check
+  translation unit validating declaration visibility, signatures, and visible
+  interactive console struct field layout
+- `tests/console/test_interactive_console_link.c` — link-check for interactive
+  console contract symbol presence
+
+This Phase 7 boundary step is kernel-internal only and is not a userspace ABI.
+It defines routing and designation behavior only.
+It defines terminal-to-consumer routing direction only.
+It enforces controlling-terminal attachment dependency.
+It does not implement terminal I/O semantics.
+It does not implement job-control or signal behavior.
+It does not implement scheduler or VFS interaction.
+
 ---
 
 ### Changed — Phase 3

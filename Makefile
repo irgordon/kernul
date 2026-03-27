@@ -32,6 +32,7 @@ SRCS = arch/stub/arch.c              \
        core/elf_loader.c             \
        core/fd_table.c               \
        core/init.c                   \
+       core/interactive_console.c    \
        core/pipe.c                   \
        core/process.c                \
        core/session.c                \
@@ -50,6 +51,7 @@ OBJS = $(SRCS:.c=.o)
 .PHONY: all test clean test_sched_api.o test_cpu_state_api.o \
         test_init_contract_compile.o \
         test_address_space_contract_compile.o \
+        test_interactive_console_contract_compile.o \
         test_fd_table_contract_compile.o \
         test_signal_contract_compile.o \
         test_session_contract_compile.o \
@@ -69,15 +71,17 @@ all: $(OBJS)
 
 test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
       tests/test_runq tests/test_sched_api.o tests/test_sched \
-      tests/test_cpu_state_api.o tests/test_idle \
-      tests/init/test_init_contract_compile.o \
-      tests/init/test_init_link \
-      tests/address_space/test_address_space_contract_compile.o \
-      tests/address_space/test_address_space_link \
-      tests/fd/test_fd_table_contract_compile.o \
-      tests/fd/test_fd_table_link \
-      tests/signal/test_signal_contract_compile.o \
-      tests/signal/test_signal_link \
+       tests/test_cpu_state_api.o tests/test_idle \
+       tests/init/test_init_contract_compile.o \
+       tests/init/test_init_link \
+       tests/address_space/test_address_space_contract_compile.o \
+       tests/address_space/test_address_space_link \
+       tests/console/test_interactive_console_contract_compile.o \
+       tests/console/test_interactive_console_link \
+       tests/fd/test_fd_table_contract_compile.o \
+       tests/fd/test_fd_table_link \
+       tests/signal/test_signal_contract_compile.o \
+       tests/signal/test_signal_link \
       tests/session/test_session_contract_compile.o \
       tests/session/test_session_link \
       tests/vfs/test_vfs_contract_compile.o \
@@ -109,6 +113,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/init/test_init_link && echo "test_init_link:     passed." || echo "test_init_link:     FAILED."
 	@echo "test_address_space_contract_compile: compile-check passed."
 	./tests/address_space/test_address_space_link && echo "test_address_space_link: passed." || echo "test_address_space_link: FAILED."
+	@echo "test_interactive_console_contract_compile: compile-check passed."
+	./tests/console/test_interactive_console_link && echo "test_interactive_console_link: passed." || echo "test_interactive_console_link: FAILED."
 	@echo "test_fd_table_contract_compile: compile-check passed."
 	./tests/fd/test_fd_table_link && echo "test_fd_table_link: passed." || echo "test_fd_table_link: FAILED."
 	@echo "test_signal_contract_compile: compile-check passed."
@@ -171,6 +177,12 @@ tests/address_space/test_address_space_contract_compile.o: tests/address_space/t
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/address_space/test_address_space_link: tests/address_space/test_address_space_link.c core/address_space.c core/assert.c arch/stub/arch.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/console/test_interactive_console_contract_compile.o: tests/console/test_interactive_console_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_interactive_console_link: tests/console/test_interactive_console_link.c core/interactive_console.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/fd/test_fd_table_contract_compile.o: tests/fd/test_fd_table_contract_compile.c
@@ -246,6 +258,7 @@ test_sched_api.o: tests/test_sched_api.o
 test_cpu_state_api.o: tests/test_cpu_state_api.o
 test_init_contract_compile.o: tests/init/test_init_contract_compile.o
 test_address_space_contract_compile.o: tests/address_space/test_address_space_contract_compile.o
+test_interactive_console_contract_compile.o: tests/console/test_interactive_console_contract_compile.o
 test_fd_table_contract_compile.o: tests/fd/test_fd_table_contract_compile.o
 test_signal_contract_compile.o: tests/signal/test_signal_contract_compile.o
 test_session_contract_compile.o: tests/session/test_session_contract_compile.o
@@ -266,6 +279,8 @@ clean:
 	      tests/init/test_init_link \
 	      tests/address_space/test_address_space_contract_compile.o \
 	      tests/address_space/test_address_space_link \
+	      tests/console/test_interactive_console_contract_compile.o \
+	      tests/console/test_interactive_console_link \
 	      tests/fd/test_fd_table_contract_compile.o \
 	      tests/fd/test_fd_table_link \
 	      tests/signal/test_signal_contract_compile.o \

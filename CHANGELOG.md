@@ -439,6 +439,27 @@ It does not implement line discipline.
 It does not implement signal or job-control integration.
 It does not implement VFS or fd-table wiring.
 
+#### Phase 6 boundary step — Controlling terminal attachment surface
+
+- `include/kernul/controlling_terminal.h` — kernel-internal controlling
+  terminal attachment contract defining `struct controlling_terminal` with
+  borrowed `session` and `terminal` associations only, explicit ownership and
+  lifetime boundaries, and one-to-one attachment invariant documentation
+- `core/controlling_terminal.c` — deterministic bounded single-slot attachment
+  stubs for `controlling_terminal_attach()` and `controlling_terminal_get()`
+- `tests/terminal/test_controlling_terminal_contract_compile.c` — compile-check
+  translation unit validating declaration visibility, signatures, and visible
+  controlling terminal struct field layout
+- `tests/terminal/test_controlling_terminal_link.c` — link-check for
+  controlling terminal attachment contract symbol presence
+
+This Phase 6 boundary step is kernel-internal only and is not a userspace ABI.
+It defines structural session-to-terminal attachment only.
+It defines a one-to-one attachment invariant.
+It does not implement job-control or signal semantics.
+It does not implement terminal I/O behavior.
+It does not implement VFS or fd-table wiring.
+
 ---
 
 ### Changed — Phase 3

@@ -579,6 +579,43 @@ It does not invoke scheduler policy or manipulate run queues.
 It does not implement signal or job-control behavior.
 It does not implement terminal I/O behavior.
 
+#### Phase 7 boundary step — Interactive runnable enqueue boundary
+
+- `include/kernul/interactive_runnable.h` — kernel-internal interactive
+  runnable enqueue contract defining `struct interactive_runnable` with borrowed
+  admission/process-group associations only, explicit ownership and lifetime
+  boundaries, explicit runnable state constants
+  (`INTERACTIVE_RUNNABLE_STATE_NONE`,
+  `INTERACTIVE_RUNNABLE_STATE_ENQUEUED`), frozen membership-registration
+  meaning (marker creation/recording only; no scheduling queue insertion; no
+  execution state mutation), admission dependency chain documentation
+  (`session -> controlling_terminal -> interactive_console ->
+  interactive_activation -> interactive_readiness -> interactive_admission ->
+  interactive_runnable`), monotonic single-transition rule, and single-runnable
+  idempotence invariant documentation
+- `core/interactive_runnable.c` — deterministic bounded single-slot runnable
+  membership stubs for `interactive_runnable_enqueue()` and
+  `interactive_runnable_state()` with identical-input idempotence and
+  conflicting-input rejection
+- `tests/console/test_interactive_runnable_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  runnable state constants, signatures, and visible interactive runnable struct
+  field layout
+- `tests/console/test_interactive_runnable_link.c` — link-check for
+  interactive runnable enqueue contract symbol presence
+
+This Phase 7 boundary step is kernel-internal only and is not a userspace ABI.
+It defines runnable membership registration only.
+It freezes membership-registration meaning as marker recording only, with no
+queue insertion semantics and no execution state mutation.
+It defines runnable membership as a monotonic transition in this contract.
+It enforces the admission dependency chain through interactive admission
+associations.
+It defines idempotent runnable enqueue behavior for identical inputs.
+It does not implement scheduling policy, fairness, time slicing, or preemption.
+It does not implement signal or job-control behavior.
+It does not implement terminal I/O behavior.
+
 ---
 
 ### Changed — Phase 3

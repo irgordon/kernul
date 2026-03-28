@@ -514,6 +514,38 @@ It does not invoke the scheduler or process wakeups.
 It does not implement signal or job-control behavior.
 It does not implement terminal I/O behavior.
 
+#### Phase 7 boundary step — Interactive process readiness transition
+
+- `include/kernul/interactive_readiness.h` — kernel-internal interactive
+  readiness contract defining `struct interactive_readiness` with borrowed
+  activation/process-group associations only, explicit ownership and lifetime
+  boundaries, explicit readiness state constants
+  (`INTERACTIVE_READINESS_STATE_INACTIVE`,
+  `INTERACTIVE_READINESS_STATE_READY`), scheduler-visible eligibility meaning,
+  activation dependency chain documentation
+  (`session -> controlling_terminal -> interactive_console ->
+  interactive_activation -> interactive_readiness`), and single-readiness
+  idempotence invariant documentation
+- `core/interactive_readiness.c` — deterministic bounded single-slot
+  readiness-eligibility stubs for `interactive_readiness_mark_ready()` and
+  `interactive_readiness_state()` with identical-input idempotence
+- `tests/console/test_interactive_readiness_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  readiness state constants, signatures, and visible interactive readiness
+  struct field layout
+- `tests/console/test_interactive_readiness_link.c` — link-check for
+  interactive readiness contract symbol presence
+
+This Phase 7 boundary step is kernel-internal only and is not a userspace ABI.
+It defines readiness eligibility only.
+It freezes scheduler-visible meaning as discoverable eligibility indication only.
+It enforces the activation dependency chain through interactive activation
+associations.
+It defines idempotent readiness behavior for identical inputs.
+It does not invoke the scheduler or process wakeups.
+It does not implement signal or job-control behavior.
+It does not implement terminal I/O behavior.
+
 ---
 
 ### Changed — Phase 3

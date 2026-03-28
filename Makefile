@@ -34,6 +34,7 @@ SRCS = arch/stub/arch.c              \
        core/init.c                   \
        core/interactive_activation.c \
        core/interactive_console.c    \
+       core/interactive_readiness.c  \
        core/pipe.c                   \
        core/process.c                \
        core/session.c                \
@@ -54,6 +55,7 @@ OBJS = $(SRCS:.c=.o)
         test_address_space_contract_compile.o \
         test_interactive_activation_contract_compile.o \
         test_interactive_console_contract_compile.o \
+        test_interactive_readiness_contract_compile.o \
         test_fd_table_contract_compile.o \
         test_signal_contract_compile.o \
         test_session_contract_compile.o \
@@ -76,14 +78,16 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/test_cpu_state_api.o tests/test_idle \
        tests/init/test_init_contract_compile.o \
        tests/init/test_init_link \
-        tests/address_space/test_address_space_contract_compile.o \
-        tests/address_space/test_address_space_link \
-        tests/console/test_interactive_activation_contract_compile.o \
-        tests/console/test_interactive_activation_link \
-        tests/console/test_interactive_console_contract_compile.o \
-        tests/console/test_interactive_console_link \
-        tests/fd/test_fd_table_contract_compile.o \
-       tests/fd/test_fd_table_link \
+         tests/address_space/test_address_space_contract_compile.o \
+         tests/address_space/test_address_space_link \
+         tests/console/test_interactive_activation_contract_compile.o \
+         tests/console/test_interactive_activation_link \
+         tests/console/test_interactive_console_contract_compile.o \
+         tests/console/test_interactive_console_link \
+         tests/console/test_interactive_readiness_contract_compile.o \
+         tests/console/test_interactive_readiness_link \
+         tests/fd/test_fd_table_contract_compile.o \
+        tests/fd/test_fd_table_link \
        tests/signal/test_signal_contract_compile.o \
        tests/signal/test_signal_link \
       tests/session/test_session_contract_compile.o \
@@ -121,6 +125,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/console/test_interactive_activation_link && echo "test_interactive_activation_link: passed." || echo "test_interactive_activation_link: FAILED."
 	@echo "test_interactive_console_contract_compile: compile-check passed."
 	./tests/console/test_interactive_console_link && echo "test_interactive_console_link: passed." || echo "test_interactive_console_link: FAILED."
+	@echo "test_interactive_readiness_contract_compile: compile-check passed."
+	./tests/console/test_interactive_readiness_link && echo "test_interactive_readiness_link: passed." || echo "test_interactive_readiness_link: FAILED."
 	@echo "test_fd_table_contract_compile: compile-check passed."
 	./tests/fd/test_fd_table_link && echo "test_fd_table_link: passed." || echo "test_fd_table_link: FAILED."
 	@echo "test_signal_contract_compile: compile-check passed."
@@ -195,6 +201,12 @@ tests/console/test_interactive_console_contract_compile.o: tests/console/test_in
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/console/test_interactive_console_link: tests/console/test_interactive_console_link.c core/interactive_console.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/console/test_interactive_readiness_contract_compile.o: tests/console/test_interactive_readiness_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_interactive_readiness_link: tests/console/test_interactive_readiness_link.c core/interactive_readiness.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/fd/test_fd_table_contract_compile.o: tests/fd/test_fd_table_contract_compile.c
@@ -272,6 +284,7 @@ test_init_contract_compile.o: tests/init/test_init_contract_compile.o
 test_address_space_contract_compile.o: tests/address_space/test_address_space_contract_compile.o
 test_interactive_activation_contract_compile.o: tests/console/test_interactive_activation_contract_compile.o
 test_interactive_console_contract_compile.o: tests/console/test_interactive_console_contract_compile.o
+test_interactive_readiness_contract_compile.o: tests/console/test_interactive_readiness_contract_compile.o
 test_fd_table_contract_compile.o: tests/fd/test_fd_table_contract_compile.o
 test_signal_contract_compile.o: tests/signal/test_signal_contract_compile.o
 test_session_contract_compile.o: tests/session/test_session_contract_compile.o
@@ -296,6 +309,8 @@ clean:
 	      tests/console/test_interactive_activation_link \
 	      tests/console/test_interactive_console_contract_compile.o \
 	      tests/console/test_interactive_console_link \
+	      tests/console/test_interactive_readiness_contract_compile.o \
+	      tests/console/test_interactive_readiness_link \
 	      tests/fd/test_fd_table_contract_compile.o \
 	      tests/fd/test_fd_table_link \
 	      tests/signal/test_signal_contract_compile.o \

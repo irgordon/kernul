@@ -700,6 +700,52 @@ It does not implement scheduling policy, fairness, time slicing, or preemption.
 It does not implement signal or job-control behavior.
 It does not implement terminal I/O behavior.
 
+#### Phase 7, Task 7 — Interactive switch operand preparation boundary
+
+- `include/kernul/interactive_switch_operands.h` — kernel-internal
+  interactive switch-operand preparation contract defining
+  `struct interactive_switch_operands` with borrowed
+  interactive-execution-target/process-group/`arch_cpu_state_t` operand
+  associations only, explicit ownership and lifetime boundaries, explicit
+  preparation state constants (`INTERACTIVE_SWITCH_OPERANDS_STATE_NONE`,
+  `INTERACTIVE_SWITCH_OPERANDS_STATE_PREPARED`), preparation-only meaning
+  (concrete switch operands prepared; no execution transfer), explicit
+  prohibition on `arch_cpu_state_switch()` invocation at this boundary,
+  complete dependency chain documentation
+  (`session -> controlling_terminal -> interactive_console ->
+  interactive_activation -> interactive_readiness -> interactive_admission ->
+  interactive_runnable -> interactive_dispatch -> interactive_execution_target ->
+  interactive_switch_operands`), deterministic/bounded operand-source
+  constraints using static non-owning architecture-state placeholders in this
+  phase, monotonic single-transition rule, and idempotent identical-input
+  behavior definition (same execution-target-associated session and consumer
+  group in this phase)
+- `core/interactive_switch_operands.c` — deterministic bounded single-slot
+  switch-operand preparation stubs for `interactive_switch_operands_prepare()`
+  and `interactive_switch_operands_state()` with identical-input idempotence,
+  conflicting-input rejection, and deterministic static stub `from`/`to`
+  architecture operand placeholders
+- `tests/console/test_interactive_switch_operands_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  preparation state constants, signatures, visible interactive switch-operands
+  struct field layout, and visible `arch_cpu_state_t *` operand field types
+- `tests/console/test_interactive_switch_operands_link.c` — link-check for
+  interactive switch-operand preparation contract symbol presence
+
+This Phase 7 boundary step is kernel-internal only and is not a userspace ABI.
+It defines operand preparation only: execution target is resolved into concrete
+architecture switch operands for a later switch surface.
+It defines preparation as a monotonic transition in this contract.
+It defines idempotent preparation behavior for identical inputs, where identical
+means the same execution-target-associated session and consumer group in this
+phase.
+It does not call `arch_cpu_state_switch()` and does not perform context
+switching.
+It does not execute threads, bind to CPUs, or reserve execution resources.
+It does not implement scheduling policy, fairness, time slicing, or preemption.
+It does not implement signal or job-control behavior.
+It does not implement terminal I/O behavior.
+
 ---
 
 ### Changed — Phase 3

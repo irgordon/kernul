@@ -546,6 +546,39 @@ It does not invoke the scheduler or process wakeups.
 It does not implement signal or job-control behavior.
 It does not implement terminal I/O behavior.
 
+#### Phase 7 boundary step — Scheduler admission boundary
+
+- `include/kernul/interactive_admission.h` — kernel-internal interactive
+  scheduler admission contract defining `struct interactive_admission` with
+  borrowed readiness/process-group associations only, explicit ownership and
+  lifetime boundaries, explicit admission state constants
+  (`INTERACTIVE_ADMISSION_STATE_NONE`, `INTERACTIVE_ADMISSION_STATE_ADMITTED`),
+  authorization-only scheduler meaning, monotonic single-transition rule,
+  readiness dependency chain documentation
+  (`session -> controlling_terminal -> interactive_console ->
+  interactive_activation -> interactive_readiness ->
+  interactive_admission`), and single-admission idempotence invariant
+  documentation
+- `core/interactive_admission.c` — deterministic bounded single-slot
+  admission-authorization stubs for `interactive_admission_admit()` and
+  `interactive_admission_state()` with identical-input idempotence
+- `tests/console/test_interactive_admission_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  admission state constants, signatures, and visible interactive admission
+  struct field layout
+- `tests/console/test_interactive_admission_link.c` — link-check for
+  interactive admission contract symbol presence
+
+This Phase 7 boundary step is kernel-internal only and is not a userspace ABI.
+It defines scheduler admission authorization only.
+It defines admission as a monotonic transition in this contract.
+It enforces the readiness dependency chain through interactive readiness
+associations.
+It defines idempotent admission behavior for identical inputs.
+It does not invoke scheduler policy or manipulate run queues.
+It does not implement signal or job-control behavior.
+It does not implement terminal I/O behavior.
+
 ---
 
 ### Changed — Phase 3

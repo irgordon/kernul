@@ -26,15 +26,16 @@ TEST_CFLAGS = -std=c11 -Wall -Wextra -Werror \
               -DKERNUL_STUB_TARGET
 
 SRCS = arch/stub/arch.c              \
-       core/assert.c                 \
-       core/address_space.c          \
-       core/controlling_terminal.c   \
-       core/elf_loader.c             \
-       core/fd_table.c               \
-       core/init.c                   \
-       core/interactive_activation.c \
-       core/interactive_console.c    \
-       core/interactive_readiness.c  \
+        core/assert.c                 \
+        core/address_space.c          \
+        core/controlling_terminal.c   \
+        core/elf_loader.c             \
+        core/fd_table.c               \
+        core/init.c                   \
+        core/interactive_admission.c  \
+        core/interactive_activation.c \
+        core/interactive_console.c    \
+        core/interactive_readiness.c  \
        core/pipe.c                   \
        core/process.c                \
        core/session.c                \
@@ -52,6 +53,7 @@ OBJS = $(SRCS:.c=.o)
 
 .PHONY: all test clean test_sched_api.o test_cpu_state_api.o \
         test_init_contract_compile.o \
+        test_interactive_admission_contract_compile.o \
         test_address_space_contract_compile.o \
         test_interactive_activation_contract_compile.o \
         test_interactive_console_contract_compile.o \
@@ -79,9 +81,11 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
        tests/init/test_init_contract_compile.o \
        tests/init/test_init_link \
          tests/address_space/test_address_space_contract_compile.o \
-         tests/address_space/test_address_space_link \
-         tests/console/test_interactive_activation_contract_compile.o \
-         tests/console/test_interactive_activation_link \
+          tests/address_space/test_address_space_link \
+          tests/console/test_interactive_admission_contract_compile.o \
+          tests/console/test_interactive_admission_link \
+          tests/console/test_interactive_activation_contract_compile.o \
+          tests/console/test_interactive_activation_link \
          tests/console/test_interactive_console_contract_compile.o \
          tests/console/test_interactive_console_link \
          tests/console/test_interactive_readiness_contract_compile.o \
@@ -121,6 +125,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/init/test_init_link && echo "test_init_link:     passed." || echo "test_init_link:     FAILED."
 	@echo "test_address_space_contract_compile: compile-check passed."
 	./tests/address_space/test_address_space_link && echo "test_address_space_link: passed." || echo "test_address_space_link: FAILED."
+	@echo "test_interactive_admission_contract_compile: compile-check passed."
+	./tests/console/test_interactive_admission_link && echo "test_interactive_admission_link: passed." || echo "test_interactive_admission_link: FAILED."
 	@echo "test_interactive_activation_contract_compile: compile-check passed."
 	./tests/console/test_interactive_activation_link && echo "test_interactive_activation_link: passed." || echo "test_interactive_activation_link: FAILED."
 	@echo "test_interactive_console_contract_compile: compile-check passed."
@@ -193,6 +199,12 @@ tests/address_space/test_address_space_link: tests/address_space/test_address_sp
 
 tests/console/test_interactive_activation_contract_compile.o: tests/console/test_interactive_activation_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_interactive_admission_contract_compile.o: tests/console/test_interactive_admission_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_interactive_admission_link: tests/console/test_interactive_admission_link.c core/interactive_admission.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_interactive_activation_link: tests/console/test_interactive_activation_link.c core/interactive_activation.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
@@ -281,6 +293,7 @@ tests/arch/aarch64/test_arch_syscall_enter_link: tests/arch/aarch64/test_arch_sy
 test_sched_api.o: tests/test_sched_api.o
 test_cpu_state_api.o: tests/test_cpu_state_api.o
 test_init_contract_compile.o: tests/init/test_init_contract_compile.o
+test_interactive_admission_contract_compile.o: tests/console/test_interactive_admission_contract_compile.o
 test_address_space_contract_compile.o: tests/address_space/test_address_space_contract_compile.o
 test_interactive_activation_contract_compile.o: tests/console/test_interactive_activation_contract_compile.o
 test_interactive_console_contract_compile.o: tests/console/test_interactive_console_contract_compile.o
@@ -305,6 +318,8 @@ clean:
 	      tests/init/test_init_link \
 	      tests/address_space/test_address_space_contract_compile.o \
 	      tests/address_space/test_address_space_link \
+	      tests/console/test_interactive_admission_contract_compile.o \
+	      tests/console/test_interactive_admission_link \
 	      tests/console/test_interactive_activation_contract_compile.o \
 	      tests/console/test_interactive_activation_link \
 	      tests/console/test_interactive_console_contract_compile.o \

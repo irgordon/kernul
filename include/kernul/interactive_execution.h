@@ -39,6 +39,8 @@
  *
  * Execution transfer semantics and scope:
  *   Execution records mark real execution transfer.
+ *   Execution transfer means invoking arch_cpu_state_switch(from, to)
+ *   exactly once per successful execution transfer in real execution builds.
  *   Transfer validates the interactive chain:
  *     session -> controlling_terminal -> interactive_console ->
  *     interactive_activation -> interactive_readiness ->

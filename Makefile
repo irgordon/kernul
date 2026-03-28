@@ -37,6 +37,7 @@ SRCS = arch/stub/arch.c              \
         core/interactive_console.c    \
         core/interactive_dispatch.c   \
         core/interactive_execution_target.c \
+        core/interactive_switch_operands.c \
         core/interactive_runnable.c   \
         core/interactive_readiness.c  \
         core/pipe.c                   \
@@ -62,6 +63,7 @@ OBJS = $(SRCS:.c=.o)
         test_interactive_console_contract_compile.o \
         test_interactive_dispatch_contract_compile.o \
         test_interactive_execution_target_contract_compile.o \
+        test_interactive_switch_operands_contract_compile.o \
         test_interactive_runnable_contract_compile.o \
         test_interactive_readiness_contract_compile.o \
         test_fd_table_contract_compile.o \
@@ -94,13 +96,15 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
            tests/console/test_interactive_activation_link \
             tests/console/test_interactive_console_contract_compile.o \
             tests/console/test_interactive_console_link \
-            tests/console/test_interactive_dispatch_contract_compile.o \
-            tests/console/test_interactive_dispatch_link \
-            tests/console/test_interactive_execution_target_contract_compile.o \
-            tests/console/test_interactive_execution_target_link \
-            tests/console/test_interactive_runnable_contract_compile.o \
-            tests/console/test_interactive_runnable_link \
-            tests/console/test_interactive_readiness_contract_compile.o \
+             tests/console/test_interactive_dispatch_contract_compile.o \
+             tests/console/test_interactive_dispatch_link \
+             tests/console/test_interactive_execution_target_contract_compile.o \
+             tests/console/test_interactive_execution_target_link \
+             tests/console/test_interactive_switch_operands_contract_compile.o \
+             tests/console/test_interactive_switch_operands_link \
+             tests/console/test_interactive_runnable_contract_compile.o \
+             tests/console/test_interactive_runnable_link \
+             tests/console/test_interactive_readiness_contract_compile.o \
             tests/console/test_interactive_readiness_link \
          tests/fd/test_fd_table_contract_compile.o \
         tests/fd/test_fd_table_link \
@@ -147,6 +151,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/console/test_interactive_dispatch_link && echo "test_interactive_dispatch_link: passed." || echo "test_interactive_dispatch_link: FAILED."
 	@echo "test_interactive_execution_target_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_target_link && echo "test_interactive_execution_target_link: passed." || echo "test_interactive_execution_target_link: FAILED."
+	@echo "test_interactive_switch_operands_contract_compile: compile-check passed."
+	./tests/console/test_interactive_switch_operands_link && echo "test_interactive_switch_operands_link: passed." || echo "test_interactive_switch_operands_link: FAILED."
 	@echo "test_interactive_runnable_contract_compile: compile-check passed."
 	./tests/console/test_interactive_runnable_link && echo "test_interactive_runnable_link: passed." || echo "test_interactive_runnable_link: FAILED."
 	@echo "test_interactive_readiness_contract_compile: compile-check passed."
@@ -245,6 +251,12 @@ tests/console/test_interactive_execution_target_contract_compile.o: tests/consol
 tests/console/test_interactive_execution_target_link: tests/console/test_interactive_execution_target_link.c core/interactive_execution_target.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_interactive_switch_operands_link: tests/console/test_interactive_switch_operands_link.c core/interactive_switch_operands.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_runnable_contract_compile.o: tests/console/test_interactive_runnable_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -335,6 +347,7 @@ test_interactive_activation_contract_compile.o: tests/console/test_interactive_a
 test_interactive_console_contract_compile.o: tests/console/test_interactive_console_contract_compile.o
 test_interactive_dispatch_contract_compile.o: tests/console/test_interactive_dispatch_contract_compile.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
+test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
 test_interactive_runnable_contract_compile.o: tests/console/test_interactive_runnable_contract_compile.o
 test_interactive_readiness_contract_compile.o: tests/console/test_interactive_readiness_contract_compile.o
 test_fd_table_contract_compile.o: tests/fd/test_fd_table_contract_compile.o
@@ -367,6 +380,8 @@ clean:
 	      tests/console/test_interactive_dispatch_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
+	      tests/console/test_interactive_switch_operands_contract_compile.o \
+	      tests/console/test_interactive_switch_operands_link \
 	      tests/console/test_interactive_runnable_contract_compile.o \
 	      tests/console/test_interactive_runnable_link \
 	      tests/console/test_interactive_readiness_contract_compile.o \

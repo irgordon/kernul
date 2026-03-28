@@ -616,6 +616,47 @@ It does not implement scheduling policy, fairness, time slicing, or preemption.
 It does not implement signal or job-control behavior.
 It does not implement terminal I/O behavior.
 
+#### Phase 7 boundary step — Interactive scheduler dispatch boundary
+
+- `include/kernul/interactive_dispatch.h` — kernel-internal interactive
+  scheduler dispatch contract defining `struct interactive_dispatch` with
+  borrowed interactive-runnable/process-group associations only, explicit
+  ownership and lifetime boundaries, explicit dispatch state constants
+  (`INTERACTIVE_DISPATCH_STATE_NONE`,
+  `INTERACTIVE_DISPATCH_STATE_DISPATCHED`), selection-acknowledgment-only
+  dispatch meaning (no CPU binding, no resource reservation, no execution-state
+  changes), explicit exclusion of CPU/thread/resource association, runnable
+  dependency chain documentation
+  (`session -> controlling_terminal -> interactive_console ->
+  interactive_activation -> interactive_readiness -> interactive_admission ->
+  interactive_runnable -> interactive_dispatch`), terminal monotonic-transition
+  rule for this Phase 7 sequence, and single-dispatch idempotence invariant
+  documentation
+- `core/interactive_dispatch.c` — deterministic bounded single-slot dispatch
+  visibility stubs for `interactive_dispatch_select()` and
+  `interactive_dispatch_state()` with identical-input idempotence and
+  conflicting-input rejection
+- `tests/console/test_interactive_dispatch_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  dispatch state constants, signatures, and visible interactive dispatch struct
+  field layout
+- `tests/console/test_interactive_dispatch_link.c` — link-check for interactive
+  dispatch contract symbol presence
+
+This Phase 7 boundary step is kernel-internal only and is not a userspace ABI.
+It defines dispatch as selection acknowledgment visibility only.
+It excludes CPU/thread/resource association at this contract boundary.
+It enforces the runnable dependency chain through interactive runnable
+associations.
+It defines dispatch as the terminal monotonic transition in this Phase 7
+sequence.
+It defines idempotent dispatch behavior for identical inputs.
+It does not execute threads or perform context switching.
+It does not bind to CPUs or reserve execution resources.
+It does not implement scheduling policy, fairness, time slicing, or preemption.
+It does not implement signal or job-control behavior.
+It does not implement terminal I/O behavior.
+
 ---
 
 ### Changed — Phase 3

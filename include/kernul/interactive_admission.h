@@ -45,9 +45,9 @@
  *   Admission is a monotonic transition in this phase; once admitted, the
  *   state does not revert within this contract.
  *   Admission validates the interactive execution chain:
- *     session -> controlling_terminal -> interactive_console
- *     -> interactive_activation -> interactive_readiness
- *     -> interactive_admission
+ *     session -> controlling_terminal -> interactive_console ->
+ *     interactive_activation -> interactive_readiness ->
+ *     interactive_admission
  *   This surface exists solely to authorize eligibility within the scheduler
  *   domain.
  *   Admission does not invoke the scheduler, enqueue processes, wake threads,

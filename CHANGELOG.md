@@ -657,6 +657,49 @@ It does not implement scheduling policy, fairness, time slicing, or preemption.
 It does not implement signal or job-control behavior.
 It does not implement terminal I/O behavior.
 
+#### Phase 7 boundary step — Interactive execution target preparation boundary
+
+- `include/kernul/interactive_execution_target.h` — kernel-internal
+  interactive execution-target preparation contract defining
+  `struct interactive_execution_target` with borrowed
+  interactive-dispatch/process-group associations only, explicit ownership and
+  lifetime boundaries, explicit preparation state constants
+  (`INTERACTIVE_EXECUTION_TARGET_STATE_NONE`,
+  `INTERACTIVE_EXECUTION_TARGET_STATE_PREPARED`), preparation-only meaning
+  (dispatch resolved into execution-target preparation record only), explicit
+  exclusion of thread binding, CPU binding, run-queue/resource/token
+  association, complete dependency chain documentation
+  (`session -> controlling_terminal -> interactive_console ->
+  interactive_activation -> interactive_readiness -> interactive_admission ->
+  interactive_runnable -> interactive_dispatch ->
+  interactive_execution_target`), monotonic single-transition rule, and
+  idempotent identical-input behavior definition (same dispatch-associated
+  session and consumer group in this phase)
+- `core/interactive_execution_target.c` — deterministic bounded single-slot
+  preparation stubs for `interactive_execution_prepare()` and
+  `interactive_execution_target_state()` with identical-input idempotence and
+  conflicting-input rejection
+- `tests/console/test_interactive_execution_target_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  preparation state constants, signatures, and visible interactive execution
+  target struct field layout
+- `tests/console/test_interactive_execution_target_link.c` — link-check for
+  interactive execution-target preparation contract symbol presence
+
+This Phase 7 boundary step is kernel-internal only and is not a userspace ABI.
+It defines preparation only: dispatch is resolved into an execution-target
+preparation record suitable for later architecture-specific context switching.
+It defines preparation as a monotonic transition in this contract.
+It defines idempotent preparation behavior for identical inputs, where identical
+means the same dispatch-associated session and consumer group in this phase.
+It does not identify or bind a specific thread.
+It does not bind to a CPU or manage run queues/resources/tokens.
+It does not perform context switching and does not call
+`arch_cpu_state_switch()`.
+It does not implement scheduling policy, fairness, time slicing, or preemption.
+It does not implement signal or job-control behavior.
+It does not implement terminal I/O behavior.
+
 ---
 
 ### Changed — Phase 3

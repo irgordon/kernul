@@ -824,6 +824,38 @@ management.
 It does not implement job-control, signal, terminal, or execution-transfer
 behavior.
 
+#### Phase 9, Task 1 — Scheduler state materialization boundary
+
+- `include/kernul/interactive_scheduler_state.h` — kernel-internal interactive
+  scheduler-state materialization contract defining
+  `struct interactive_scheduler_state` with borrowed
+  session/interactive-runnable associations only, explicit ownership and
+  lifetime boundaries, scheduler-state constants
+  (`INTERACTIVE_SCHEDULER_STATE_NONE`,
+  `INTERACTIVE_SCHEDULER_STATE_READY`), explicit runnable-membership ordering
+  authority, explicit determinism/idempotence/conflict invariants, and explicit
+  prohibitions against selection/execution/architecture-switch/timekeeping
+  dependencies
+- `core/interactive_scheduler_state.c` — deterministic bounded single-slot
+  per-session stand-in scheduler-state materialization stubs for
+  `interactive_scheduler_state_create()` and
+  `interactive_scheduler_state_state()` with invalid-input rejection,
+  identical-input idempotence by session/runnable pointer identity,
+  conflicting-input rejection, and monotonic ready-state visibility
+- `tests/console/test_interactive_scheduler_state_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  scheduler-state constants, signatures, and visible
+  interactive-scheduler-state struct field layout
+- `tests/console/test_interactive_scheduler_state_link.c` — link-check for
+  interactive scheduler-state contract symbol presence
+
+This Phase 9 boundary step is kernel-internal only and is not a userspace ABI.
+It introduces scheduler-state materialization as a per-session persistent
+structure representing runnable membership deterministically.
+It is phase-local substrate only and does not introduce scheduler behavior.
+It does not implement timekeeping, fairness, time slicing, preemption, or
+execution behavior.
+
 ---
 
 ### Changed — Phase 3

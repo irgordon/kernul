@@ -746,6 +746,46 @@ It does not implement scheduling policy, fairness, time slicing, or preemption.
 It does not implement signal or job-control behavior.
 It does not implement terminal I/O behavior.
 
+
+#### Phase 8, Task 1 — Interactive execution transfer boundary
+
+- `include/kernul/interactive_execution.h` — kernel-internal interactive
+  execution-transfer contract defining `struct interactive_execution` with
+  borrowed interactive-switch-operands/process-group associations only, explicit
+  ownership and lifetime boundaries, execution state constants
+  (`INTERACTIVE_EXECUTION_STATE_NONE`,
+  `INTERACTIVE_EXECUTION_STATE_EXECUTED`), executed-state meaning as explicit
+  `arch_cpu_state_switch()` invocation (or explicitly gated simulation in
+  verification/test builds), complete dependency chain documentation
+  (`session -> controlling_terminal -> interactive_console ->
+  interactive_activation -> interactive_readiness -> interactive_admission ->
+  interactive_runnable -> interactive_dispatch -> interactive_execution_target ->
+  interactive_switch_operands -> interactive_execution ->
+  arch_cpu_state_switch()`), explicit real-build control-flow boundary semantics,
+  explicit verification gating requirement, monotonic single-transfer invariant,
+  and idempotent identical-input behavior definition (same
+  switch-operands-associated session and consumer group in this phase)
+- `core/interactive_execution.c` — deterministic bounded single-slot
+  execution-transfer stubs for `interactive_execution_transfer()` with full chain
+  validation, identical-input idempotence, conflicting-input rejection, monotonic
+  executed state transition, and guarded architecture switch invocation
+- `tests/console/test_interactive_execution_contract_compile.c` — compile-check
+  translation unit validating declaration visibility, required execution state
+  constants, signature, and visible interactive execution struct field layout
+- `tests/console/test_interactive_execution_link.c` — link-check for interactive
+  execution transfer contract symbol presence
+
+This Phase 8 boundary step is kernel-internal only and is not a userspace ABI.
+It defines execution transfer as explicit invocation of `arch_cpu_state_switch()`.
+It enforces switch-operands dependency at the execution boundary.
+It gates architecture switching for verification/test safety.
+It defines execution as a monotonic transition in this contract.
+It defines idempotent behavior for identical inputs.
+It does not implement scheduling policy, fairness, time slicing, or preemption.
+It does not implement run-queue management, signal behavior, or job-control
+behavior.
+It does not implement terminal I/O behavior.
+
 ---
 
 ### Changed — Phase 3

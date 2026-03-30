@@ -18,6 +18,7 @@
  */
 
 #include <kernul/interactive_selection.h>
+#include <kernul/interactive_selection_result.h>
 #include <kernul/interactive_dispatch.h>
 #include <kernul/interactive_runnable.h>
 #include <kernul/interactive_scheduler_state.h>
@@ -32,6 +33,7 @@
 static struct interactive_selection interactive_selection_slot;
 static struct session *interactive_selection_slot_session;
 static struct interactive_dispatch interactive_selection_dispatch_slot;
+static struct interactive_selection_result interactive_selection_result_slot;
 static u32 interactive_selection_slot_live;
 
 struct interactive_selection *
@@ -161,8 +163,38 @@ interactive_selection_select(struct interactive_runnable *runnable)
     interactive_selection_slot.consumer_group = consumer_group;
     interactive_selection_slot.state = INTERACTIVE_SELECTION_STATE_SELECTED;
     interactive_selection_slot_session = session;
+    interactive_selection_result_slot.session = session;
+    interactive_selection_result_slot.operand_identity = runnable;
 
     return &interactive_selection_slot;
+}
+
+const struct interactive_selection_result *
+interactive_selection_result_expose(const struct interactive_selection *sel)
+{
+    if (sel == NULL)
+        return NULL;
+
+    if (sel != &interactive_selection_slot)
+        return NULL;
+
+    if (interactive_selection_slot_live == 0U)
+        return NULL;
+
+    if (interactive_selection_slot.state != INTERACTIVE_SELECTION_STATE_SELECTED)
+        return NULL;
+
+    if (interactive_selection_slot.runnable == NULL ||
+        interactive_selection_slot_session == NULL) {
+        return NULL;
+    }
+
+    if (interactive_selection_result_slot.session != interactive_selection_slot_session ||
+        interactive_selection_result_slot.operand_identity != interactive_selection_slot.runnable) {
+        return NULL;
+    }
+
+    return &interactive_selection_result_slot;
 }
 
 u32

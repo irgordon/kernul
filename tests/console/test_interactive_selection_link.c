@@ -12,6 +12,7 @@
 int main(void)
 {
     (void)&interactive_selection_select;
+    (void)&interactive_selection_result_expose;
     (void)&interactive_selection_state;
     (void)&interactive_scheduler_state_create;
     (void)&interactive_scheduler_container_materialize;

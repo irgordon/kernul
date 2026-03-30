@@ -39,6 +39,7 @@ SRCS = arch/stub/arch.c              \
         core/interactive_console.c    \
         core/interactive_dispatch.c   \
         core/interactive_selection.c  \
+        core/interactive_selection_handoff_binding.c \
         core/interactive_execution_handoff.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
@@ -70,6 +71,7 @@ OBJS = $(SRCS:.c=.o)
         test_interactive_console_contract_compile.o \
         test_interactive_dispatch_contract_compile.o \
         test_interactive_selection_contract_compile.o \
+        test_interactive_selection_handoff_binding_contract_compile.o \
         test_interactive_execution_handoff_contract_compile.o \
         test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
@@ -110,12 +112,14 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
             tests/console/test_interactive_activation_link \
              tests/console/test_interactive_console_contract_compile.o \
              tests/console/test_interactive_console_link \
-              tests/console/test_interactive_dispatch_contract_compile.o \
-              tests/console/test_interactive_dispatch_link \
-               tests/console/test_interactive_selection_contract_compile.o \
-               tests/console/test_interactive_selection_link \
-               tests/console/test_interactive_execution_handoff_contract_compile.o \
-               tests/console/test_interactive_execution_handoff_link \
+               tests/console/test_interactive_dispatch_contract_compile.o \
+               tests/console/test_interactive_dispatch_link \
+                tests/console/test_interactive_selection_contract_compile.o \
+                tests/console/test_interactive_selection_link \
+                tests/console/test_interactive_selection_handoff_binding_contract_compile.o \
+                tests/console/test_interactive_selection_handoff_binding_link \
+                tests/console/test_interactive_execution_handoff_contract_compile.o \
+                tests/console/test_interactive_execution_handoff_link \
                tests/console/test_interactive_execution_target_contract_compile.o \
               tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
@@ -175,6 +179,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/console/test_interactive_dispatch_link && echo "test_interactive_dispatch_link: passed." || echo "test_interactive_dispatch_link: FAILED."
 	@echo "test_interactive_selection_contract_compile: compile-check passed."
 	./tests/console/test_interactive_selection_link && echo "test_interactive_selection_link: passed." || echo "test_interactive_selection_link: FAILED."
+	@echo "test_interactive_selection_handoff_binding_contract_compile: compile-check passed."
+	./tests/console/test_interactive_selection_handoff_binding_link && echo "test_interactive_selection_handoff_binding_link: passed." || echo "test_interactive_selection_handoff_binding_link: FAILED."
 	@echo "test_interactive_execution_handoff_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_handoff_link && echo "test_interactive_execution_handoff_link: passed." || echo "test_interactive_execution_handoff_link: FAILED."
 	@echo "test_interactive_execution_target_contract_compile: compile-check passed."
@@ -296,6 +302,17 @@ tests/console/test_interactive_selection_link: tests/console/test_interactive_se
                                                core/interactive_scheduler_container.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_interactive_selection_handoff_binding_contract_compile.o: tests/console/test_interactive_selection_handoff_binding_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_interactive_selection_handoff_binding_link: tests/console/test_interactive_selection_handoff_binding_link.c \
+                                                               core/interactive_selection_handoff_binding.c \
+                                                               core/interactive_selection.c \
+                                                               core/interactive_execution_handoff.c \
+                                                               core/interactive_scheduler_state.c \
+                                                               core/interactive_scheduler_container.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_execution_handoff_contract_compile.o: tests/console/test_interactive_execution_handoff_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -412,6 +429,7 @@ test_interactive_activation_contract_compile.o: tests/console/test_interactive_a
 test_interactive_console_contract_compile.o: tests/console/test_interactive_console_contract_compile.o
 test_interactive_dispatch_contract_compile.o: tests/console/test_interactive_dispatch_contract_compile.o
 test_interactive_selection_contract_compile.o: tests/console/test_interactive_selection_contract_compile.o
+test_interactive_selection_handoff_binding_contract_compile.o: tests/console/test_interactive_selection_handoff_binding_contract_compile.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -451,6 +469,8 @@ clean:
 	      tests/console/test_interactive_dispatch_link \
 	      tests/console/test_interactive_selection_contract_compile.o \
 	      tests/console/test_interactive_selection_link \
+	      tests/console/test_interactive_selection_handoff_binding_contract_compile.o \
+	      tests/console/test_interactive_selection_handoff_binding_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
 	      tests/console/test_interactive_execution_contract_compile.o \

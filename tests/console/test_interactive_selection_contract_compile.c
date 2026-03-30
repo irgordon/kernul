@@ -8,6 +8,7 @@
 
 #include <kernul/interactive_selection.h>
 #include <kernul/compiler.h>
+#include <kernul/interactive_selection_result.h>
 #include <kernul/interactive_scheduler_container.h>
 #include <kernul/interactive_scheduler_state.h>
 #include <kernul/session.h>
@@ -16,17 +17,21 @@ static struct interactive_selection *(*const check_interactive_selection_select)
     struct interactive_runnable *) = interactive_selection_select;
 static u32 (*const check_interactive_selection_state)(
     const struct interactive_selection *) = interactive_selection_state;
+static const struct interactive_selection_result *(*const check_interactive_selection_result_expose)(
+    const struct interactive_selection *) = interactive_selection_result_expose;
 
 static void use_checks(void) KERN_UNUSED;
 static void use_checks(void)
 {
     struct interactive_selection sel = {0};
+    struct interactive_selection_result result = {0};
     struct session session = {0};
     struct interactive_scheduler_state state = {0};
     struct interactive_scheduler_container container = {0};
 
     (void)check_interactive_selection_select;
     (void)check_interactive_selection_state;
+    (void)check_interactive_selection_result_expose;
 
     (void)INTERACTIVE_SELECTION_STATE_NONE;
     (void)INTERACTIVE_SELECTION_STATE_SELECTED;
@@ -34,6 +39,8 @@ static void use_checks(void)
     (void)sel.dispatch;
     (void)sel.consumer_group;
     (void)sel.state;
+    (void)result.session;
+    (void)result.operand_identity;
     (void)session.scheduler_state;
     (void)session.scheduler_container;
     (void)state.session;

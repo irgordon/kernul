@@ -15,7 +15,11 @@
  *
  * Required dependencies:
  *   This contract depends on struct interactive_runnable,
+ *   struct interactive_scheduler_state,
+ *   struct interactive_scheduler_container,
  *   struct interactive_dispatch, and struct interactive_execution_target.
+ *   Selection reads candidate identity from a per-session
+ *   interactive_scheduler_container membership view.
  *   Selection is strictly upstream of execution-target preparation and
  *   execution transfer.
  *
@@ -53,14 +57,15 @@
  *   terminal I/O.
  *
  * Deterministic policy rule:
- *   Deterministic ordering is authoritative only from runnable membership
- *   ordering recorded by the interactive runnable surface.
- *   Deterministic selection order is defined by that runnable membership
- *   ordering, not by incidental traversal behavior.
- *   In this phase, this surface records a caller-supplied runnable candidate
- *   under that ordering authority and does not implement a membership walk.
+ *   Deterministic ordering is authoritative only from interactive runnable
+ *   membership ordering.
+ *   Deterministic selection order is defined by interactive runnable
+ *   membership ordering, not by incidental traversal behavior.
+ *   In this phase, this surface records a runnable candidate read from the
+ *   per-session scheduler container membership view under that ordering
+ *   authority and does not implement a membership walk.
  *   Dispatch creation order, execution-target preparation order, container
- *   iteration order, and incidental pointer ordering are non-authoritative.
+ *   traversal behavior, and incidental pointer ordering are non-authoritative.
  *   This is a phase-local policy boundary only; it is not a long-term fairness
  *   or performance commitment.
  *

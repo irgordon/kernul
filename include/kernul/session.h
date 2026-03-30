@@ -35,6 +35,8 @@
 
 #include <kernul/types.h>
 #include <kernul/interactive_scheduler_container.h>
+#include <kernul/interactive_selection_result.h>
+#include <kernul/interactive_execution_handoff.h>
 
 struct process;
 struct interactive_runnable;
@@ -54,6 +56,8 @@ struct session {
     u32 scheduler_state_live;
     struct interactive_scheduler_container scheduler_container;
     u32 scheduler_container_live;
+    struct interactive_execution_handoff execution_handoff;
+    u32 execution_handoff_live;
 };
 
 struct process_group {

@@ -930,6 +930,39 @@ Selection now reads from per-session scheduler container substrate while
 preserving the deterministic selection boundary with no policy change.
 No time, fairness, priority, preemption, or execution behavior is introduced.
 
+#### Phase 10, Task 1 — Execution handoff substrate materialization
+
+- `include/kernul/interactive_selection_result.h` — kernel-internal
+  `struct interactive_selection_result` identity record introduced as a
+  structural selection-output dependency surface for handoff materialization
+- `include/kernul/interactive_execution_handoff.h` — kernel-internal
+  execution handoff substrate contract defining
+  `struct interactive_execution_handoff` and
+  `interactive_execution_handoff_materialize()` for per-session structural
+  transfer-input record materialization only
+- `include/kernul/session.h` — extended `struct session` with explicitly
+  owned execution-handoff storage and explicit execution-handoff publication
+  marker
+- `core/interactive_execution_handoff.c` — deterministic per-session handoff
+  materialization stub with pointer-identity idempotence and conflict semantics,
+  plus explicit acquire/release publication boundaries
+- `core/session.c` — session creation initializes execution-handoff storage
+  and publication marker to deterministic unmaterialized baseline
+- `tests/console/test_interactive_execution_handoff_contract_compile.c` —
+  compile-check translation unit validating handoff type/API visibility and
+  session ownership association
+- `tests/console/test_interactive_execution_handoff_link.c` — link-check for
+  interactive execution handoff materialization symbol presence
+- `tests/session/test_session_contract_compile.c` — compile-check coverage
+  extended for session-visible execution-handoff ownership fields
+- `Makefile` — build/test integration for execution-handoff compile/link
+  contract checks
+
+This Phase 10 boundary step is kernel-internal only and is not a userspace ABI.
+It materializes execution handoff substrate structure as structural packaging
+only.
+No execution, time, fairness, priority, or preemption behavior is introduced.
+
 ---
 
 ### Changed — Phase 3

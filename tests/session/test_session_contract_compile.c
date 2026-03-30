@@ -30,6 +30,8 @@ static void use_checks(void)
 
     (void)s.id;
     (void)s.leader;
+    (void)s.execution_handoff;
+    (void)s.execution_handoff_live;
 
     (void)pg.id;
     (void)pg.session;

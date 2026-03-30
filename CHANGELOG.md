@@ -856,6 +856,28 @@ It is phase-local substrate only and does not introduce scheduler behavior.
 It does not implement timekeeping, fairness, time slicing, preemption, or
 execution behavior.
 
+#### Phase 9, Task 1.6 — Scheduler state ownership remediation
+
+- `include/kernul/session.h` — extended `struct session` with explicitly
+  owned scheduler-state storage and explicit scheduler-state liveness marker,
+  preserving existing scheduler-state contract shape and semantics
+- `include/kernul/interactive_scheduler_state.h` — scheduler-state record
+  materialization now sourced from the session contract surface, preserving
+  public scheduler-state API
+- `core/interactive_scheduler_state.c` — removed subsystem-wide scheduler-state
+  slot and subsystem-wide ownership flag; scheduler-state materialization now
+  uses per-session owned storage with existing deterministic idempotence,
+  conflict behavior, and acquire/release publication semantics preserved
+- `core/session.c` — session creation initializes per-session scheduler-state
+  storage to a deterministic unmaterialized baseline
+- `tests/console/test_interactive_scheduler_state_contract_compile.c` —
+  compile-check coverage extended to verify session-visible scheduler-state
+  ownership fields
+
+Scheduler state ownership is remediated to align implementation with the
+existing per-session contract. No scheduler behavior or policy changes are
+introduced.
+
 ---
 
 ### Changed — Phase 3

@@ -8,6 +8,7 @@
 
 #include <kernul/interactive_scheduler_state.h>
 #include <kernul/compiler.h>
+#include <kernul/session.h>
 
 static struct interactive_scheduler_state *(*const check_interactive_scheduler_state_create)(
     struct session *,
@@ -19,6 +20,7 @@ static void use_checks(void) KERN_UNUSED;
 static void use_checks(void)
 {
     struct interactive_scheduler_state state = {0};
+    struct session session = {0};
 
     (void)check_interactive_scheduler_state_create;
     (void)check_interactive_scheduler_state_state;
@@ -28,4 +30,6 @@ static void use_checks(void)
     (void)state.session;
     (void)state.runnable;
     (void)state.state;
+    (void)session.scheduler_state;
+    (void)session.scheduler_state_live;
 }

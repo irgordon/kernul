@@ -23,15 +23,16 @@ env:
   TZ: UTC
   CC: gcc
   CFLAGS: -std=c11 -Wall -Wextra -Werror
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build-and-verify:
-    name: Build and verify (deterministic)
+  build-and-test:
+    name: Build and test (deterministic)
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install pinned toolchain
         run: |
@@ -43,14 +44,18 @@ jobs:
           gcc --version
           make --version
 
-      - name: Run canonical verification entry point
+      - name: Build
         run: |
-          make verify
+          make all
+
+      - name: Run deterministic test suite
+        run: |
+          make test
 
   codeql:
     name: CodeQL analysis
     runs-on: ubuntu-22.04
-    needs: build-and-verify
+    needs: build-and-test
 
     permissions:
       actions: read
@@ -60,11 +65,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ "c-cpp" ]
+        language: ["c-cpp"]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Install pinned toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc make
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -72,9 +82,10 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: manual
 
-      - name: Run canonical verification entry point
+      - name: Build analyzed targets
         run: |
-          make verify
+          make all
+          make test
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3

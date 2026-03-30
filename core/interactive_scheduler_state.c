@@ -30,11 +30,14 @@ interactive_scheduler_state_create(
 )
 {
     u32 expected = 0U;
+    u32 live;
 
     if (session == NULL || runnable == NULL)
         return NULL;
 
-    if (interactive_scheduler_state_slot_live != 0U) {
+    live = __atomic_load_n(&interactive_scheduler_state_slot_live,
+                           __ATOMIC_ACQUIRE);
+    if (live == 1U) {
         if (interactive_scheduler_state_slot.session == session) {
             if (interactive_scheduler_state_slot.runnable == runnable)
                 return &interactive_scheduler_state_slot;
@@ -47,11 +50,13 @@ interactive_scheduler_state_create(
 
     if (!__atomic_compare_exchange_n(&interactive_scheduler_state_slot_live,
                                      &expected,
-                                     1U,
+                                     2U,
                                      false,
                                      __ATOMIC_ACQ_REL,
                                      __ATOMIC_ACQUIRE)) {
-        if (interactive_scheduler_state_slot.session == session &&
+        if (__atomic_load_n(&interactive_scheduler_state_slot_live,
+                            __ATOMIC_ACQUIRE) == 1U &&
+            interactive_scheduler_state_slot.session == session &&
             interactive_scheduler_state_slot.runnable == runnable) {
             return &interactive_scheduler_state_slot;
         }
@@ -62,6 +67,8 @@ interactive_scheduler_state_create(
     interactive_scheduler_state_slot.session = session;
     interactive_scheduler_state_slot.runnable = runnable;
     interactive_scheduler_state_slot.state = INTERACTIVE_SCHEDULER_STATE_READY;
+    __atomic_store_n(&interactive_scheduler_state_slot_live, 1U,
+                     __ATOMIC_RELEASE);
 
     return &interactive_scheduler_state_slot;
 }

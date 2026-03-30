@@ -55,8 +55,10 @@
  * Deterministic policy rule:
  *   Deterministic ordering is authoritative only from runnable membership
  *   ordering recorded by the interactive runnable surface.
- *   Selection chooses the first runnable member according to that authoritative
- *   runnable membership ordering.
+ *   Deterministic selection order is defined by that runnable membership
+ *   ordering, not by incidental traversal behavior.
+ *   In this phase, this surface records a caller-supplied runnable candidate
+ *   under that ordering authority and does not implement a membership walk.
  *   Dispatch creation order, execution-target preparation order, container
  *   iteration order, and incidental pointer ordering are non-authoritative.
  *   This is a phase-local policy boundary only; it is not a long-term fairness
@@ -64,13 +66,15 @@
  *
  * Validity, uniqueness, idempotence, monotonicity, and visibility:
  *   A session may have zero or one interactive selection record.
- *   The bounded single-slot model in this phase is a per-session stand-in.
+ *   The single-slot selection record is scoped per session and exists only as
+ *   a deterministic stand-in for the one-per-session invariant.
  *   Selection may occur only after runnable membership exists.
  *   Duplicate or conflicting selections are invalid input.
  *   Identical inputs return the existing selection record.
- *   Identical inputs are defined by pointer identity of the runnable and its
+ *   Idempotence is defined by pointer identity of the runnable input; structural
+ *   equivalence is not considered.
+ *   Identical inputs additionally require pointer-identity match of the
  *   associated session/consumer-group chain.
- *   Structural equivalence without pointer identity is not identical input.
  *   Selection is monotonic: once selected, this state does not revert.
  *   Subsequent identical-input calls must observe the same selected record with
  *   no intermediate rollback or transient state.
@@ -82,6 +86,7 @@
  *   This includes helper/wrapper paths that call:
  *     interactive_execution_transfer()
  *     arch_cpu_state_switch()
+ *   This surface must not include execution-transfer headers.
  */
 
 #include <kernul/types.h>

@@ -11,7 +11,7 @@ on:
     - cron: "0 3 * * 1"
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -25,27 +25,32 @@ env:
   CFLAGS: -std=c11 -Wall -Wextra -Werror
 
 jobs:
-  build-and-test:
-    name: Build and test
-    runs-on: ubuntu-latest
+  build-and-verify:
+    name: Build and verify (deterministic)
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build and run deterministic test suite
+      - name: Install pinned toolchain
         run: |
-          make test
+          sudo apt-get update
+          sudo apt-get install -y gcc make
 
-      - name: Compile API contract checks
+      - name: Show toolchain versions
         run: |
-          make test_sched_api.o
-          make test_cpu_state_api.o
+          gcc --version
+          make --version
+
+      - name: Run canonical verification entry point
+        run: |
+          make verify
 
   codeql:
     name: CodeQL analysis
-    runs-on: ubuntu-latest
-    needs: build-and-test
+    runs-on: ubuntu-22.04
+    needs: build-and-verify
 
     permissions:
       actions: read
@@ -67,11 +72,9 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: manual
 
-      - name: Build CodeQL targets
+      - name: Run canonical verification entry point
         run: |
-          make test
-          make test_sched_api.o
-          make test_cpu_state_api.o
+          make verify
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3

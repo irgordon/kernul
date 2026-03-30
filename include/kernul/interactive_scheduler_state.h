@@ -82,18 +82,12 @@
  */
 
 #include <kernul/types.h>
+#include <kernul/session.h>
 
 struct interactive_runnable;
-struct session;
 
 #define INTERACTIVE_SCHEDULER_STATE_NONE   0U
 #define INTERACTIVE_SCHEDULER_STATE_READY  1U
-
-struct interactive_scheduler_state {
-    struct session *session;
-    struct interactive_runnable *runnable;
-    u32 state;
-};
 
 struct interactive_scheduler_state *
 interactive_scheduler_state_create(

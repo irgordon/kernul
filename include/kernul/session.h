@@ -36,6 +36,13 @@
 #include <kernul/types.h>
 
 struct process;
+struct interactive_runnable;
+
+struct interactive_scheduler_state {
+    struct session *session;
+    struct interactive_runnable *runnable;
+    u32 state;
+};
 
 typedef u32 session_id_t;
 typedef u32 process_group_id_t;
@@ -43,6 +50,8 @@ typedef u32 process_group_id_t;
 struct session {
     session_id_t     id;
     struct process  *leader;
+    struct interactive_scheduler_state scheduler_state;
+    u32 scheduler_state_live;
 };
 
 struct process_group {

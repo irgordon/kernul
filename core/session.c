@@ -40,6 +40,10 @@ struct session *session_create(struct process *leader)
 
     session_slot.id = id;
     session_slot.leader = leader;
+    session_slot.scheduler_state.session = NULL;
+    session_slot.scheduler_state.runnable = NULL;
+    session_slot.scheduler_state.state = 0U;
+    __atomic_store_n(&session_slot.scheduler_state_live, 0U, __ATOMIC_RELEASE);
 
     return &session_slot;
 }

@@ -34,10 +34,10 @@
  */
 
 #include <kernul/types.h>
+#include <kernul/interactive_scheduler_container.h>
 
 struct process;
 struct interactive_runnable;
-
 struct interactive_scheduler_state {
     struct session *session;
     struct interactive_runnable *runnable;
@@ -52,6 +52,8 @@ struct session {
     struct process  *leader;
     struct interactive_scheduler_state scheduler_state;
     u32 scheduler_state_live;
+    struct interactive_scheduler_container scheduler_container;
+    u32 scheduler_container_live;
 };
 
 struct process_group {

@@ -878,6 +878,36 @@ Scheduler state ownership is remediated to align implementation with the
 existing per-session contract. No scheduler behavior or policy changes are
 introduced.
 
+#### Phase 9, Task 2 — Scheduler runnable container materialization
+
+- `include/kernul/interactive_scheduler_container.h` — kernel-internal
+  interactive scheduler runnable-container materialization contract defining
+  `struct interactive_scheduler_container`, explicit session ownership and
+  session-bounded lifetime, explicit interactive runnable membership ordering
+  authority, deterministic/idempotent/conflict semantics, and explicit
+  prohibition of scheduling policy or execution behavior
+- `core/interactive_scheduler_container.c` — deterministic per-session
+  container materialization stub for
+  `interactive_scheduler_container_materialize()` with invalid-input rejection,
+  identical-input idempotence by session/runnable pointer identity, conflict
+  rejection for different runnable pointer identity, and persistent
+  session-owned container publication
+- `include/kernul/session.h` — extended `struct session` with explicit
+  session-owned scheduler-container storage and explicit scheduler-container
+  liveness marker
+- `core/session.c` — session creation initializes scheduler-container storage
+  and liveness marker to deterministic unmaterialized baseline
+- `tests/console/test_interactive_scheduler_container_contract_compile.c` —
+  compile-check translation unit validating container type/API visibility and
+  session ownership association fields
+- `tests/console/test_interactive_scheduler_container_link.c` — link-check for
+  interactive scheduler container materialization symbol presence
+
+This Phase 9 boundary step is kernel-internal only and is not a userspace ABI.
+It materializes scheduler runnable container structure as persistent mechanical
+representation only.
+No scheduling policy or execution behavior is introduced.
+
 ---
 
 ### Changed — Phase 3

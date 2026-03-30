@@ -786,6 +786,43 @@ It does not implement run-queue management, signal behavior, or job-control
 behavior.
 It does not implement terminal I/O behavior.
 
+
+#### Phase 8, Task 2 — Scheduler policy introduction boundary
+
+- `include/kernul/interactive_selection.h` — kernel-internal interactive
+  scheduler selection-policy contract defining `struct interactive_selection`
+  with borrowed interactive-runnable/interactive-dispatch/process-group
+  associations only, explicit ownership and lifetime boundaries, selection
+  state constants (`INTERACTIVE_SELECTION_STATE_NONE`,
+  `INTERACTIVE_SELECTION_STATE_SELECTED`), explicit deterministic first-member
+  selection policy sourced from authoritative interactive runnable membership
+  ordering, explicit dependency boundary on interactive runnable/dispatch/
+  execution target contracts, and explicit prohibition against execution
+  transfer and architecture switching dependencies
+- `core/interactive_selection.c` — deterministic bounded single-slot
+  per-session stand-in selection-policy stubs for
+  `interactive_selection_select()` and `interactive_selection_state()` with
+  full upstream chain validation, identical-input idempotence by runnable and
+  session/consumer-group pointer identity, conflicting-input rejection, and
+  monotonic selected-state visibility
+- `tests/console/test_interactive_selection_contract_compile.c` —
+  compile-check translation unit validating declaration visibility, required
+  selection state constants, signatures, and visible interactive selection
+  struct field layout
+- `tests/console/test_interactive_selection_link.c` — link-check for
+  interactive selection contract symbol presence
+
+This Phase 8 boundary step is kernel-internal only and is not a userspace ABI.
+It introduces a deterministic phase-local selection policy boundary:
+interactive runnable membership ordering is authoritative, and selection chooses
+the first runnable member in that order.
+It defines a per-session single-slot selection invariant with idempotent
+identical-input behavior and monotonic selected-state visibility guarantees.
+It does not implement fairness, time slicing, preemption, or run-queue
+management.
+It does not implement job-control, signal, terminal, or execution-transfer
+behavior.
+
 ---
 
 ### Changed — Phase 3

@@ -7,10 +7,13 @@
  * A bounded single-slot selection record is used in this phase.
  * The bounded single-slot model is a deterministic stand-in for the
  * per-session single-selection invariant and does not define allocation policy.
+ * Deterministic selection order authority belongs to interactive runnable
+ * membership ordering; this file does not define ordering through traversal.
  * Selection here is policy-only: no execution transfer, no architecture
  * switching, no fairness logic, no time slicing, no preemption, no run-queue
  * management, no signal behavior, no job-control behavior, and no terminal I/O
- * behavior are implemented here.
+ * behavior are implemented here. This surface must not invoke execution
+ * transfer or architecture switching, directly or indirectly.
  */
 
 #include <kernul/interactive_selection.h>

@@ -794,9 +794,9 @@ It does not implement terminal I/O behavior.
   with borrowed interactive-runnable/interactive-dispatch/process-group
   associations only, explicit ownership and lifetime boundaries, selection
   state constants (`INTERACTIVE_SELECTION_STATE_NONE`,
-  `INTERACTIVE_SELECTION_STATE_SELECTED`), explicit deterministic first-member
-  selection policy sourced from authoritative interactive runnable membership
-  ordering, explicit dependency boundary on interactive runnable/dispatch/
+  `INTERACTIVE_SELECTION_STATE_SELECTED`), explicit deterministic selection
+  ordering authority sourced from interactive runnable membership ordering,
+  explicit dependency boundary on interactive runnable/dispatch/
   execution target contracts, and explicit prohibition against execution
   transfer and architecture switching dependencies
 - `core/interactive_selection.c` — deterministic bounded single-slot
@@ -814,8 +814,9 @@ It does not implement terminal I/O behavior.
 
 This Phase 8 boundary step is kernel-internal only and is not a userspace ABI.
 It introduces a deterministic phase-local selection policy boundary:
-interactive runnable membership ordering is authoritative, and selection chooses
-the first runnable member in that order.
+interactive runnable membership ordering is authoritative for selection order.
+This phase records selection with a deterministic per-session single-slot
+stand-in and does not introduce broader scheduler commitments.
 It defines a per-session single-slot selection invariant with idempotent
 identical-input behavior and monotonic selected-state visibility guarantees.
 It does not implement fairness, time slicing, preemption, or run-queue

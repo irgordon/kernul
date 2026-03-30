@@ -8,7 +8,8 @@
  * The bounded single-slot model is a deterministic stand-in for the
  * per-session single-selection invariant and does not define allocation policy.
  * Deterministic selection order authority belongs to interactive runnable
- * membership ordering; this file does not define ordering through traversal.
+ * membership ordering; this file reads candidate identity from per-session
+ * container membership view and does not define ordering through traversal.
  * Selection here is policy-only: no execution transfer, no architecture
  * switching, no fairness logic, no time slicing, no preemption, no run-queue
  * management, no signal behavior, no job-control behavior, and no terminal I/O
@@ -19,6 +20,8 @@
 #include <kernul/interactive_selection.h>
 #include <kernul/interactive_dispatch.h>
 #include <kernul/interactive_runnable.h>
+#include <kernul/interactive_scheduler_state.h>
+#include <kernul/interactive_scheduler_container.h>
 #include <kernul/interactive_admission.h>
 #include <kernul/interactive_readiness.h>
 #include <kernul/interactive_activation.h>
@@ -35,6 +38,8 @@ struct interactive_selection *
 interactive_selection_select(struct interactive_runnable *runnable)
 {
     u32 expected = 0U;
+    struct interactive_scheduler_state *scheduler_state;
+    struct interactive_scheduler_container *scheduler_container;
     struct interactive_admission *admission;
     struct interactive_readiness *readiness;
     struct interactive_activation *activation;
@@ -101,6 +106,26 @@ interactive_selection_select(struct interactive_runnable *runnable)
 
     if (consumer_group->session != session)
         return NULL;
+
+    scheduler_state = interactive_scheduler_state_create(session, runnable);
+    if (scheduler_state == NULL)
+        return NULL;
+
+    scheduler_container =
+        interactive_scheduler_container_materialize(scheduler_state);
+    if (scheduler_container == NULL)
+        return NULL;
+
+    /*
+     * Ordering authority remains external: interactive runnable membership
+     * ordering. Container traversal behavior is non-authoritative; selection
+     * only reads the membership view bound to this session.
+     */
+    if (scheduler_container->session != session ||
+        scheduler_container->scheduler_state != scheduler_state ||
+        scheduler_container->runnable != runnable) {
+        return NULL;
+    }
 
     if (interactive_selection_slot_live != 0U) {
         if (interactive_selection_slot.runnable == runnable &&

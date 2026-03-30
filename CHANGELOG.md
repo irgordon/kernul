@@ -908,6 +908,28 @@ It materializes scheduler runnable container structure as persistent mechanical
 representation only.
 No scheduling policy or execution behavior is introduced.
 
+#### Phase 9, Task 3 — Selection over scheduler container
+
+- `core/interactive_selection.c` — selection now binds candidate enumeration to
+  a per-session scheduler container membership view by materializing
+  `interactive_scheduler_state` and `interactive_scheduler_container` before
+  recording selection, while preserving existing deterministic selection logic,
+  idempotence, and conflict behavior
+- `include/kernul/interactive_selection.h` — selection contract documentation
+  updated to state container-backed membership-view sourcing and explicit
+  external ordering authority (`interactive runnable membership ordering`)
+- `tests/console/test_interactive_selection_contract_compile.c` — compile-time
+  dependency boundary checks extended to include scheduler-state/container
+  surface visibility through selection integration context
+- `tests/console/test_interactive_selection_link.c` / `Makefile` — link-check
+  integration updated to ensure selection/container/state symbols resolve
+  together in the bound integration path
+
+This Phase 9 boundary step is kernel-internal only and is not a userspace ABI.
+Selection now reads from per-session scheduler container substrate while
+preserving the deterministic selection boundary with no policy change.
+No time, fairness, priority, preemption, or execution behavior is introduced.
+
 ---
 
 ### Changed — Phase 3

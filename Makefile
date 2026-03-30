@@ -284,7 +284,10 @@ tests/console/test_interactive_dispatch_link: tests/console/test_interactive_dis
 tests/console/test_interactive_selection_contract_compile.o: tests/console/test_interactive_selection_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
-tests/console/test_interactive_selection_link: tests/console/test_interactive_selection_link.c core/interactive_selection.c
+tests/console/test_interactive_selection_link: tests/console/test_interactive_selection_link.c \
+                                              core/interactive_selection.c \
+                                              core/interactive_scheduler_state.c \
+                                              core/interactive_scheduler_container.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c

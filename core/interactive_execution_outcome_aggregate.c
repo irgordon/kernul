@@ -23,7 +23,7 @@ interactive_execution_outcome_aggregate_acquire(struct session *session)
 
     if (view->kind == INTERACTIVE_EXECUTION_OUTCOME_COMPLETED)
         aggregate.completed_count = 1U;
-    else
+    else if (view->kind == INTERACTIVE_EXECUTION_OUTCOME_FAILED)
         aggregate.failed_count = 1U;
 
     return aggregate;

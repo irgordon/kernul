@@ -1080,6 +1080,30 @@ mechanical mapping to completed/failed and explicit publish/acquire visibility.
 No retries/backoff, no time/fairness/priority/preemption/CPU binding behavior,
 and no upstream consumption or reaction behavior is introduced.
 
+#### Phase 11, Task 2 — Passive execution outcome view exposure
+
+- `include/kernul/interactive_execution_outcome_view.h` — kernel-internal
+  passive outcome view acquire contract added for
+  `struct interactive_execution_outcome_view` and
+  `interactive_execution_outcome_view_acquire()`
+- `core/interactive_execution_outcome_view.c` — passive session-owned outcome
+  view exposure added with explicit acquire load of the outcome publication
+  marker and deterministic NULL return when unpublished
+- `tests/console/test_interactive_execution_outcome_view_contract_compile.c` —
+  compile-check translation unit validating outcome view type visibility,
+  acquire symbol signature, and dependency-isolated include shape
+- `tests/console/test_interactive_execution_outcome_view_link.c` — link-check
+  for outcome view acquire symbol presence with session-owned storage context
+- `Makefile` — build/test integration extended for outcome view compile/link
+  contract checks
+
+This Phase 11 boundary step is kernel-internal only and is not a userspace ABI.
+It introduces passive execution outcome exposure with explicit acquire semantics
+over the already-published session-owned outcome record. Unpublished outcome
+returns NULL unchanged. No retries/backoff, no policy interpretation, no
+time/fairness/priority/preemption/CPU binding behavior, and no consumers are
+introduced in this task.
+
 ---
 
 ### Changed — Phase 3

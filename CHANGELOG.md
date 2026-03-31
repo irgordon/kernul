@@ -1104,6 +1104,34 @@ returns NULL unchanged. No retries/backoff, no policy interpretation, no
 time/fairness/priority/preemption/CPU binding behavior, and no consumers are
 introduced in this task.
 
+#### Phase 11, Task 3 — Passive per-session execution outcome aggregation
+
+- `include/kernul/interactive_execution_outcome_aggregate.h` — kernel-internal
+  per-session passive outcome aggregation contract added for
+  `struct interactive_execution_outcome_aggregate` and
+  `interactive_execution_outcome_aggregate_acquire()`
+- `core/interactive_execution_outcome_aggregate.c` — passive per-session
+  aggregate acquire implementation added; consumes outcome visibility only
+  through `interactive_execution_outcome_view_acquire()` and returns aggregate
+  by value
+- `tests/console/test_interactive_execution_outcome_aggregate_contract_compile.c`
+  — compile-check translation unit validating aggregate type visibility,
+  acquire symbol signature, and dependency-isolated include shape
+- `tests/console/test_interactive_execution_outcome_aggregate_link.c` —
+  link-check for aggregate acquire symbol presence against session and outcome
+  view objects
+- `Makefile` — build/test integration extended for outcome aggregate
+  compile/link contract checks
+
+This Phase 11 boundary step is kernel-internal only and is not a userspace ABI.
+It introduces passive, read-only, ephemeral per-session execution outcome
+aggregation with explicit acquire semantics via the outcome view surface.
+Counts are explicitly bounded by singular outcome record shape
+(`completed_count` and `failed_count` each in `{0,1}`), with zeroed counts when
+outcome is unpublished. No retries/backoff, no policy semantics, no reaction
+behavior, and no time/fairness/priority/preemption/CPU binding behavior are
+introduced in this task.
+
 ---
 
 ### Changed — Phase 3

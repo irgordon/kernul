@@ -38,6 +38,7 @@
 #include <kernul/interactive_selection_result.h>
 #include <kernul/interactive_execution_handoff.h>
 #include <kernul/interactive_execution_transfer_operands_view.h>
+#include <kernul/interactive_execution_outcome_record.h>
 
 struct process;
 struct interactive_runnable;
@@ -62,6 +63,8 @@ struct session {
     struct interactive_execution_transfer_operands_view
         execution_transfer_operands_view;
     u32 execution_transfer_operands_view_live;
+    struct interactive_execution_outcome_record execution_outcome_record;
+    u32 execution_outcome_record_live;
 };
 
 struct process_group {

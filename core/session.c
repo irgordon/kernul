@@ -60,6 +60,11 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.execution_transfer_operands_view_live,
                      0U,
                      __ATOMIC_RELEASE);
+    session_slot.execution_outcome_record.kind =
+        INTERACTIVE_EXECUTION_OUTCOME_FAILED;
+    __atomic_store_n(&session_slot.execution_outcome_record_live,
+                     0U,
+                     __ATOMIC_RELEASE);
 
     return &session_slot;
 }

@@ -54,6 +54,12 @@ struct session *session_create(struct process *leader)
     session_slot.execution_handoff.operand_identity = NULL;
     __atomic_store_n(&session_slot.execution_handoff_live, 0U,
                      __ATOMIC_RELEASE);
+    session_slot.execution_transfer_operands_view.session = NULL;
+    session_slot.execution_transfer_operands_view.handoff = NULL;
+    session_slot.execution_transfer_operands_view.operand_identity = NULL;
+    __atomic_store_n(&session_slot.execution_transfer_operands_view_live,
+                     0U,
+                     __ATOMIC_RELEASE);
 
     return &session_slot;
 }

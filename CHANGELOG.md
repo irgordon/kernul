@@ -1026,6 +1026,29 @@ structural packaging only, with no allocation.
 No execution initiation, time, fairness, priority, preemption, or CPU binding
 behavior is introduced.
 
+#### Phase 10, Task 4 — Explicit transfer initiation gate
+
+- `include/kernul/interactive_execution_transfer_initiation_gate.h` —
+  kernel-internal explicit transfer initiation gate contract added for
+  `interactive_execution_transfer_initiate(session, operands_view)`
+- `core/interactive_execution_transfer_initiation_gate.c` — explicit initiation
+  gate implementation added that consumes transfer operands view, performs a
+  single boundary call, and returns boundary status unchanged
+- `tests/console/test_interactive_execution_transfer_initiation_gate_contract_compile.c`
+  — compile-check translation unit validating initiation gate symbol visibility
+  and required signature
+- `tests/console/test_interactive_execution_transfer_initiation_gate_link.c` —
+  link-check for initiation gate symbol presence with operands-view and
+  transfer-boundary symbols
+- `Makefile` — build/test integration extended for initiation gate compile/link
+  contract checks
+
+This Phase 10 boundary step is kernel-internal only and is not a userspace ABI.
+It introduces explicit execution transfer initiation that consumes transfer
+operands view, with a single boundary call and transparent status passthrough.
+No retries, no outcome observation, and no time/fairness/priority/preemption/CPU
+binding behavior is introduced.
+
 ---
 
 ### Changed — Phase 3

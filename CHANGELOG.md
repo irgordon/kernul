@@ -1049,6 +1049,37 @@ operands view, with a single boundary call and transparent status passthrough.
 No retries, no outcome observation, and no time/fairness/priority/preemption/CPU
 binding behavior is introduced.
 
+#### Phase 11, Task 1 — Execution outcome publication record
+
+- `include/kernul/interactive_execution_outcome_record.h` —
+  kernel-internal outcome publication contract added for
+  `struct interactive_execution_outcome_record`,
+  `interactive_execution_outcome_record_publish_from_transfer()`, and
+  `interactive_execution_outcome_record_acquire()`
+- `include/kernul/session.h` — extended `struct session` with session-owned
+  execution outcome record storage and explicit publication marker
+- `core/interactive_execution_outcome_record.c` — passive outcome publication
+  implementation added with total deterministic transfer-result mapping to
+  completed/failed and explicit release/acquire visibility boundaries
+- `core/session.c` — session creation initializes execution outcome record
+  storage and publication marker to deterministic unpublished baseline
+- `tests/console/test_interactive_execution_outcome_record_contract_compile.c`
+  — compile-check translation unit validating type visibility, symbol
+  signatures, and required dependency context
+- `tests/console/test_interactive_execution_outcome_record_link.c` —
+  link-check for outcome publication/acquire symbols with transfer-boundary and
+  session types
+- `tests/session/test_session_contract_compile.c` — compile-check coverage
+  extended for session-visible outcome record ownership fields
+- `Makefile` — build/test integration extended for outcome record
+  compile/link contract checks
+
+This Phase 11 boundary step is kernel-internal only and is not a userspace ABI.
+It introduces a session-owned execution outcome publication record with total
+mechanical mapping to completed/failed and explicit publish/acquire visibility.
+No retries/backoff, no time/fairness/priority/preemption/CPU binding behavior,
+and no upstream consumption or reaction behavior is introduced.
+
 ---
 
 ### Changed — Phase 3

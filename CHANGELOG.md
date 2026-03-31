@@ -963,6 +963,38 @@ It materializes execution handoff substrate structure as structural packaging
 only.
 No execution, time, fairness, priority, or preemption behavior is introduced.
 
+#### Phase 10, Task 2 — Selection-to-handoff binding
+
+- `include/kernul/interactive_selection.h` — selection surface now exposes
+  deterministic selection output through
+  `interactive_selection_result_expose()` as
+  `const struct interactive_selection_result *` identity
+- `core/interactive_selection.c` — selection output identity record is
+  materialized from the already-chosen operand/session association with
+  selection semantics preserved
+- `include/kernul/interactive_selection_handoff_binding.h` — kernel-internal
+  binding contract added for selection-result to per-session handoff
+  materialization
+- `core/interactive_selection_handoff_binding.c` — binding entrypoint
+  `interactive_selection_handoff_bind()` added; it obtains selection result,
+  invokes `interactive_execution_handoff_materialize(session, selection)`, and
+  propagates `NULL` unchanged
+- `tests/console/test_interactive_selection_contract_compile.c` and
+  `tests/console/test_interactive_selection_link.c` — compile/link coverage
+  extended for selection-result exposure symbol visibility
+- `tests/console/test_interactive_selection_handoff_binding_contract_compile.c`
+  and `tests/console/test_interactive_selection_handoff_binding_link.c` —
+  compile/link checks added for binding symbol visibility and
+  selection/handoff linkage
+- `Makefile` — build/test integration extended for the new binding
+  compile/link contract checks
+
+This Phase 10 boundary step is kernel-internal only and is not a userspace ABI.
+Deterministic selection output is bound to per-session execution handoff
+substrate with selection semantics preserved.
+No execution initiation, time, fairness, priority, preemption, or CPU binding
+behavior is introduced.
+
 ---
 
 ### Changed — Phase 3

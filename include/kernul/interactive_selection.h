@@ -95,6 +95,7 @@
  */
 
 #include <kernul/types.h>
+#include <kernul/interactive_selection_result.h>
 
 struct interactive_runnable;
 struct interactive_dispatch;
@@ -113,6 +114,9 @@ struct interactive_selection {
 
 struct interactive_selection *
 interactive_selection_select(struct interactive_runnable *runnable);
+
+const struct interactive_selection_result *
+interactive_selection_result_expose(const struct interactive_selection *sel);
 
 u32
 interactive_selection_state(const struct interactive_selection *sel);

@@ -32,6 +32,8 @@ static void use_checks(void)
     (void)s.leader;
     (void)s.execution_handoff;
     (void)s.execution_handoff_live;
+    (void)s.execution_transfer_operands_view;
+    (void)s.execution_transfer_operands_view_live;
 
     (void)pg.id;
     (void)pg.session;

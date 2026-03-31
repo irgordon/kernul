@@ -995,6 +995,37 @@ substrate with selection semantics preserved.
 No execution initiation, time, fairness, priority, preemption, or CPU binding
 behavior is introduced.
 
+#### Phase 10, Task 3 — Handoff-to-transfer operand view binding
+
+- `include/kernul/interactive_execution_transfer_operands_view.h` —
+  kernel-internal transfer-input view contract added for
+  `struct interactive_execution_transfer_operands_view` and
+  `interactive_execution_transfer_operands_view_expose()`
+- `include/kernul/session.h` — extended `struct session` with
+  session-owned transfer-input view storage and explicit view publication
+  marker
+- `core/interactive_execution_transfer_operands_view.c` — transfer-input view
+  exposure added as immutable structural packaging over the already-published
+  per-session handoff record, with explicit acquire consumption of handoff
+  publication and deterministic pointer-identity idempotence
+- `core/session.c` — session creation initializes transfer-input view storage
+  and publication marker to deterministic unexposed baseline
+- `tests/console/test_interactive_execution_transfer_operands_view_contract_compile.c`
+  — compile-check translation unit validating transfer-input view type/API
+  visibility and session-owned storage visibility
+- `tests/console/test_interactive_execution_transfer_operands_view_link.c` —
+  link-check for transfer-input view exposure symbol presence
+- `tests/session/test_session_contract_compile.c` — compile-check coverage
+  extended for session-visible transfer-input view ownership fields
+- `Makefile` — build/test integration extended for transfer-input view
+  compile/link contract checks
+
+This Phase 10 boundary step is kernel-internal only and is not a userspace ABI.
+It binds execution handoff to transfer-input view exposure as immutable
+structural packaging only, with no allocation.
+No execution initiation, time, fairness, priority, preemption, or CPU binding
+behavior is introduced.
+
 ---
 
 ### Changed — Phase 3

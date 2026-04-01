@@ -47,6 +47,7 @@ SRCS = arch/stub/arch.c              \
         core/interactive_execution_outcome_view.c \
         core/interactive_execution_outcome_aggregate.c \
         core/interactive_execution_failure_ack_gate.c \
+        core/interactive_execution_failure_initiation_gate.c \
         core/interactive_execution_completion_ack_gate.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
@@ -86,6 +87,7 @@ OBJS = $(SRCS:.c=.o)
         test_interactive_execution_outcome_view_contract_compile.o \
         test_interactive_execution_outcome_aggregate_contract_compile.o \
         test_interactive_execution_failure_ack_gate_contract_compile.o \
+        test_interactive_execution_failure_initiation_gate_contract_compile.o \
         test_interactive_execution_completion_ack_gate_contract_compile.o \
         test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
@@ -144,10 +146,12 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                      tests/console/test_interactive_execution_outcome_view_link \
                       tests/console/test_interactive_execution_outcome_aggregate_contract_compile.o \
                       tests/console/test_interactive_execution_outcome_aggregate_link \
-                      tests/console/test_interactive_execution_failure_ack_gate_contract_compile.o \
-                      tests/console/test_interactive_execution_failure_ack_gate_link \
-                      tests/console/test_interactive_execution_completion_ack_gate_contract_compile.o \
-                      tests/console/test_interactive_execution_completion_ack_gate_link \
+                       tests/console/test_interactive_execution_failure_ack_gate_contract_compile.o \
+                       tests/console/test_interactive_execution_failure_ack_gate_link \
+                       tests/console/test_interactive_execution_failure_initiation_gate_contract_compile.o \
+                       tests/console/test_interactive_execution_failure_initiation_gate_link \
+                       tests/console/test_interactive_execution_completion_ack_gate_contract_compile.o \
+                       tests/console/test_interactive_execution_completion_ack_gate_link \
                       tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
@@ -223,6 +227,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/console/test_interactive_execution_outcome_aggregate_link && echo "test_interactive_execution_outcome_aggregate_link: passed." || echo "test_interactive_execution_outcome_aggregate_link: FAILED."
 	@echo "test_interactive_execution_failure_ack_gate_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_failure_ack_gate_link && echo "test_interactive_execution_failure_ack_gate_link: passed." || echo "test_interactive_execution_failure_ack_gate_link: FAILED."
+	@echo "test_interactive_execution_failure_initiation_gate_contract_compile: compile-check passed."
+	./tests/console/test_interactive_execution_failure_initiation_gate_link && echo "test_interactive_execution_failure_initiation_gate_link: passed." || echo "test_interactive_execution_failure_initiation_gate_link: FAILED."
 	@echo "test_interactive_execution_completion_ack_gate_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_completion_ack_gate_link && echo "test_interactive_execution_completion_ack_gate_link: passed." || echo "test_interactive_execution_completion_ack_gate_link: FAILED."
 	@echo "test_interactive_execution_target_contract_compile: compile-check passed."
@@ -374,11 +380,14 @@ tests/console/test_interactive_execution_transfer_initiation_gate_contract_compi
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/console/test_interactive_execution_transfer_initiation_gate_link: tests/console/test_interactive_execution_transfer_initiation_gate_link.c \
-                                                                          core/interactive_execution_transfer_initiation_gate.c \
-                                                                          core/interactive_execution_transfer_operands_view.c \
-                                                                          core/interactive_execution_handoff.c \
-                                                                          core/interactive_execution.c \
-                                                                          core/session.c
+                                                                           core/interactive_execution_transfer_initiation_gate.c \
+                                                                           core/interactive_execution_failure_initiation_gate.c \
+                                                                           core/interactive_execution_failure_ack_gate.c \
+                                                                           core/interactive_execution_transfer_operands_view.c \
+                                                                           core/interactive_execution_handoff.c \
+                                                                           core/interactive_execution_outcome_view.c \
+                                                                           core/interactive_execution.c \
+                                                                           core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_interactive_execution_outcome_record_contract_compile.o: tests/console/test_interactive_execution_outcome_record_contract_compile.c
@@ -414,6 +423,20 @@ tests/console/test_interactive_execution_failure_ack_gate_link: tests/console/te
                                                                  core/interactive_execution_failure_ack_gate.c \
                                                                  core/interactive_execution_outcome_view.c \
                                                                  core/session.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/console/test_interactive_execution_failure_initiation_gate_contract_compile.o: tests/console/test_interactive_execution_failure_initiation_gate_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_interactive_execution_failure_initiation_gate_link: tests/console/test_interactive_execution_failure_initiation_gate_link.c \
+                                                                        core/interactive_execution_failure_initiation_gate.c \
+                                                                        core/interactive_execution_failure_ack_gate.c \
+                                                                        core/interactive_execution_transfer_initiation_gate.c \
+                                                                        core/interactive_execution_transfer_operands_view.c \
+                                                                        core/interactive_execution_handoff.c \
+                                                                        core/interactive_execution.c \
+                                                                        core/interactive_execution_outcome_view.c \
+                                                                        core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_interactive_execution_completion_ack_gate_contract_compile.o: tests/console/test_interactive_execution_completion_ack_gate_contract_compile.c
@@ -542,6 +565,7 @@ test_interactive_execution_outcome_record_contract_compile.o: tests/console/test
 test_interactive_execution_outcome_view_contract_compile.o: tests/console/test_interactive_execution_outcome_view_contract_compile.o
 test_interactive_execution_outcome_aggregate_contract_compile.o: tests/console/test_interactive_execution_outcome_aggregate_contract_compile.o
 test_interactive_execution_failure_ack_gate_contract_compile.o: tests/console/test_interactive_execution_failure_ack_gate_contract_compile.o
+test_interactive_execution_failure_initiation_gate_contract_compile.o: tests/console/test_interactive_execution_failure_initiation_gate_contract_compile.o
 test_interactive_execution_completion_ack_gate_contract_compile.o: tests/console/test_interactive_execution_completion_ack_gate_contract_compile.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
@@ -598,6 +622,8 @@ clean:
 	      tests/console/test_interactive_execution_outcome_aggregate_link \
 	      tests/console/test_interactive_execution_failure_ack_gate_contract_compile.o \
 	      tests/console/test_interactive_execution_failure_ack_gate_link \
+	      tests/console/test_interactive_execution_failure_initiation_gate_contract_compile.o \
+	      tests/console/test_interactive_execution_failure_initiation_gate_link \
 	      tests/console/test_interactive_execution_completion_ack_gate_contract_compile.o \
 	      tests/console/test_interactive_execution_completion_ack_gate_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \

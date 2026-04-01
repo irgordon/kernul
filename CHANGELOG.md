@@ -1203,6 +1203,44 @@ time/fairness/priority/preemption/CPU binding behavior, no mutation of outcome
 record/view/aggregate surfaces, and no mutation or observation of the failure
 acknowledgment gate are introduced.
 
+#### Phase 13, Task 1 — Failure acknowledgment–driven initiation gating
+
+- `include/kernul/interactive_execution_failure_initiation_gate.h` —
+  kernel-internal initiation-gating policy contract added for
+  `interactive_execution_initiation_forbid_on_failure_ack()` and
+  `interactive_execution_initiation_is_permitted_acquire()`
+- `core/interactive_execution_failure_initiation_gate.c` — policy
+  implementation added; consumes only
+  `interactive_execution_failure_ack_acquire(session)` and performs one-way
+  failure-ack-driven transition from initiation permitted to forbidden
+- `include/kernul/session.h` — extended `struct session` with exactly one
+  session-owned initiation-permitted marker
+- `core/session.c` — session creation initializes initiation-permitted marker to
+  deterministic permitted baseline
+- `core/interactive_execution_transfer_initiation_gate.c` — existing execution
+  initiation boundary now acquire-checks initiation-permitted state and refuses
+  new initiation when forbidden
+- `tests/console/test_interactive_execution_failure_initiation_gate_contract_compile.c`
+  — compile-check translation unit validating policy symbol visibility,
+  signatures, and dependency-isolated include shape
+- `tests/console/test_interactive_execution_failure_initiation_gate_link.c` —
+  link-check for failure initiation-gating symbols against session, failure-ack
+  gate, and initiation-boundary objects
+- `tests/session/test_session_contract_compile.c` — compile-check coverage
+  extended for session-visible initiation-permitted marker
+- `Makefile` — build/test integration extended for failure initiation-gating
+  compile/link contract checks
+
+This Phase 13 boundary step is kernel-internal only and is not a userspace ABI.
+It introduces the first control-bearing policy: once the session failure
+acknowledgment gate is published, future execution initiation for that session
+is forbidden irreversibly for session lifetime. Enforcement occurs only at the
+existing initiation boundary, and in-flight execution transfer/running execution
+is never modified. Visibility is explicit: forbid publication is release and
+initiation-boundary observation is acquire. No retries/fallback, no completion
+ack reaction, and no scheduling/time/fairness/priority/preemption/CPU binding
+behavior are introduced.
+
 ---
 
 ### Changed — Phase 3

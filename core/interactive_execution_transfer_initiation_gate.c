@@ -12,6 +12,7 @@
  */
 
 #include <kernul/interactive_execution_transfer_initiation_gate.h>
+#include <kernul/interactive_execution_failure_initiation_gate.h>
 #include <kernul/interactive_execution_transfer_operands_view.h>
 #include <kernul/interactive_execution.h>
 #include <kernul/session.h>
@@ -23,6 +24,9 @@ interactive_execution_transfer_initiate(
 )
 {
     if (session == NULL || operands_view == NULL)
+        return NULL;
+
+    if (!interactive_execution_initiation_is_permitted_acquire(session))
         return NULL;
 
     if (operands_view->session != session ||

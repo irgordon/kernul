@@ -380,11 +380,14 @@ tests/console/test_interactive_execution_transfer_initiation_gate_contract_compi
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/console/test_interactive_execution_transfer_initiation_gate_link: tests/console/test_interactive_execution_transfer_initiation_gate_link.c \
-                                                                          core/interactive_execution_transfer_initiation_gate.c \
-                                                                          core/interactive_execution_transfer_operands_view.c \
-                                                                          core/interactive_execution_handoff.c \
-                                                                          core/interactive_execution.c \
-                                                                          core/session.c
+                                                                           core/interactive_execution_transfer_initiation_gate.c \
+                                                                           core/interactive_execution_failure_initiation_gate.c \
+                                                                           core/interactive_execution_failure_ack_gate.c \
+                                                                           core/interactive_execution_transfer_operands_view.c \
+                                                                           core/interactive_execution_handoff.c \
+                                                                           core/interactive_execution_outcome_view.c \
+                                                                           core/interactive_execution.c \
+                                                                           core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_interactive_execution_outcome_record_contract_compile.o: tests/console/test_interactive_execution_outcome_record_contract_compile.c

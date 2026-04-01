@@ -1166,6 +1166,43 @@ monotonic, and idempotent, and visibility is explicit release/acquire. No
 retries/backoff, no time/fairness/priority/preemption/CPU binding behavior, and
 no mutation of outcome record/view/aggregate surfaces are introduced.
 
+#### Phase 12, Task 2 — Completion acknowledgment gate update policy
+
+- `include/kernul/interactive_execution_completion_ack_gate.h` —
+  kernel-internal completion acknowledgment gate policy contract added for
+  `struct interactive_execution_completion_ack_view`,
+  `interactive_execution_completion_ack_publish_if_completed()`, and
+  `interactive_execution_completion_ack_acquire()`
+- `include/kernul/session.h` — extended `struct session` with strictly additive
+  session-owned completion acknowledgment gate view storage and explicit
+  publication marker independent of failure acknowledgment storage
+- `core/interactive_execution_completion_ack_gate.c` — policy implementation
+  added; consumes outcome only via
+  `interactive_execution_outcome_view_acquire(session)`, publishes completion
+  ack gate only on COMPLETED, and keeps FAILED inert by intentional asymmetry
+- `core/session.c` — session creation initializes completion acknowledgment gate
+  storage and publication marker to deterministic unpublished baseline
+- `tests/console/test_interactive_execution_completion_ack_gate_contract_compile.c`
+  — compile-check translation unit validating policy symbol visibility,
+  signatures, and dependency-isolated include shape
+- `tests/console/test_interactive_execution_completion_ack_gate_link.c` —
+  link-check for completion acknowledgment policy symbols against session and
+  outcome view objects
+- `tests/session/test_session_contract_compile.c` — compile-check coverage
+  extended for session-visible completion acknowledgment gate fields
+- `Makefile` — build/test integration extended for completion acknowledgment
+  gate compile/link contract checks
+
+This Phase 12 boundary step is kernel-internal only and is not a userspace ABI.
+It introduces a second, independent externally triggered acknowledgment
+reaction: completion acknowledgment gate publication on COMPLETED only, with
+intentional FAILED inertness within this policy. The gate is session-lifetime
+bounded, publication is one-shot, monotonic, and idempotent, and visibility is
+explicit release/acquire with no background evaluation. No retries/backoff, no
+time/fairness/priority/preemption/CPU binding behavior, no mutation of outcome
+record/view/aggregate surfaces, and no mutation or observation of the failure
+acknowledgment gate are introduced.
+
 ---
 
 ### Changed — Phase 3

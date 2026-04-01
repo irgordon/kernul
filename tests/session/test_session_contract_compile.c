@@ -38,6 +38,8 @@ static void use_checks(void)
     (void)s.execution_outcome_record_live;
     (void)s.execution_failure_ack_view;
     (void)s.execution_failure_ack_view_live;
+    (void)s.execution_completion_ack_view;
+    (void)s.execution_completion_ack_view_live;
 
     (void)pg.id;
     (void)pg.session;

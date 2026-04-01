@@ -69,6 +69,10 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.execution_failure_ack_view_live,
                      0U,
                      __ATOMIC_RELEASE);
+    session_slot.execution_completion_ack_view.published = 0U;
+    __atomic_store_n(&session_slot.execution_completion_ack_view_live,
+                     0U,
+                     __ATOMIC_RELEASE);
 
     return &session_slot;
 }

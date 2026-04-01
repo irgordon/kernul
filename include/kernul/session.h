@@ -40,6 +40,7 @@
 #include <kernul/interactive_execution_transfer_operands_view.h>
 #include <kernul/interactive_execution_outcome_record.h>
 #include <kernul/interactive_execution_failure_ack_gate.h>
+#include <kernul/interactive_execution_completion_ack_gate.h>
 
 struct process;
 struct interactive_runnable;
@@ -68,6 +69,9 @@ struct session {
     u32 execution_outcome_record_live;
     struct interactive_execution_failure_ack_view execution_failure_ack_view;
     u32 execution_failure_ack_view_live;
+    struct interactive_execution_completion_ack_view
+        execution_completion_ack_view;
+    u32 execution_completion_ack_view_live;
 };
 
 struct process_group {

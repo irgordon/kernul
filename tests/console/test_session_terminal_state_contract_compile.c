@@ -8,7 +8,6 @@
 
 #include <kernul/session_terminal_state.h>
 #include <kernul/compiler.h>
-#include <kernul/session.h>
 
 #ifdef KERNUL_INTERACTIVE_EXECUTION_FAILURE_ACK_GATE_H
 #error "session_terminal_state.h must not include failure ack gate headers"
@@ -42,9 +41,6 @@ static bool (*const check_session_is_terminal_acquire)(
 static void use_checks(void) KERN_UNUSED;
 static void use_checks(void)
 {
-    struct session session = {0};
-
     (void)check_session_publish_terminal_state_if_initiation_forbidden;
     (void)check_session_is_terminal_acquire;
-    (void)session.terminal_state_published;
 }

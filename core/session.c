@@ -76,6 +76,9 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.execution_initiation_permitted,
                      1U,
                      __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.terminal_state_published,
+                     0U,
+                     __ATOMIC_RELEASE);
 
     return &session_slot;
 }

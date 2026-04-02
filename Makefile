@@ -50,6 +50,7 @@ SRCS = arch/stub/arch.c              \
         core/interactive_execution_failure_initiation_gate.c \
         core/interactive_execution_completion_ack_gate.c \
         core/interactive_execution_completion_initiation_gate.c \
+        core/session_terminal_state.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
         core/interactive_switch_operands.c \
@@ -91,6 +92,7 @@ OBJS = $(SRCS:.c=.o)
         test_interactive_execution_failure_initiation_gate_contract_compile.o \
         test_interactive_execution_completion_ack_gate_contract_compile.o \
         test_interactive_execution_completion_initiation_gate_contract_compile.o \
+        test_session_terminal_state_contract_compile.o \
         test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
@@ -154,9 +156,11 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                        tests/console/test_interactive_execution_failure_initiation_gate_link \
                        tests/console/test_interactive_execution_completion_ack_gate_contract_compile.o \
                        tests/console/test_interactive_execution_completion_ack_gate_link \
-                       tests/console/test_interactive_execution_completion_initiation_gate_contract_compile.o \
-                       tests/console/test_interactive_execution_completion_initiation_gate_link \
-                      tests/console/test_interactive_execution_target_contract_compile.o \
+                        tests/console/test_interactive_execution_completion_initiation_gate_contract_compile.o \
+                        tests/console/test_interactive_execution_completion_initiation_gate_link \
+                        tests/console/test_session_terminal_state_contract_compile.o \
+                        tests/console/test_session_terminal_state_link \
+                       tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
              tests/console/test_interactive_execution_link \
@@ -237,6 +241,8 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/console/test_interactive_execution_completion_ack_gate_link && echo "test_interactive_execution_completion_ack_gate_link: passed." || echo "test_interactive_execution_completion_ack_gate_link: FAILED."
 	@echo "test_interactive_execution_completion_initiation_gate_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_completion_initiation_gate_link && echo "test_interactive_execution_completion_initiation_gate_link: passed." || echo "test_interactive_execution_completion_initiation_gate_link: FAILED."
+	@echo "test_session_terminal_state_contract_compile: compile-check passed."
+	./tests/console/test_session_terminal_state_link && echo "test_session_terminal_state_link: passed." || echo "test_session_terminal_state_link: FAILED."
 	@echo "test_interactive_execution_target_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_target_link && echo "test_interactive_execution_target_link: passed." || echo "test_interactive_execution_target_link: FAILED."
 	@echo "test_interactive_execution_contract_compile: compile-check passed."
@@ -470,6 +476,17 @@ tests/console/test_interactive_execution_completion_initiation_gate_link: tests/
                                                                            core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_session_terminal_state_contract_compile.o: tests/console/test_session_terminal_state_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_terminal_state_link: tests/console/test_session_terminal_state_link.c \
+                                                 core/session_terminal_state.c \
+                                                 core/interactive_execution_failure_initiation_gate.c \
+                                                 core/interactive_execution_failure_ack_gate.c \
+                                                 core/interactive_execution_outcome_view.c \
+                                                 core/session.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -590,6 +607,7 @@ test_interactive_execution_failure_ack_gate_contract_compile.o: tests/console/te
 test_interactive_execution_failure_initiation_gate_contract_compile.o: tests/console/test_interactive_execution_failure_initiation_gate_contract_compile.o
 test_interactive_execution_completion_ack_gate_contract_compile.o: tests/console/test_interactive_execution_completion_ack_gate_contract_compile.o
 test_interactive_execution_completion_initiation_gate_contract_compile.o: tests/console/test_interactive_execution_completion_initiation_gate_contract_compile.o
+test_session_terminal_state_contract_compile.o: tests/console/test_session_terminal_state_contract_compile.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -651,6 +669,8 @@ clean:
 	      tests/console/test_interactive_execution_completion_ack_gate_link \
 	      tests/console/test_interactive_execution_completion_initiation_gate_contract_compile.o \
 	      tests/console/test_interactive_execution_completion_initiation_gate_link \
+	      tests/console/test_session_terminal_state_contract_compile.o \
+	      tests/console/test_session_terminal_state_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
 	      tests/console/test_interactive_execution_contract_compile.o \

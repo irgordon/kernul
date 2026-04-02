@@ -73,6 +73,7 @@ struct session {
         execution_completion_ack_view;
     u32 execution_completion_ack_view_live;
     u32 execution_initiation_permitted;
+    u32 terminal_state_published;
 };
 
 struct process_group {

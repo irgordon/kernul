@@ -9,6 +9,27 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
+## [v0.0.1] — 2026-04-01
+
+### Added — Phase 14: Policy composition
+
+#### Phase 14, Task 1 — Terminal session state publication
+
+- Introduced terminal session state publication through
+  `include/kernul/session_terminal_state.h` and
+  `core/session_terminal_state.c`.
+- Terminal state is derived solely from initiation-forbidden control through
+  `interactive_execution_initiation_is_permitted_acquire(const struct session *)`.
+- Terminal state is declarative lifecycle signaling only:
+  no retries, no scheduling changes, and no lifecycle action behavior.
+- Terminal state is monotonic and irreversible for session lifetime with no
+  reset path.
+- Terminal publication and observation use explicit release/acquire visibility.
+
+This Phase 14 boundary step is kernel-internal only and is not a userspace ABI.
+
+---
+
 ## [v0.0.0] — 2026-03-24
 
 ### Summary

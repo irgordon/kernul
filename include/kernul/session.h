@@ -41,6 +41,7 @@
 #include <kernul/interactive_execution_outcome_record.h>
 #include <kernul/interactive_execution_failure_ack_gate.h>
 #include <kernul/interactive_execution_completion_ack_gate.h>
+#include <kernul/session_terminal_cause.h>
 
 struct process;
 struct interactive_runnable;
@@ -74,6 +75,7 @@ struct session {
     u32 execution_completion_ack_view_live;
     u32 execution_initiation_permitted;
     u32 terminal_state_published;
+    enum session_terminal_cause terminal_cause;
 };
 
 struct process_group {

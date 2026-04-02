@@ -26,6 +26,21 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
   reset path.
 - Terminal publication and observation use explicit release/acquire visibility.
 
+#### Phase 14, Task 2 — Terminal cause classification (declarative)
+
+- Introduced terminal cause classification through
+  `include/kernul/session_terminal_cause.h` and
+  `core/session_terminal_cause.c`.
+- Classification is declarative and informational only; no retries, cleanup,
+  scheduling, or lifecycle actions are driven by terminal cause.
+- Terminal cause publication is terminal-state-guarded and is a no-op when
+  `session_is_terminal_acquire(const struct session *)` is false.
+- Terminal cause is monotonic and irreversible for session lifetime:
+  initialized to `SESSION_TERMINAL_CAUSE_UNSPECIFIED`, then published once with
+  no reset or override path.
+- Terminal cause publication and observation use explicit release/acquire
+  visibility semantics.
+
 This Phase 14 boundary step is kernel-internal only and is not a userspace ABI.
 
 ---

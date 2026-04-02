@@ -75,6 +75,7 @@ struct session {
     u32 execution_completion_ack_view_live;
     u32 execution_initiation_permitted;
     u32 terminal_state_published;
+    u32 finalized_published;
     enum session_terminal_cause terminal_cause;
 };
 

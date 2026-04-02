@@ -9,6 +9,27 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
+## [v0.0.2] — 2026-04-02
+
+### Added — Phase 15: Terminal lifecycle action boundary
+
+#### Phase 15, Task 1 — Terminal session finalization publication
+
+- Introduced terminal session finalization marker publication through
+  `include/kernul/session_finalization.h` and
+  `core/session_finalization.c`.
+- Finalization publication is explicit-invocation only and terminal-guarded:
+  `session_publish_finalized_if_terminal(struct session *)` is a no-op unless
+  `session_is_terminal_acquire(const struct session *)` is true.
+- Finalized marker publication is single-assignment, monotonic, and
+  irreversible for session lifetime; terminal does not imply finalized.
+- Finalized marker storage is session-owned and atomically ordered with
+  explicit release publication and acquire observation semantics.
+- No cleanup, retry/restart, scheduling, or additional lifecycle actions are
+  introduced by this boundary.
+
+---
+
 ## [v0.0.1] — 2026-04-01
 
 ### Added — Phase 14: Policy composition

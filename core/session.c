@@ -20,6 +20,7 @@ static process_group_id_t next_process_group_id = 1U;
 struct session *session_create(struct process *leader)
 {
     u32 expected = 0U;
+    u32 ownership_entry_index;
     session_id_t id;
 
     if (leader == NULL)
@@ -84,8 +85,10 @@ struct session *session_create(struct process *leader)
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,
                      __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.ownership.lock, 0U, __ATOMIC_RELAXED);
-    for (id = 0U; id < SESSION_OWNERSHIP_FIXED_CAPACITY; ++id) {
-        __atomic_store_n(&session_slot.ownership.entries[id],
+    for (ownership_entry_index = 0U;
+         ownership_entry_index < SESSION_OWNERSHIP_FIXED_CAPACITY;
+         ++ownership_entry_index) {
+        __atomic_store_n(&session_slot.ownership.entries[ownership_entry_index],
                          0U,
                          __ATOMIC_RELAXED);
     }

@@ -13,6 +13,20 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ### Added — Phase 15: Terminal lifecycle action boundary
 
+#### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
+
+- Introduced a session resource ownership registry via
+  `include/kernul/session_ownership.h` and `core/session_ownership.c`.
+- Ownership is declarative, idempotent, and monotonic:
+  repeated registration of the same `resource_id_t` returns
+  `SESSION_OWNERSHIP_REGISTER_ALREADY_PRESENT` with no duplicate publication.
+- Ownership storage is explicitly capacity-bounded with fixed per-session
+  capacity (`SESSION_OWNERSHIP_FIXED_CAPACITY`) and deterministic overflow
+  (`SESSION_OWNERSHIP_REGISTER_CAPACITY_EXCEEDED`).
+- Ownership declaration is informational only and does not imply allocation
+  authority, reclamation intent, cleanup, retry, scheduling, or lifecycle
+  behavior.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

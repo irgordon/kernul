@@ -42,6 +42,7 @@
 #include <kernul/interactive_execution_failure_ack_gate.h>
 #include <kernul/interactive_execution_completion_ack_gate.h>
 #include <kernul/session_terminal_cause.h>
+#include <kernul/session_ownership.h>
 
 struct process;
 struct interactive_runnable;
@@ -49,6 +50,12 @@ struct interactive_scheduler_state {
     struct session *session;
     struct interactive_runnable *runnable;
     u32 state;
+};
+
+struct session_owned_resource_registry {
+    resource_id_t entries[SESSION_OWNERSHIP_FIXED_CAPACITY];
+    u32 count;
+    u32 lock;
 };
 
 typedef u32 session_id_t;
@@ -77,6 +84,7 @@ struct session {
     u32 terminal_state_published;
     u32 finalized_published;
     enum session_terminal_cause terminal_cause;
+    struct session_owned_resource_registry ownership;
 };
 
 struct process_group {

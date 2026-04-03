@@ -41,6 +41,7 @@ static void use_checks(void)
     (void)s.execution_completion_ack_view;
     (void)s.execution_completion_ack_view_live;
     (void)s.execution_initiation_permitted;
+    (void)s.finalized_published;
 
     (void)pg.id;
     (void)pg.session;

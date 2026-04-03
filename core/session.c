@@ -79,6 +79,7 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.terminal_state_published,
                      0U,
                      __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.finalized_published, 0U, __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.terminal_cause,
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,
                      __ATOMIC_RELEASE);

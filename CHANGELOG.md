@@ -75,6 +75,21 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retries, coordination, scheduling, recovery execution logic, or lifecycle
   mutation behavior was introduced by this boundary.
 
+#### Unreleased — Phase 20, Task 1 — Explicit recovery execution (single attempt)
+
+- Introduced explicit single-attempt recovery execution via
+  `include/kernul/session_recovery_execution.h` and
+  `core/session_recovery_execution.c`.
+- Execution consumes authorization before recovery attempt and is irreversible.
+- Execution effects are synchronous and visible before
+  `session_execute_recovery(struct session *)` returns.
+- Execution outcome is informational only and does not mutate eligibility or
+  authorization state beyond the authorization consumption transition.
+- Recovery execution primitive is constrained from invoking authorization or
+  eligibility APIs.
+- No retries, scheduling, coordination, or policy evaluation behavior was
+  introduced by this boundary.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

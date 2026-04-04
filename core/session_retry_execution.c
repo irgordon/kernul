@@ -9,6 +9,7 @@
  */
 
 #include <kernul/session_retry_execution.h>
+#include <kernul/session_retry_execution_result.h>
 #include <kernul/session_retry_authorization.h>
 #include "session_retry_authorization_storage.h"
 
@@ -33,6 +34,8 @@ session_retry_execute_primitive(struct session *session)
 session_retry_execution_result_t
 session_execute_retry(struct session *session)
 {
+    session_retry_execution_result_t execution_result;
+
     if (session == NULL)
         return SESSION_RETRY_EXEC_FAILED;
 
@@ -42,8 +45,10 @@ session_execute_retry(struct session *session)
     if (!session_retry_authorization_try_consume_release(session))
         return SESSION_RETRY_EXEC_NOT_AUTHORIZED;
 
+    execution_result = SESSION_RETRY_EXEC_OK;
     if (!session_retry_execute_primitive(session))
-        return SESSION_RETRY_EXEC_FAILED;
+        execution_result = SESSION_RETRY_EXEC_FAILED;
 
-    return SESSION_RETRY_EXEC_OK;
+    (void)session_publish_retry_execution_result(session, execution_result);
+    return execution_result;
 }

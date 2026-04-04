@@ -10,6 +10,7 @@
 
 #include <kernul/session.h>
 #include <kernul/session_recovery_execution.h>
+#include "session_retry_execution_result_storage.h"
 
 static struct session session_slot;
 static struct process_group process_group_slot;
@@ -25,6 +26,50 @@ session_publish_ready_release(struct session *session)
         return;
 
     __atomic_store_n(&session->ready_published, 1U, __ATOMIC_RELEASE);
+}
+
+void
+session_retry_execution_result_storage_init_release(struct session *session)
+{
+    if (session == NULL)
+        return;
+
+    __atomic_store_n(&session->retry_execution_result_publication,
+                     0U,
+                     __ATOMIC_RELEASE);
+}
+
+bool
+session_retry_execution_result_try_publish_release(
+    struct session *session,
+    session_retry_execution_result_t exec_result)
+{
+    u64 expected;
+
+    if (session == NULL)
+        return false;
+
+    expected = 0U;
+    return __atomic_compare_exchange_n(&session->retry_execution_result_publication,
+                                       &expected,
+                                       (u64)exec_result + 1U,
+                                       false,
+                                       __ATOMIC_RELEASE,
+                                       __ATOMIC_ACQUIRE);
+}
+
+u32
+session_retry_execution_result_state_load_acquire(const struct session *session)
+{
+    if (session == NULL)
+        return (u32)SESSION_RETRY_EXEC_RESULT_UNSET;
+
+    if (__atomic_load_n(&session->retry_execution_result_publication, __ATOMIC_ACQUIRE)
+        == 0U) {
+        return (u32)SESSION_RETRY_EXEC_RESULT_UNSET;
+    }
+
+    return (u32)SESSION_RETRY_EXEC_RESULT_SET;
 }
 
 bool
@@ -124,6 +169,7 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.retry_authorization_state,
                      SESSION_RETRY_AUTH_NONE,
                      __ATOMIC_RELEASE);
+    session_retry_execution_result_storage_init_release(&session_slot);
     __atomic_store_n(&session_slot.ready_published, 0U, __ATOMIC_RELAXED);
     __atomic_store_n(&session_slot.terminal_cause,
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,

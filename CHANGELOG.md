@@ -243,6 +243,23 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retry scheduling, coordination, policy inference, or recovery lifecycle
   mutation behavior was introduced by this boundary.
 
+#### Unreleased — Phase 27, Task 1 — Retry execution result publication (final)
+
+- Introduced immutable retry execution result publication via
+  `include/kernul/session_retry_execution_result.h` and
+  `core/session_retry_execution_result.c`.
+- Publication is durable lifecycle state, single-assignment, and release-ordered
+  with monotonic transition from `SESSION_RETRY_EXEC_RESULT_UNSET` to
+  `SESSION_RETRY_EXEC_RESULT_SET`.
+- Retry execution result storage is initialized during session construction
+  before readiness publication.
+- Retry execution result writes complete before publication becomes observable.
+- State observation is visibility-only and acquire-ordered:
+  `session_get_retry_execution_result_state_acquire(const struct session *)`
+  reports publication state only and does not interpret execution semantics.
+- No retry observation behavior, scheduling behavior, or coordination behavior
+  was introduced by this boundary.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

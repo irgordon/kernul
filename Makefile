@@ -736,10 +736,7 @@ tests/console/test_session_retry_authorization_storage_include_ban.o: tests/cons
 
 tests/console/test_session_retry_authorization_link: tests/console/test_session_retry_authorization_link.c \
                                                       core/session_retry_authorization.c \
-                                                      core/session_retry_authorization_storage.c \
-                                                      core/session_retry_policy.c \
-                                                      core/session_retry_policy_storage.c \
-                                                      core/session.c
+                                                      core/session_retry_authorization_storage.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c

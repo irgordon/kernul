@@ -47,6 +47,20 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retries, scheduling, coordination, or new synchronization channels are
   introduced.
 
+#### Unreleased — Phase 18, Task 1 — Session recovery eligibility declaration
+
+- Introduced declarative recovery eligibility via
+  `include/kernul/session_recovery_eligibility.h` and
+  `core/session_recovery_eligibility.c`.
+- Recovery eligibility is finalized-only, single-assignment, and tri-state:
+  `SESSION_RECOVERY_ELIGIBILITY_UNSET`,
+  `SESSION_RECOVERY_ELIGIBLE`, and
+  `SESSION_RECOVERY_INELIGIBLE`.
+- Declaration is informational only and does not initiate recovery or alter
+  lifecycle state.
+- No retries, scheduling, coordination, or lifecycle mutation behavior was
+  introduced by this boundary.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

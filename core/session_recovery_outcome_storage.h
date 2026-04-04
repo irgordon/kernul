@@ -25,4 +25,7 @@ session_recovery_outcome_try_publish_release(
     struct session *session,
     session_recovery_outcome_t outcome);
 
+u64
+session_recovery_outcome_timestamp_acquire(const struct session *session);
+
 #endif /* KERNUL_SESSION_RECOVERY_OUTCOME_STORAGE_H */

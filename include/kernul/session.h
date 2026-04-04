@@ -102,6 +102,7 @@ struct session {
     u32 recovery_execution_completed;
     u32 recovery_execution_result;
     u32 recovery_outcome_state;
+    u64 recovery_outcome_timestamp;
     u32 ready_published;
     enum session_terminal_cause terminal_cause;
     struct session_owned_resource_registry ownership;

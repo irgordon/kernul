@@ -29,10 +29,24 @@ session_recovery_outcome_try_publish_release(
         return false;
 
     expected = (u32)SESSION_RECOVERY_NOT_ATTEMPTED;
+    __atomic_store_n(&session->recovery_outcome_timestamp,
+                     1U,
+                     __ATOMIC_RELAXED);
     return __atomic_compare_exchange_n(&session->recovery_outcome_state,
                                        &expected,
                                        (u32)outcome,
                                        false,
                                        __ATOMIC_RELEASE,
                                        __ATOMIC_ACQUIRE);
+}
+
+u64
+session_recovery_outcome_timestamp_acquire(const struct session *session)
+{
+    if (session == NULL)
+        return 0U;
+    if (!session_is_ready_acquire(session))
+        return 0U;
+
+    return __atomic_load_n(&session->recovery_outcome_timestamp, __ATOMIC_ACQUIRE);
 }

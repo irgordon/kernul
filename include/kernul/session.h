@@ -84,6 +84,7 @@ struct session {
     u32 terminal_state_published;
     u32 finalized_published;
     u32 recovery_eligibility;
+    u32 recovery_authorization_state;
     enum session_terminal_cause terminal_cause;
     struct session_owned_resource_registry ownership;
 };

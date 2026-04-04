@@ -57,6 +57,8 @@ SRCS = arch/stub/arch.c              \
         core/session_reclamation.c \
         core/session_recovery_eligibility.c \
         core/session_recovery_eligibility_storage.c \
+        core/session_recovery_authorization.c \
+        core/session_recovery_authorization_storage.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
         core/interactive_switch_operands.c \
@@ -106,6 +108,8 @@ OBJS = $(SRCS:.c=.o)
         test_session_reclamation_include_ban.o \
         test_session_recovery_eligibility_contract_compile.o \
         test_session_recovery_eligibility_include_ban.o \
+        test_session_recovery_authorization_contract_compile.o \
+        test_session_recovery_authorization_include_ban.o \
         test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
@@ -182,10 +186,13 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                           tests/console/test_session_reclamation_contract_compile.o \
                           tests/console/test_session_reclamation_include_ban.o \
                           tests/console/test_session_reclamation_link \
-                          tests/console/test_session_recovery_eligibility_contract_compile.o \
-                          tests/console/test_session_recovery_eligibility_include_ban.o \
-                          tests/console/test_session_recovery_eligibility_link \
-                          tests/console/test_interactive_execution_target_contract_compile.o \
+                           tests/console/test_session_recovery_eligibility_contract_compile.o \
+                           tests/console/test_session_recovery_eligibility_include_ban.o \
+                           tests/console/test_session_recovery_eligibility_link \
+                           tests/console/test_session_recovery_authorization_contract_compile.o \
+                           tests/console/test_session_recovery_authorization_include_ban.o \
+                           tests/console/test_session_recovery_authorization_link \
+                           tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
              tests/console/test_interactive_execution_link \
@@ -280,6 +287,9 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	@echo "test_session_recovery_eligibility_contract_compile: compile-check passed."
 	@echo "test_session_recovery_eligibility_include_ban: compile-check passed."
 	./tests/console/test_session_recovery_eligibility_link && echo "test_session_recovery_eligibility_link: passed." || echo "test_session_recovery_eligibility_link: FAILED."
+	@echo "test_session_recovery_authorization_contract_compile: compile-check passed."
+	@echo "test_session_recovery_authorization_include_ban: compile-check passed."
+	./tests/console/test_session_recovery_authorization_link && echo "test_session_recovery_authorization_link: passed." || echo "test_session_recovery_authorization_link: FAILED."
 	@echo "test_interactive_execution_target_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_target_link && echo "test_interactive_execution_target_link: passed." || echo "test_interactive_execution_target_link: FAILED."
 	@echo "test_interactive_execution_contract_compile: compile-check passed."
@@ -578,6 +588,17 @@ tests/console/test_session_recovery_eligibility_link: tests/console/test_session
                                                       core/session_recovery_eligibility_storage.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_session_recovery_authorization_contract_compile.o: tests/console/test_session_recovery_authorization_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_recovery_authorization_include_ban.o: tests/console/test_session_recovery_authorization_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_recovery_authorization_link: tests/console/test_session_recovery_authorization_link.c \
+                                                        core/session_recovery_authorization.c \
+                                                        core/session_recovery_authorization_storage.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -706,6 +727,8 @@ test_session_reclamation_contract_compile.o: tests/console/test_session_reclamat
 test_session_reclamation_include_ban.o: tests/console/test_session_reclamation_include_ban.o
 test_session_recovery_eligibility_contract_compile.o: tests/console/test_session_recovery_eligibility_contract_compile.o
 test_session_recovery_eligibility_include_ban.o: tests/console/test_session_recovery_eligibility_include_ban.o
+test_session_recovery_authorization_contract_compile.o: tests/console/test_session_recovery_authorization_contract_compile.o
+test_session_recovery_authorization_include_ban.o: tests/console/test_session_recovery_authorization_include_ban.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -781,6 +804,9 @@ clean:
 	      tests/console/test_session_recovery_eligibility_contract_compile.o \
 	      tests/console/test_session_recovery_eligibility_include_ban.o \
 	      tests/console/test_session_recovery_eligibility_link \
+	      tests/console/test_session_recovery_authorization_contract_compile.o \
+	      tests/console/test_session_recovery_authorization_include_ban.o \
+	      tests/console/test_session_recovery_authorization_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
 	      tests/console/test_interactive_execution_contract_compile.o \

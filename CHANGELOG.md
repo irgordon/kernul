@@ -61,6 +61,20 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retries, scheduling, coordination, or lifecycle mutation behavior was
   introduced by this boundary.
 
+#### Unreleased — Phase 19, Task 1 — Explicit recovery attempt authorization
+
+- Introduced explicit recovery attempt authorization via
+  `include/kernul/session_recovery_authorization.h` and
+  `core/session_recovery_authorization.c`.
+- Authorization is finalized-only, eligibility-gated, single-use, and
+  irreversible.
+- `AUTHORIZED` is capability-only: permission to attempt recovery, not a
+  trigger or scheduling signal.
+- Consumption is explicit, safe, idempotent, and monotonic through terminal
+  `CONSUMED` state.
+- No retries, coordination, scheduling, recovery execution logic, or lifecycle
+  mutation behavior was introduced by this boundary.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

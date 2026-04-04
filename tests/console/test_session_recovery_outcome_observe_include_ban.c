@@ -41,6 +41,14 @@
 #error "session_recovery_outcome_observe include path must not expose reclamation headers"
 #endif
 
+#ifdef KERNUL_SESSION_RECOVERY_ELIGIBILITY_H
+#error "session_recovery_outcome_observe include path must not expose recovery eligibility headers"
+#endif
+
+#ifdef KERNUL_SESSION_RECOVERY_AUTHORIZATION_H
+#error "session_recovery_outcome_observe include path must not expose recovery authorization headers"
+#endif
+
 #ifdef KERNUL_SIGNAL_H
 #error "session_recovery_outcome_observe include path must not expose signaling headers"
 #endif

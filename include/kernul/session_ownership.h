@@ -20,6 +20,12 @@
  *   This surface depends only on session identity and session-owned storage.
  *   It must not depend on terminal/finalized state, scheduler policy,
  *   execution transfer behavior, or cleanup/reclamation behavior.
+ *
+ * Visibility contract (normative):
+ *   Writers initialize ownership.entries[k] first and publish ownership.count
+ *   with release semantics.
+ *   Readers must acquire-load ownership.count before reading entries and must
+ *   only read entries in [0, count-1].
  */
 
 #include <kernul/types.h>

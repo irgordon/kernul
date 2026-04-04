@@ -33,6 +33,8 @@ session_register_resource(struct session *session, resource_id_t resource)
 
     if (session == NULL)
         return SESSION_OWNERSHIP_REGISTER_CAPACITY_EXCEEDED;
+    if (!session_is_ready_acquire(session))
+        return SESSION_OWNERSHIP_REGISTER_CAPACITY_EXCEEDED;
 
     session_ownership_lock_acquire(&session->ownership);
 
@@ -66,6 +68,8 @@ session_owns_resource_acquire(const struct session *session,
     u32 count;
 
     if (session == NULL)
+        return false;
+    if (!session_is_ready_acquire(session))
         return false;
 
     count = __atomic_load_n(&session->ownership.count, __ATOMIC_ACQUIRE);

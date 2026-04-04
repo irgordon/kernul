@@ -31,6 +31,19 @@
  *   No terminal association is defined.
  *   No foreground/background or job-control semantics are defined.
  *   No scheduler behavior is defined.
+ *
+ * Global observation contract:
+ *   Observational getters are permissive for NULL input and return safe
+ *   defaults. NULL-derived values are non-authoritative and must not be
+ *   treated as lifecycle facts.
+ *
+ * Publication boundary:
+ *   Session slot reservation and session readiness are distinct events.
+ *   session_slot_live publication means slot reservation/ownership only.
+ *   session_publish_ready_release(struct session *) is the single observer
+ *   readiness publication boundary after full session initialization.
+ *   session_is_ready_acquire(const struct session *) is the matching
+ *   readiness observation gate.
  */
 
 #include <kernul/types.h>
@@ -89,6 +102,7 @@ struct session {
     u32 recovery_execution_completed;
     u32 recovery_execution_result;
     u32 recovery_outcome_state;
+    u32 ready_published;
     enum session_terminal_cause terminal_cause;
     struct session_owned_resource_registry ownership;
 };
@@ -98,6 +112,12 @@ struct process_group {
     struct session     *session;
     struct process     *leader;
 };
+
+void
+session_publish_ready_release(struct session *session);
+
+bool
+session_is_ready_acquire(const struct session *session);
 
 struct session *session_create(struct process *leader);
 struct process_group *process_group_create(struct session *session,

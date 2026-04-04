@@ -41,8 +41,6 @@ session_execute_recovery(struct session *session)
 
     if (!session_is_finalized_acquire(session))
         result = SESSION_RECOVERY_EXEC_NOT_FINALIZED;
-    else if (!session_is_recovery_authorized_acquire(session))
-        result = SESSION_RECOVERY_EXEC_NOT_AUTHORIZED;
     else {
         consume_result = session_consume_recovery_authorization(session);
         if (consume_result != SESSION_RECOVERY_CONSUME_OK)

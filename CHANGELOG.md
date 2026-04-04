@@ -13,6 +13,46 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ### Added — Phase 15: Terminal lifecycle action boundary
 
+#### Unreleased — Phase 25, Task 1 — Recovery and retry lifecycle freeze & invariants lock
+
+- Declared the canonical lifecycle sequence complete and frozen for this run:
+  1) session finalization publication; 2) ownership declaration;
+  3) reclamation; 4) recovery eligibility;
+  5) recovery authorization (single-use);
+  6) recovery execution (single-attempt);
+  7) recovery outcome recording (immutable);
+  8) recovery outcome observation (read-only);
+  9) retry policy declaration (meaning only);
+  10) retry authorization (single-use capability).
+- Declared stopping points explicitly:
+  recovery lifecycle is complete through outcome observation;
+  retry lifecycle is complete through authorization.
+- Locked semantic invariants:
+  recovery execution remains single-attempt; recovery outcome remains immutable;
+  outcome observation remains read-only and readiness-gated;
+  retry remains declarative/authorization-only with no execution, scheduling,
+  or coordination behavior.
+- Locked authority invariants:
+  authorization surfaces grant capability only and do not execute behavior,
+  schedule work, or coordinate subsystems.
+- Locked dependency invariants:
+  no new recovery/retry dependencies on scheduler subsystems, retry execution
+  logic, coordination/signaling systems, or time-based backoff/timers without
+  a new phase.
+- Locked storage-helper invariants:
+  helpers remain mechanical-only load/store/CAS with explicit ordering and
+  must not grow policy inference, readiness checks, derived-state logic, or
+  convenience APIs.
+- Locked observation invariants:
+  observation remains readiness-gated, acquire-ordered, side-effect free,
+  non-allocating, and non-mutating; observation must not trigger behavior,
+  grant authority, or schedule work.
+- Recorded forecast supersessions as explicit historical locks:
+  forecast Phase 19 retry action was superseded by retry authorization;
+  forecast Phase 20 scheduler observation was superseded by recovery execution.
+- No code paths, authority, execution, or scheduling behavior were added by
+  this task.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

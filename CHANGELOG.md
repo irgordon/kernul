@@ -152,6 +152,22 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Observation is passive and introduces no authority, retries, scheduling, or
   coordination behavior.
 
+#### Unreleased — Phase 23, Task 1 — Retry policy declaration (meaning only)
+
+- Introduced declarative retry policy marker via
+  `include/kernul/session_retry_policy.h` and
+  `core/session_retry_policy.c`.
+- Retry policy storage is initialized to `SESSION_RETRY_UNSET` before session
+  readiness publication.
+- Retry policy declaration is readiness-gated, NULL-safe, atomic, and
+  single-assignment with monotonic transitions:
+  `SESSION_RETRY_UNSET` -> `SESSION_RETRY_ALLOWED` or
+  `SESSION_RETRY_UNSET` -> `SESSION_RETRY_FORBIDDEN`.
+- Retry policy observation is readiness-gated via centralized session
+  observation policy and is side-effect free.
+- No authority, retry execution, scheduling, coordination, or recovery outcome
+  mutation behavior was introduced by this boundary.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

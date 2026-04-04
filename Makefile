@@ -64,6 +64,8 @@ SRCS = arch/stub/arch.c              \
         core/session_recovery_outcome.c \
         core/session_recovery_outcome_storage.c \
         core/session_recovery_outcome_observe.c \
+        core/session_retry_policy.c \
+        core/session_retry_policy_storage.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
         core/interactive_switch_operands.c \
@@ -123,6 +125,9 @@ OBJS = $(SRCS:.c=.o)
         test_session_recovery_outcome_storage_include_ban.o \
         test_session_recovery_outcome_observe_contract_compile.o \
         test_session_recovery_outcome_observe_include_ban.o \
+        test_session_retry_policy_contract_compile.o \
+        test_session_retry_policy_include_ban.o \
+        test_session_retry_policy_storage_include_ban.o \
         test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
@@ -216,6 +221,10 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                              tests/console/test_session_recovery_outcome_observe_contract_compile.o \
                              tests/console/test_session_recovery_outcome_observe_include_ban.o \
                              tests/console/test_session_recovery_outcome_observe_link \
+                             tests/console/test_session_retry_policy_contract_compile.o \
+                             tests/console/test_session_retry_policy_include_ban.o \
+                             tests/console/test_session_retry_policy_storage_include_ban.o \
+                             tests/console/test_session_retry_policy_link \
                              tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
@@ -326,6 +335,10 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	@echo "test_session_recovery_outcome_observe_contract_compile: compile-check passed."
 	@echo "test_session_recovery_outcome_observe_include_ban: compile-check passed."
 	./tests/console/test_session_recovery_outcome_observe_link && echo "test_session_recovery_outcome_observe_link: passed." || echo "test_session_recovery_outcome_observe_link: FAILED."
+	@echo "test_session_retry_policy_contract_compile: compile-check passed."
+	@echo "test_session_retry_policy_include_ban: compile-check passed."
+	@echo "test_session_retry_policy_storage_include_ban: compile-check passed."
+	./tests/console/test_session_retry_policy_link && echo "test_session_retry_policy_link: passed." || echo "test_session_retry_policy_link: FAILED."
 	@echo "test_session_contract_compile: compile-check passed."
 	./tests/session/test_session_link && echo "test_session_link:  passed." || echo "test_session_link:  FAILED."
 	./tests/session/test_session_readiness_link && echo "test_session_readiness_link: passed." || echo "test_session_readiness_link: FAILED."
@@ -684,6 +697,21 @@ tests/console/test_session_recovery_outcome_observe_link: tests/console/test_ses
                                                            core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_session_retry_policy_contract_compile.o: tests/console/test_session_retry_policy_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_retry_policy_include_ban.o: tests/console/test_session_retry_policy_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_retry_policy_storage_include_ban.o: tests/console/test_session_retry_policy_storage_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_retry_policy_link: tests/console/test_session_retry_policy_link.c \
+                                              core/session_retry_policy.c \
+                                              core/session_retry_policy_storage.c \
+                                              core/session.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -825,6 +853,9 @@ test_session_recovery_outcome_include_ban.o: tests/console/test_session_recovery
 test_session_recovery_outcome_storage_include_ban.o: tests/console/test_session_recovery_outcome_storage_include_ban.o
 test_session_recovery_outcome_observe_contract_compile.o: tests/console/test_session_recovery_outcome_observe_contract_compile.o
 test_session_recovery_outcome_observe_include_ban.o: tests/console/test_session_recovery_outcome_observe_include_ban.o
+test_session_retry_policy_contract_compile.o: tests/console/test_session_retry_policy_contract_compile.o
+test_session_retry_policy_include_ban.o: tests/console/test_session_retry_policy_include_ban.o
+test_session_retry_policy_storage_include_ban.o: tests/console/test_session_retry_policy_storage_include_ban.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -914,6 +945,10 @@ clean:
 	      tests/console/test_session_recovery_outcome_observe_contract_compile.o \
 	      tests/console/test_session_recovery_outcome_observe_include_ban.o \
 	      tests/console/test_session_recovery_outcome_observe_link \
+	      tests/console/test_session_retry_policy_contract_compile.o \
+	      tests/console/test_session_retry_policy_include_ban.o \
+	      tests/console/test_session_retry_policy_storage_include_ban.o \
+	      tests/console/test_session_retry_policy_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
 	      tests/console/test_interactive_execution_contract_compile.o \

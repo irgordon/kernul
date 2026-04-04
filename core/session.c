@@ -9,6 +9,7 @@
  */
 
 #include <kernul/session.h>
+#include <kernul/session_recovery_execution.h>
 
 static struct session session_slot;
 static struct process_group process_group_slot;
@@ -86,6 +87,15 @@ struct session *session_create(struct process *leader)
                      __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.recovery_authorization_state,
                      0U,
+                     __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.recovery_execution_completed,
+                     0U,
+                     __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.recovery_execution_result,
+                     (u32)SESSION_RECOVERY_EXEC_FAILED,
+                     __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.recovery_outcome_state,
+                     (u32)SESSION_RECOVERY_NOT_ATTEMPTED,
                      __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.terminal_cause,
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,

@@ -90,6 +90,19 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retries, scheduling, coordination, or policy evaluation behavior was
   introduced by this boundary.
 
+#### Unreleased — Phase 21, Task 1 — Recovery outcome recording
+
+- Introduced immutable recovery outcome recording via
+  `include/kernul/session_recovery_outcome.h` and
+  `core/session_recovery_outcome.c`.
+- Recovery outcome storage is initialized to
+  `SESSION_RECOVERY_NOT_ATTEMPTED` before session visibility.
+- Outcome recording is single-assignment, terminal, and published only after
+  recovery execution completion is observed with acquire semantics.
+- Outcome publication and observation use explicit release/acquire visibility.
+- Outcome is declarative lifecycle meaning only and introduces no authority,
+  retry, scheduling, or coordination behavior.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

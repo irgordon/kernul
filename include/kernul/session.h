@@ -43,6 +43,7 @@
 #include <kernul/interactive_execution_completion_ack_gate.h>
 #include <kernul/session_terminal_cause.h>
 #include <kernul/session_ownership.h>
+#include <kernul/session_recovery_outcome.h>
 
 struct process;
 struct interactive_runnable;
@@ -85,6 +86,9 @@ struct session {
     u32 finalized_published;
     u32 recovery_eligibility;
     u32 recovery_authorization_state;
+    u32 recovery_execution_completed;
+    u32 recovery_execution_result;
+    u32 recovery_outcome_state;
     enum session_terminal_cause terminal_cause;
     struct session_owned_resource_registry ownership;
 };

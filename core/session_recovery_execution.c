@@ -11,6 +11,7 @@
 #include <kernul/session_recovery_execution.h>
 #include <kernul/session_finalization.h>
 #include <kernul/session_recovery_authorization.h>
+#include "session_recovery_execution_storage.h"
 
 /*
  * Recovery execution primitive boundary.
@@ -29,22 +30,34 @@ session_recovery_execution_result_t
 session_execute_recovery(struct session *session)
 {
     session_recovery_consume_result_t consume_result;
+    session_recovery_execution_result_t result;
+    bool attempted;
 
     if (session == NULL)
         return SESSION_RECOVERY_EXEC_FAILED;
 
+    result = SESSION_RECOVERY_EXEC_FAILED;
+    attempted = false;
+
     if (!session_is_finalized_acquire(session))
-        return SESSION_RECOVERY_EXEC_NOT_FINALIZED;
+        result = SESSION_RECOVERY_EXEC_NOT_FINALIZED;
+    else if (!session_is_recovery_authorized_acquire(session))
+        result = SESSION_RECOVERY_EXEC_NOT_AUTHORIZED;
+    else {
+        consume_result = session_consume_recovery_authorization(session);
+        if (consume_result != SESSION_RECOVERY_CONSUME_OK)
+            result = SESSION_RECOVERY_EXEC_NOT_AUTHORIZED;
+        else {
+            attempted = true;
+            if (!session_recovery_execute_primitive(session))
+                result = SESSION_RECOVERY_EXEC_FAILED;
+            else
+                result = SESSION_RECOVERY_EXEC_OK;
+        }
+    }
 
-    if (!session_is_recovery_authorized_acquire(session))
-        return SESSION_RECOVERY_EXEC_NOT_AUTHORIZED;
+    if (attempted)
+        session_publish_recovery_execution_completion_release(session, result);
 
-    consume_result = session_consume_recovery_authorization(session);
-    if (consume_result != SESSION_RECOVERY_CONSUME_OK)
-        return SESSION_RECOVERY_EXEC_NOT_AUTHORIZED;
-
-    if (!session_recovery_execute_primitive(session))
-        return SESSION_RECOVERY_EXEC_FAILED;
-
-    return SESSION_RECOVERY_EXEC_OK;
+    return result;
 }

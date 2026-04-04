@@ -121,6 +121,9 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.retry_policy_state,
                      SESSION_RETRY_UNSET,
                      __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.retry_authorization_state,
+                     SESSION_RETRY_AUTH_NONE,
+                     __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.ready_published, 0U, __ATOMIC_RELAXED);
     __atomic_store_n(&session_slot.terminal_cause,
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,

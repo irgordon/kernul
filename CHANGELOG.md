@@ -168,6 +168,22 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No authority, retry execution, scheduling, coordination, or recovery outcome
   mutation behavior was introduced by this boundary.
 
+#### Unreleased — Phase 24, Task 1 — Retry authorization capability (authority only)
+
+- Introduced explicit single-use retry authorization capability via
+  `include/kernul/session_retry_authorization.h` and
+  `core/session_retry_authorization.c`.
+- Retry authorization storage is initialized to `SESSION_RETRY_AUTH_NONE`
+  before session readiness publication.
+- Grant/consume/observe paths are readiness-gated, NULL-safe, and policy-checked
+  against retry policy via direct read-only acquire observation.
+- Grant and consume each perform exactly one CAS transition attempt with no
+  retry loops and deterministic collapse under contention.
+- Authorization observation is side-effect free and performs readiness gating
+  plus acquire state load only.
+- No retry execution, scheduling, or coordination behavior was introduced by
+  this boundary.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

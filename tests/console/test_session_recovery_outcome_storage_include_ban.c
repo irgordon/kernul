@@ -34,4 +34,5 @@ static void use_checks(void)
 {
     (void)&session_recovery_outcome_state_acquire;
     (void)&session_recovery_outcome_try_publish_release;
+    (void)&session_recovery_outcome_timestamp_acquire;
 }

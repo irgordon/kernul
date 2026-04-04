@@ -136,6 +136,22 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
   observation surface; the scheduler observation surface remains unimplemented
   and unassigned to a phase.
 
+#### Unreleased — Phase 22, Task 1 — Recovery outcome observation surface
+
+- Introduced read-only recovery outcome observation snapshot via
+  `include/kernul/session_recovery_outcome_observe.h` and
+  `core/session_recovery_outcome_observe.c`.
+- Observation is readiness-gated and acquire-ordered for readiness, completion,
+  execution result observation, outcome state, and timestamp reads.
+- Snapshot reports immutable recovery outcome, outcome publication timestamp,
+  and execution attempt count.
+- Attempt count is derived from completion observation only and remains bounded
+  to `0` or `1`.
+- Outcome timestamp is immutable metadata published with outcome and never
+  mutated afterward.
+- Observation is passive and introduces no authority, retries, scheduling, or
+  coordination behavior.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

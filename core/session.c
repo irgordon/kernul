@@ -115,6 +115,9 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.recovery_outcome_state,
                      (u32)SESSION_RECOVERY_NOT_ATTEMPTED,
                      __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.recovery_outcome_timestamp,
+                     0U,
+                     __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.ready_published, 0U, __ATOMIC_RELAXED);
     __atomic_store_n(&session_slot.terminal_cause,
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,

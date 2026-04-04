@@ -27,6 +27,26 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
   authority, reclamation intent, cleanup, retry, scheduling, or lifecycle
   behavior.
 
+#### Unreleased — Phase 17, Task 1 — Session resource reclamation (explicit, local)
+
+- Introduced explicit session resource reclamation via
+  `include/kernul/session_reclamation.h` and `core/session_reclamation.c`.
+- Reclamation is finalized-only and ownership-bounded:
+  `session_reclaim_resource_if_finalized(struct session *, resource_id_t)`
+  returns deterministic guard outcomes for NULL, not-finalized, and not-owned
+  paths.
+- Reclaim primitive contract is constrained to deterministic, synchronous,
+  idempotent-per-identity behavior with external effect visibility on return;
+  no deferred teardown or hidden completion path is introduced.
+- Reclaim primitive behavior is identity-local and must not depend on session
+  lifecycle state beyond the provided resource identity.
+- Reclamation attempts do not mutate the ownership registry; ownership remains
+  historical and observable after both success and failure.
+- Reclamation failure does not reopen lifecycle transitions and does not alter
+  finalization state.
+- No retries, scheduling, coordination, or new synchronization channels are
+  introduced.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

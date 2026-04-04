@@ -84,6 +84,9 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.recovery_eligibility,
                      0U,
                      __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.recovery_authorization_state,
+                     0U,
+                     __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.terminal_cause,
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,
                      __ATOMIC_RELEASE);

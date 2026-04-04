@@ -166,6 +166,8 @@ session_id_t session_id(const struct session *s)
 {
     if (s == NULL)
         return 0U;
+    if (!session_is_ready_acquire(s))
+        return 0U;
 
     return s->id;
 }

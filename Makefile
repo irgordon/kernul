@@ -116,8 +116,10 @@ OBJS = $(SRCS:.c=.o)
         test_session_recovery_authorization_include_ban.o \
         test_session_recovery_execution_contract_compile.o \
         test_session_recovery_execution_include_ban.o \
+        test_session_recovery_execution_storage_include_ban.o \
         test_session_recovery_outcome_contract_compile.o \
         test_session_recovery_outcome_include_ban.o \
+        test_session_recovery_outcome_storage_include_ban.o \
         test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
@@ -202,9 +204,11 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                            tests/console/test_session_recovery_authorization_link \
                             tests/console/test_session_recovery_execution_contract_compile.o \
                             tests/console/test_session_recovery_execution_include_ban.o \
+                            tests/console/test_session_recovery_execution_storage_include_ban.o \
                             tests/console/test_session_recovery_execution_link \
                             tests/console/test_session_recovery_outcome_contract_compile.o \
                             tests/console/test_session_recovery_outcome_include_ban.o \
+                            tests/console/test_session_recovery_outcome_storage_include_ban.o \
                             tests/console/test_session_recovery_outcome_link \
                             tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
@@ -220,9 +224,10 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
         tests/fd/test_fd_table_link \
        tests/signal/test_signal_contract_compile.o \
        tests/signal/test_signal_link \
-      tests/session/test_session_contract_compile.o \
-      tests/session/test_session_link \
-      tests/vfs/test_vfs_contract_compile.o \
+	      tests/session/test_session_contract_compile.o \
+	      tests/session/test_session_link \
+	      tests/session/test_session_readiness_link \
+	      tests/vfs/test_vfs_contract_compile.o \
       tests/vfs/test_vfs_link \
       tests/pipe/test_pipe_contract_compile.o \
       tests/pipe/test_pipe_link \
@@ -306,10 +311,15 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/console/test_session_recovery_authorization_link && echo "test_session_recovery_authorization_link: passed." || echo "test_session_recovery_authorization_link: FAILED."
 	@echo "test_session_recovery_execution_contract_compile: compile-check passed."
 	@echo "test_session_recovery_execution_include_ban: compile-check passed."
+	@echo "test_session_recovery_execution_storage_include_ban: compile-check passed."
 	./tests/console/test_session_recovery_execution_link && echo "test_session_recovery_execution_link: passed." || echo "test_session_recovery_execution_link: FAILED."
 	@echo "test_session_recovery_outcome_contract_compile: compile-check passed."
 	@echo "test_session_recovery_outcome_include_ban: compile-check passed."
+	@echo "test_session_recovery_outcome_storage_include_ban: compile-check passed."
 	./tests/console/test_session_recovery_outcome_link && echo "test_session_recovery_outcome_link: passed." || echo "test_session_recovery_outcome_link: FAILED."
+	@echo "test_session_contract_compile: compile-check passed."
+	./tests/session/test_session_link && echo "test_session_link:  passed." || echo "test_session_link:  FAILED."
+	./tests/session/test_session_readiness_link && echo "test_session_readiness_link: passed." || echo "test_session_readiness_link: FAILED."
 	@echo "test_interactive_execution_target_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_target_link && echo "test_interactive_execution_target_link: passed." || echo "test_interactive_execution_target_link: FAILED."
 	@echo "test_interactive_execution_contract_compile: compile-check passed."
@@ -625,6 +635,9 @@ tests/console/test_session_recovery_execution_contract_compile.o: tests/console/
 tests/console/test_session_recovery_execution_include_ban.o: tests/console/test_session_recovery_execution_include_ban.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
+tests/console/test_session_recovery_execution_storage_include_ban.o: tests/console/test_session_recovery_execution_storage_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
 tests/console/test_session_recovery_execution_link: tests/console/test_session_recovery_execution_link.c \
                                                     core/session_recovery_execution.c \
                                                     core/session_recovery_execution_storage.c
@@ -634,6 +647,9 @@ tests/console/test_session_recovery_outcome_contract_compile.o: tests/console/te
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/console/test_session_recovery_outcome_include_ban.o: tests/console/test_session_recovery_outcome_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_recovery_outcome_storage_include_ban.o: tests/console/test_session_recovery_outcome_storage_include_ban.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/console/test_session_recovery_outcome_link: tests/console/test_session_recovery_outcome_link.c \
@@ -688,6 +704,9 @@ tests/session/test_session_contract_compile.o: tests/session/test_session_contra
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/session/test_session_link: tests/session/test_session_link.c core/session.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
+tests/session/test_session_readiness_link: tests/session/test_session_readiness_link.c core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/vfs/test_vfs_contract_compile.o: tests/vfs/test_vfs_contract_compile.c
@@ -774,8 +793,10 @@ test_session_recovery_authorization_contract_compile.o: tests/console/test_sessi
 test_session_recovery_authorization_include_ban.o: tests/console/test_session_recovery_authorization_include_ban.o
 test_session_recovery_execution_contract_compile.o: tests/console/test_session_recovery_execution_contract_compile.o
 test_session_recovery_execution_include_ban.o: tests/console/test_session_recovery_execution_include_ban.o
+test_session_recovery_execution_storage_include_ban.o: tests/console/test_session_recovery_execution_storage_include_ban.o
 test_session_recovery_outcome_contract_compile.o: tests/console/test_session_recovery_outcome_contract_compile.o
 test_session_recovery_outcome_include_ban.o: tests/console/test_session_recovery_outcome_include_ban.o
+test_session_recovery_outcome_storage_include_ban.o: tests/console/test_session_recovery_outcome_storage_include_ban.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -856,9 +877,11 @@ clean:
 	      tests/console/test_session_recovery_authorization_link \
 	      tests/console/test_session_recovery_execution_contract_compile.o \
 	      tests/console/test_session_recovery_execution_include_ban.o \
+	      tests/console/test_session_recovery_execution_storage_include_ban.o \
 	      tests/console/test_session_recovery_execution_link \
 	      tests/console/test_session_recovery_outcome_contract_compile.o \
 	      tests/console/test_session_recovery_outcome_include_ban.o \
+	      tests/console/test_session_recovery_outcome_storage_include_ban.o \
 	      tests/console/test_session_recovery_outcome_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
@@ -876,6 +899,7 @@ clean:
 	      tests/signal/test_signal_link \
 	      tests/session/test_session_contract_compile.o \
 	      tests/session/test_session_link \
+	      tests/session/test_session_readiness_link \
 	      tests/vfs/test_vfs_contract_compile.o \
 	      tests/vfs/test_vfs_link \
 	      tests/pipe/test_pipe_contract_compile.o \

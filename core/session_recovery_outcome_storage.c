@@ -12,6 +12,8 @@ session_recovery_outcome_state_acquire(const struct session *session)
 {
     if (session == NULL)
         return (u32)SESSION_RECOVERY_NOT_ATTEMPTED;
+    if (!session_is_ready_acquire(session))
+        return (u32)SESSION_RECOVERY_NOT_ATTEMPTED;
 
     return __atomic_load_n(&session->recovery_outcome_state, __ATOMIC_ACQUIRE);
 }

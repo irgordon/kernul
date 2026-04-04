@@ -12,6 +12,8 @@ session_recovery_authorization_state_acquire(const struct session *session)
 {
     if (session == NULL)
         return (u32)SESSION_RECOVERY_AUTHORIZATION_UNAUTHORIZED;
+    if (!session_is_ready_acquire(session))
+        return (u32)SESSION_RECOVERY_AUTHORIZATION_UNAUTHORIZED;
 
     return __atomic_load_n(&session->recovery_authorization_state,
                            __ATOMIC_ACQUIRE);

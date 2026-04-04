@@ -18,6 +18,11 @@
  * State model:
  *   UNAUTHORIZED -> AUTHORIZED -> CONSUMED
  *   monotonic, single-direction, and irreversible.
+ *
+ * Observation rule:
+ *   session_is_recovery_authorized_acquire() is permissive for NULL or
+ *   not-ready input and returns false.
+ *   NULL/not-ready observations are non-authoritative lifecycle facts.
  */
 
 #include <kernul/types.h>

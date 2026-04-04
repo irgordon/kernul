@@ -15,6 +15,11 @@
  *   - recording is single-assignment and irreversible
  *   - recording depends on observed recovery execution completion
  *   - recording does not trigger retries, scheduling, or coordination
+ *
+ * Observation rule:
+ *   session_get_recovery_outcome_acquire() is permissive for NULL or not-ready
+ *   input and returns SESSION_RECOVERY_NOT_ATTEMPTED.
+ *   NULL/not-ready observations are non-authoritative lifecycle facts.
  */
 
 #include <kernul/types.h>

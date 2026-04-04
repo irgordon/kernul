@@ -38,6 +38,8 @@ session_is_terminal_acquire(const struct session *session)
 {
     if (session == NULL)
         return false;
+    if (!session_is_ready_acquire(session))
+        return false;
 
     return __atomic_load_n(&session->terminal_state_published,
                            __ATOMIC_ACQUIRE) == 1U;

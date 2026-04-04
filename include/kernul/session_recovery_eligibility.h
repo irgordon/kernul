@@ -30,6 +30,11 @@
  * Dependency boundary:
  *   This surface depends only on session identity and finalized observation
  *   via session_is_finalized_acquire(const struct session *).
+ *
+ * Observation rule:
+ *   session_get_recovery_eligibility_acquire() is permissive for NULL or
+ *   not-ready input and returns SESSION_RECOVERY_ELIGIBILITY_UNSET.
+ *   NULL/not-ready observations are non-authoritative lifecycle facts.
  */
 
 #include <kernul/types.h>

@@ -614,8 +614,9 @@ tests/console/test_session_recovery_eligibility_include_ban.o: tests/console/tes
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/console/test_session_recovery_eligibility_link: tests/console/test_session_recovery_eligibility_link.c \
-                                                      core/session_recovery_eligibility.c \
-                                                      core/session_recovery_eligibility_storage.c
+                                                       core/session_recovery_eligibility.c \
+                                                       core/session_recovery_eligibility_storage.c \
+                                                       core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_session_recovery_authorization_contract_compile.o: tests/console/test_session_recovery_authorization_contract_compile.c
@@ -625,8 +626,9 @@ tests/console/test_session_recovery_authorization_include_ban.o: tests/console/t
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/console/test_session_recovery_authorization_link: tests/console/test_session_recovery_authorization_link.c \
-                                                        core/session_recovery_authorization.c \
-                                                        core/session_recovery_authorization_storage.c
+                                                         core/session_recovery_authorization.c \
+                                                         core/session_recovery_authorization_storage.c \
+                                                         core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_session_recovery_execution_contract_compile.o: tests/console/test_session_recovery_execution_contract_compile.c
@@ -640,7 +642,8 @@ tests/console/test_session_recovery_execution_storage_include_ban.o: tests/conso
 
 tests/console/test_session_recovery_execution_link: tests/console/test_session_recovery_execution_link.c \
                                                     core/session_recovery_execution.c \
-                                                    core/session_recovery_execution_storage.c
+                                                    core/session_recovery_execution_storage.c \
+                                                    core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_session_recovery_outcome_contract_compile.o: tests/console/test_session_recovery_outcome_contract_compile.c
@@ -655,7 +658,8 @@ tests/console/test_session_recovery_outcome_storage_include_ban.o: tests/console
 tests/console/test_session_recovery_outcome_link: tests/console/test_session_recovery_outcome_link.c \
                                                    core/session_recovery_outcome.c \
                                                    core/session_recovery_outcome_storage.c \
-                                                   core/session_recovery_execution_storage.c
+                                                   core/session_recovery_execution_storage.c \
+                                                   core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c

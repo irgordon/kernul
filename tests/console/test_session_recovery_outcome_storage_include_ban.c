@@ -25,16 +25,8 @@
 #error "outcome storage must not include recovery authorization headers"
 #endif
 
-#ifdef KERNUL_SCHED_H
-#error "outcome storage must not include scheduler headers"
-#endif
-
-#ifdef KERNUL_INTERACTIVE_SCHEDULER_STATE_H
-#error "outcome storage must not include scheduler state headers"
-#endif
-
-#ifdef KERNUL_INTERACTIVE_SCHEDULER_CONTAINER_H
-#error "outcome storage must not include scheduler container headers"
+#ifdef KERNUL_INTERACTIVE_EXECUTION_H
+#error "outcome storage must not include interactive execution headers"
 #endif
 
 static void use_checks(void) KERN_UNUSED;

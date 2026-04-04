@@ -54,6 +54,7 @@ SRCS = arch/stub/arch.c              \
         core/session_finalization.c \
         core/session_terminal_cause.c \
         core/session_ownership.c \
+        core/session_reclamation.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
         core/interactive_switch_operands.c \
@@ -99,6 +100,8 @@ OBJS = $(SRCS:.c=.o)
         test_session_finalization_contract_compile.o \
         test_session_terminal_cause_contract_compile.o \
         test_session_ownership_contract_compile.o \
+        test_session_reclamation_contract_compile.o \
+        test_session_reclamation_include_ban.o \
         test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
@@ -172,6 +175,9 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                          tests/console/test_session_terminal_cause_link \
                          tests/console/test_session_ownership_contract_compile.o \
                          tests/console/test_session_ownership_link \
+                         tests/console/test_session_reclamation_contract_compile.o \
+                         tests/console/test_session_reclamation_include_ban.o \
+                         tests/console/test_session_reclamation_link \
                          tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
@@ -261,6 +267,9 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	./tests/console/test_session_terminal_cause_link && echo "test_session_terminal_cause_link: passed." || echo "test_session_terminal_cause_link: FAILED."
 	@echo "test_session_ownership_contract_compile: compile-check passed."
 	./tests/console/test_session_ownership_link && echo "test_session_ownership_link: passed." || echo "test_session_ownership_link: FAILED."
+	@echo "test_session_reclamation_contract_compile: compile-check passed."
+	@echo "test_session_reclamation_include_ban: compile-check passed."
+	./tests/console/test_session_reclamation_link && echo "test_session_reclamation_link: passed." || echo "test_session_reclamation_link: FAILED."
 	@echo "test_interactive_execution_target_contract_compile: compile-check passed."
 	./tests/console/test_interactive_execution_target_link && echo "test_interactive_execution_target_link: passed." || echo "test_interactive_execution_target_link: FAILED."
 	@echo "test_interactive_execution_contract_compile: compile-check passed."
@@ -538,6 +547,16 @@ tests/console/test_session_ownership_link: tests/console/test_session_ownership_
                                            core/session.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_session_reclamation_contract_compile.o: tests/console/test_session_reclamation_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_reclamation_include_ban.o: tests/console/test_session_reclamation_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_reclamation_link: tests/console/test_session_reclamation_link.c \
+                                             core/session_reclamation.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -662,6 +681,8 @@ test_session_terminal_state_contract_compile.o: tests/console/test_session_termi
 test_session_finalization_contract_compile.o: tests/console/test_session_finalization_contract_compile.o
 test_session_terminal_cause_contract_compile.o: tests/console/test_session_terminal_cause_contract_compile.o
 test_session_ownership_contract_compile.o: tests/console/test_session_ownership_contract_compile.o
+test_session_reclamation_contract_compile.o: tests/console/test_session_reclamation_contract_compile.o
+test_session_reclamation_include_ban.o: tests/console/test_session_reclamation_include_ban.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -731,6 +752,9 @@ clean:
 	      tests/console/test_session_terminal_cause_link \
 	      tests/console/test_session_ownership_contract_compile.o \
 	      tests/console/test_session_ownership_link \
+	      tests/console/test_session_reclamation_contract_compile.o \
+	      tests/console/test_session_reclamation_include_ban.o \
+	      tests/console/test_session_reclamation_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
 	      tests/console/test_interactive_execution_contract_compile.o \

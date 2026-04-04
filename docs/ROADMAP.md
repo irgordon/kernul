@@ -336,22 +336,90 @@ At the end of each task, the repository must remain:
 
 # Canonical implemented phase ledger (session lifecycle boundaries)
 
-Implemented canonical sequence:
+Implemented canonical sequence (frozen for this run):
 
-1. Phase 15 — finalization publication
+1. Phase 15 — session finalization publication
 2. Phase 16 — ownership declaration
 3. Phase 17 — reclamation
 4. Phase 18 — recovery eligibility
-5. Phase 19 — recovery authorization
-6. Phase 20 — recovery execution
-7. Phase 21 — recovery outcome recording
+5. Phase 19 — recovery authorization (single-use)
+6. Phase 20 — recovery execution (single-attempt)
+7. Phase 21 — recovery outcome recording (immutable)
+8. Phase 22 — recovery outcome observation (read-only)
+9. Phase 23 — retry policy declaration (meaning only)
+10. Phase 24 — retry authorization (single-use capability)
 
-Deviation note:
-Phase 19 introduced recovery authorization semantics in place of the
-originally forecast retry action. Phase 20 introduced bounded recovery
-execution in place of the originally forecast scheduler observation surface.
-The scheduler observation surface remains unimplemented and unassigned to a
-phase.
+Lifecycle stopping points (frozen):
+
+- Recovery lifecycle is complete through outcome observation.
+- Retry lifecycle is complete through authorization.
+- No additional lifecycle behavior may be introduced without a new phase.
+- Existing semantics must not be reinterpreted or extended.
+
+Semantic freeze invariants:
+
+Recovery:
+- Recovery execution is single-attempt.
+- Recovery outcome is immutable once published.
+- Outcome observation is read-only and readiness-gated.
+
+Retry:
+- Retry policy is declarative meaning only.
+- Retry authorization is single-use authority only.
+- No retry execution exists.
+- No retry scheduling exists.
+- No retry coordination exists.
+
+Authority freeze invariants:
+
+- Authorization surfaces grant capability only.
+- Authorization surfaces do not execute behavior.
+- Authorization surfaces do not schedule work.
+- Authorization surfaces do not coordinate subsystems.
+
+Dependency freeze invariants:
+
+No recovery or retry component may newly depend on:
+- scheduler subsystems
+- retry execution logic
+- coordination or signaling systems
+- time-based backoff or timers
+
+Any such dependency requires a new phase.
+
+Storage helper freeze invariants:
+
+All storage helpers in the recovery/retry subsystem must remain:
+- mechanical only
+- load/store/CAS with explicit ordering
+- non-semantic
+- non-coordinating
+
+Helpers must not grow:
+- policy inference
+- readiness checks
+- derived-state logic
+- convenience APIs
+
+Observation freeze invariants:
+
+All observation APIs must remain:
+- readiness-gated
+- acquire-ordered
+- side-effect free
+- non-allocating
+- non-mutating
+
+Observation must never:
+- trigger behavior
+- grant authority
+- schedule work
+
+Known forecast supersessions:
+
+- Forecast Phase 19 retry action was superseded by retry authorization.
+- Forecast Phase 20 scheduler observation was superseded by recovery execution.
+- No documentation may describe retry execution or retry scheduling as existing.
 
 ---
 

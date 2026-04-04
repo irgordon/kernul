@@ -224,6 +224,25 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retry execution, scheduling, or coordination behavior was introduced by
   this boundary.
 
+#### Unreleased — Phase 26, Task 1 — Retry execution (single-attempt)
+
+- Introduced explicit single-attempt retry execution via
+  `include/kernul/session_retry_execution.h` and
+  `core/session_retry_execution.c`.
+- Retry execution performs readiness acquire observation before authorization
+  consumption.
+- Authorization consumption is enforced through exactly one CAS transition
+  (`SESSION_RETRY_AUTH_GRANTED` -> `SESSION_RETRY_AUTH_CONSUMED`) with no CAS
+  loops.
+- Authorization consumption is irreversible; execution failure does not restore
+  authorization and no rollback path exists.
+- Retry execution is local to the provided session instance and performs exactly
+  one retry attempt per consumed authorization.
+- Retry execution result is transient in this phase and is not durably recorded
+  in lifecycle state.
+- No retry scheduling, coordination, policy inference, or recovery lifecycle
+  mutation behavior was introduced by this boundary.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

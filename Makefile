@@ -554,14 +554,7 @@ tests/console/test_session_reclamation_include_ban.o: tests/console/test_session
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 tests/console/test_session_reclamation_link: tests/console/test_session_reclamation_link.c \
-                                              core/session_reclamation.c \
-                                              core/session_finalization.c \
-                                              core/session_ownership.c \
-                                              core/session_terminal_state.c \
-                                              core/interactive_execution_failure_initiation_gate.c \
-                                              core/interactive_execution_failure_ack_gate.c \
-                                              core/interactive_execution_outcome_view.c \
-                                              core/session.c
+                                             core/session_reclamation.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c

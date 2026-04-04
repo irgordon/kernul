@@ -12,10 +12,17 @@
  * already been explicitly authorized.
  *
  * Execution semantics:
- *   - Authorization is consumed before execution begins.
+ *   - Authorization consumption is the sole execution authority gate.
  *   - Exactly one attempt is performed per successful authorization consume.
  *   - Outcome is informational and does not reopen lifecycle transitions.
  *   - No retries, scheduling, coordination, or policy evaluation are defined.
+ *   - If no primitive exists in this phase, the attempted execution
+ *     deterministically fails.
+ *
+ * Observation rule:
+ *   Storage-observed execution completion/result queries are permissive for
+ *   NULL or not-ready input and return safe defaults.
+ *   NULL/not-ready observations are non-authoritative lifecycle facts.
  */
 
 #include <kernul/types.h>

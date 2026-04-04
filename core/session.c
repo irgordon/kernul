@@ -18,6 +18,24 @@ static u32 process_group_slot_live;
 static session_id_t next_session_id = 1U;
 static process_group_id_t next_process_group_id = 1U;
 
+void
+session_publish_ready_release(struct session *session)
+{
+    if (session == NULL)
+        return;
+
+    __atomic_store_n(&session->ready_published, 1U, __ATOMIC_RELEASE);
+}
+
+bool
+session_is_ready_acquire(const struct session *session)
+{
+    if (session == NULL)
+        return false;
+
+    return __atomic_load_n(&session->ready_published, __ATOMIC_ACQUIRE) == 1U;
+}
+
 struct session *session_create(struct process *leader)
 {
     u32 expected = 0U;
@@ -97,6 +115,7 @@ struct session *session_create(struct process *leader)
     __atomic_store_n(&session_slot.recovery_outcome_state,
                      (u32)SESSION_RECOVERY_NOT_ATTEMPTED,
                      __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.ready_published, 0U, __ATOMIC_RELAXED);
     __atomic_store_n(&session_slot.terminal_cause,
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,
                      __ATOMIC_RELEASE);
@@ -109,6 +128,7 @@ struct session *session_create(struct process *leader)
                          __ATOMIC_RELAXED);
     }
     __atomic_store_n(&session_slot.ownership.count, 0U, __ATOMIC_RELEASE);
+    session_publish_ready_release(&session_slot);
 
     return &session_slot;
 }
@@ -145,6 +165,8 @@ struct process_group *process_group_create(struct session *session,
 session_id_t session_id(const struct session *s)
 {
     if (s == NULL)
+        return 0U;
+    if (!session_is_ready_acquire(s))
         return 0U;
 
     return s->id;

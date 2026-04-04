@@ -12,6 +12,8 @@ session_recovery_eligibility_state_acquire(const struct session *session)
 {
     if (session == NULL)
         return (u32)SESSION_RECOVERY_ELIGIBILITY_UNSET;
+    if (!session_is_ready_acquire(session))
+        return (u32)SESSION_RECOVERY_ELIGIBILITY_UNSET;
 
     return __atomic_load_n(&session->recovery_eligibility, __ATOMIC_ACQUIRE);
 }

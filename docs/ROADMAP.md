@@ -334,6 +334,27 @@ At the end of each task, the repository must remain:
 
 ---
 
+# Canonical implemented phase ledger (session lifecycle boundaries)
+
+Implemented canonical sequence:
+
+1. Phase 15 — finalization publication
+2. Phase 16 — ownership declaration
+3. Phase 17 — reclamation
+4. Phase 18 — recovery eligibility
+5. Phase 19 — recovery authorization
+6. Phase 20 — recovery execution
+7. Phase 21 — recovery outcome recording
+
+Deviation note:
+Phase 19 introduced recovery authorization semantics in place of the
+originally forecast retry action. Phase 20 introduced bounded recovery
+execution in place of the originally forecast scheduler observation surface.
+The scheduler observation surface remains unimplemented and unassigned to a
+phase.
+
+---
+
 ## Stub definition
 
 A stub provides the minimal behavior required to satisfy a declared interface and maintain repository buildability.

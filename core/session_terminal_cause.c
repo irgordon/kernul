@@ -21,6 +21,8 @@ session_get_terminal_cause_acquire(const struct session *session)
 {
     if (session == NULL)
         return SESSION_TERMINAL_CAUSE_UNSPECIFIED;
+    if (!session_is_ready_acquire(session))
+        return SESSION_TERMINAL_CAUSE_UNSPECIFIED;
 
     return __atomic_load_n(&session->terminal_cause, __ATOMIC_ACQUIRE);
 }

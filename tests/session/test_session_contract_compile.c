@@ -16,6 +16,10 @@ static session_id_t (*const check_session_id)(const struct session *) =
     session_id;
 static process_group_id_t (*const check_process_group_id)(
     const struct process_group *) = process_group_id;
+static void (*const check_session_publish_ready_release)(
+    struct session *) = session_publish_ready_release;
+static bool (*const check_session_is_ready_acquire)(
+    const struct session *) = session_is_ready_acquire;
 
 static void use_checks(void) KERN_UNUSED;
 static void use_checks(void)
@@ -27,6 +31,8 @@ static void use_checks(void)
     (void)check_process_group_create;
     (void)check_session_id;
     (void)check_process_group_id;
+    (void)check_session_publish_ready_release;
+    (void)check_session_is_ready_acquire;
 
     (void)s.id;
     (void)s.leader;
@@ -42,6 +48,7 @@ static void use_checks(void)
     (void)s.execution_completion_ack_view_live;
     (void)s.execution_initiation_permitted;
     (void)s.finalized_published;
+    (void)s.ready_published;
     (void)s.ownership;
 
     (void)pg.id;

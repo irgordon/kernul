@@ -30,6 +30,8 @@
  * Visibility:
  *   Publication uses explicit release semantics.
  *   Observation uses explicit acquire semantics.
+ *   Observing terminal state from a NULL or not-ready session returns false
+ *   and is non-authoritative.
  */
 
 #include <kernul/types.h>

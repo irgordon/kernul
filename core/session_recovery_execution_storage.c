@@ -24,6 +24,8 @@ session_recovery_execution_completed_acquire(const struct session *session)
 {
     if (session == NULL)
         return false;
+    if (!session_is_ready_acquire(session))
+        return false;
 
     return __atomic_load_n(&session->recovery_execution_completed,
                            __ATOMIC_ACQUIRE) == 1U;
@@ -33,6 +35,8 @@ session_recovery_execution_result_t
 session_recovery_execution_result_acquire(const struct session *session)
 {
     if (session == NULL)
+        return SESSION_RECOVERY_EXEC_FAILED;
+    if (!session_is_ready_acquire(session))
         return SESSION_RECOVERY_EXEC_FAILED;
 
     return (session_recovery_execution_result_t)

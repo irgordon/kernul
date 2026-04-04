@@ -18,6 +18,8 @@ session_record_recovery_outcome(
     struct session *session,
     session_recovery_outcome_t outcome)
 {
+    session_recovery_execution_result_t execution_result;
+
     if (session == NULL)
         return SESSION_RECOVERY_OUTCOME_FAILED;
 
@@ -29,19 +31,16 @@ session_record_recovery_outcome(
         return SESSION_RECOVERY_OUTCOME_FAILED;
     }
 
-    if (session_recovery_execution_result_acquire(session) == SESSION_RECOVERY_EXEC_OK
+    execution_result = session_recovery_execution_result_acquire(session);
+
+    if (execution_result == SESSION_RECOVERY_EXEC_OK
         && outcome != SESSION_RECOVERY_SUCCEEDED) {
         return SESSION_RECOVERY_OUTCOME_FAILED;
     }
 
-    if (session_recovery_execution_result_acquire(session) != SESSION_RECOVERY_EXEC_OK
+    if (execution_result != SESSION_RECOVERY_EXEC_OK
         && outcome != SESSION_RECOVERY_FAILED) {
         return SESSION_RECOVERY_OUTCOME_FAILED;
-    }
-
-    if (session_recovery_outcome_state_acquire(session)
-        != (u32)SESSION_RECOVERY_NOT_ATTEMPTED) {
-        return SESSION_RECOVERY_OUTCOME_ALREADY_RECORDED;
     }
 
     if (!session_recovery_outcome_try_publish_release(session, outcome))

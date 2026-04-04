@@ -103,6 +103,39 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Outcome is declarative lifecycle meaning only and introduces no authority,
   retry, scheduling, or coordination behavior.
 
+#### Unreleased — Phase 21, Task 1.5 — Hardening: readiness boundary, authority purity, visibility contracts
+
+- Hardened session publication boundaries by making slot reservation and
+  observer-visible readiness explicit and distinct via
+  `session_publish_ready_release(struct session *)` and
+  `session_is_ready_acquire(const struct session *)`.
+- Enforced readiness-gated observation: lifecycle observers and identity
+  getters treat not-ready the same as NULL-safe defaults and do not derive
+  authoritative lifecycle facts from those values.
+- Hardened ownership visibility contract as normative: entry writes publish
+  through release `ownership.count`, and readers acquire `ownership.count`
+  before scanning only `[0, count-1]`.
+- Hardened recovery execution authority purity: authorization consumption is
+  the sole authority gate for execution attempt.
+- Hardened completion/result contract: completion is release-published,
+  completion observation is acquire, and post-completion result is stable and
+  visible to acquire observers.
+- Hardened recovery outcome recording path: execution result is observed once
+  per call and single-assignment authority is centralized in CAS publish helper.
+- Added storage-helper hardening constraints and include-ban tests to keep
+  execution/outcome storage helpers mechanical-only and isolated from semantic
+  lifecycle/retry/scheduler/coordination surfaces.
+- Canonical implemented phase sequence is:
+  Phase 15 finalization publication; Phase 16 ownership declaration;
+  Phase 17 reclamation; Phase 18 recovery eligibility;
+  Phase 19 recovery authorization; Phase 20 recovery execution;
+  Phase 21 recovery outcome recording.
+- Forecast deviation note: Phase 19 introduced recovery authorization semantics
+  in place of the originally forecast retry action, and Phase 20 introduced
+  bounded recovery execution in place of the originally forecast scheduler
+  observation surface; the scheduler observation surface remains unimplemented
+  and unassigned to a phase.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

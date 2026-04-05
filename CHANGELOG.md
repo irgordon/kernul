@@ -285,6 +285,20 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retry outcome observation API, scheduling, coordination, or escalation
   behavior was introduced by this boundary.
 
+#### Unreleased — Phase 29, Task 1 — Retry outcome observation
+
+- Introduced read-only retry outcome observation via
+  `include/kernul/session_retry_outcome_observation.h` and
+  `core/session_retry_outcome_observation.c`.
+- Observation is readiness-gated, acquire-ordered, side-effect-free, and
+  returns deterministic guard outcomes for NULL session, NULL output pointer,
+  and not-ready session input.
+- Observation reads only the durable retry outcome state from session storage
+  and does not record outcomes, execute retries, schedule work, coordinate
+  subsystems, or escalate failures.
+- Added compile-time contract, include-ban, and link-time dependency tests for
+  retry outcome observation.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

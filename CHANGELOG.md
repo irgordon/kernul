@@ -260,6 +260,31 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retry observation behavior, scheduling behavior, or coordination behavior
   was introduced by this boundary.
 
+#### Unreleased — Phase 28, Task 1 — Retry outcome recording
+
+- Introduced immutable retry outcome recording via
+  `include/kernul/session_retry_outcome.h` and
+  `core/session_retry_outcome.c`.
+- Retry outcome recording is single-assignment, durable, and release-ordered
+  with monotonic transitions:
+  `SESSION_RETRY_OUTCOME_UNSET` -> `SESSION_RETRY_OUTCOME_SUCCESS` or
+  `SESSION_RETRY_OUTCOME_UNSET` -> `SESSION_RETRY_OUTCOME_FAILURE`.
+- Retry outcome storage is initialized during session construction before
+  readiness publication.
+- Outcome recording derives only from the acquire-observed published retry
+  execution result stored in session state and does not use transient execution
+  return values or caller-provided derivation parameters.
+- Explicit total mapping is defined from published retry execution result to
+  retry outcome:
+  - `SESSION_RETRY_EXEC_OK` -> `SESSION_RETRY_OUTCOME_SUCCESS`
+  - `SESSION_RETRY_EXEC_NOT_READY` -> `SESSION_RETRY_OUTCOME_FAILURE`
+  - `SESSION_RETRY_EXEC_NOT_AUTHORIZED` -> `SESSION_RETRY_OUTCOME_FAILURE`
+  - `SESSION_RETRY_EXEC_FAILED` -> `SESSION_RETRY_OUTCOME_FAILURE`
+- Added compile-time contract, include-ban, and link-time dependency tests for
+  retry outcome recording.
+- No retry outcome observation API, scheduling, coordination, or escalation
+  behavior was introduced by this boundary.
+
 #### Phase 15, Task 1 — Terminal session finalization publication
 
 - Introduced terminal session finalization marker publication through

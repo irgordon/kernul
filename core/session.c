@@ -81,6 +81,44 @@ session_is_ready_acquire(const struct session *session)
     return __atomic_load_n(&session->ready_published, __ATOMIC_ACQUIRE) == 1U;
 }
 
+u32
+session_retry_outcome_state_load_acquire(const struct session *session)
+{
+    if (session == NULL)
+        return (u32)SESSION_RETRY_OUTCOME_UNSET;
+
+    return __atomic_load_n(&session->retry_outcome_state, __ATOMIC_ACQUIRE);
+}
+
+bool
+session_retry_outcome_try_record_release(
+    struct session *session,
+    session_retry_outcome_state_t outcome_state)
+{
+    u32 expected;
+
+    if (session == NULL)
+        return false;
+
+    expected = (u32)SESSION_RETRY_OUTCOME_UNSET;
+    return __atomic_compare_exchange_n(&session->retry_outcome_state,
+                                       &expected,
+                                       (u32)outcome_state,
+                                       false,
+                                       __ATOMIC_RELEASE,
+                                       __ATOMIC_ACQUIRE);
+}
+
+u32
+session_retry_execution_result_load_published_acquire(const struct session *session)
+{
+    if (session == NULL)
+        return 0U;
+
+    return (u32)__atomic_load_n(&session->retry_execution_result_publication,
+                                __ATOMIC_ACQUIRE);
+}
+
 struct session *session_create(struct process *leader)
 {
     u32 expected = 0U;
@@ -170,6 +208,9 @@ struct session *session_create(struct process *leader)
                      SESSION_RETRY_AUTH_NONE,
                      __ATOMIC_RELEASE);
     session_retry_execution_result_storage_init_release(&session_slot);
+    __atomic_store_n(&session_slot.retry_outcome_state,
+                     SESSION_RETRY_OUTCOME_UNSET,
+                     __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.ready_published, 0U, __ATOMIC_RELAXED);
     __atomic_store_n(&session_slot.terminal_cause,
                      SESSION_TERMINAL_CAUSE_UNSPECIFIED,

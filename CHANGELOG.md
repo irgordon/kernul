@@ -53,6 +53,14 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No code paths, authority, execution, or scheduling behavior were added by
   this task.
 
+#### Unreleased — Phase 30, Task 1 — Retry lifecycle freeze and architectural consolidation
+
+- Retry lifecycle frozen through outcome observation.
+- Retry outcome observation is passive and read-only.
+- No retry behavior beyond observation exists in this run.
+- Future retry behavior requires new, explicitly bounded phase and architecture
+  surface definitions with explicit acceptance criteria.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

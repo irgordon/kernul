@@ -348,11 +348,16 @@ Implemented canonical sequence (frozen for this run):
 8. Phase 22 — recovery outcome observation (read-only)
 9. Phase 23 — retry policy declaration (meaning only)
 10. Phase 24 — retry authorization (single-use capability)
+11. Phase 26 — retry execution (single-attempt)
+12. Phase 27 — retry execution result publication (final)
+13. Phase 28 — retry outcome recording
+14. Phase 29 — retry outcome observation (read-only)
+15. Phase 30 — retry lifecycle freeze and architectural consolidation
 
 Lifecycle stopping points (frozen):
 
 - Recovery lifecycle is complete through outcome observation.
-- Retry lifecycle is complete through authorization.
+- Retry lifecycle is complete through outcome observation.
 - No additional lifecycle behavior may be introduced without a new phase.
 - Existing semantics must not be reinterpreted or extended.
 
@@ -364,11 +369,22 @@ Recovery:
 - Outcome observation is read-only and readiness-gated.
 
 Retry:
-- Retry policy is declarative meaning only.
-- Retry authorization is single-use authority only.
-- No retry execution exists.
+- Retry lifecycle consists of exactly:
+  1) retry execution;
+  2) retry execution result publication;
+  3) retry outcome recording;
+  4) retry outcome observation.
+- Observation is passive and read-only.
+- Retry policy remains declarative meaning only.
+- Retry authorization remains single-use authority only.
 - No retry scheduling exists.
 - No retry coordination exists.
+- No retry escalation exists.
+- No retry loops exist.
+- No retry policy automation exists.
+- No retry outcome reaction exists.
+- Observation does not imply handling.
+- Outcome existence does not imply action.
 
 Authority freeze invariants:
 
@@ -419,7 +435,8 @@ Known forecast supersessions:
 
 - Forecast Phase 19 retry action was superseded by retry authorization.
 - Forecast Phase 20 scheduler observation was superseded by recovery execution.
-- No documentation may describe retry execution or retry scheduling as existing.
+- No documentation may describe retry scheduling, coordination, escalation,
+  loops, policy automation, or outcome reaction as existing.
 
 ---
 

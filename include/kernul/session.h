@@ -101,6 +101,8 @@ struct session {
     u32 execution_initiation_permitted;
     u32 terminal_state_published;
     u32 finalized_published;
+    u64 owner_id;
+    u32 reclaimed;
     u32 recovery_eligibility;
     u32 recovery_authorization_state;
     u32 recovery_execution_completed;

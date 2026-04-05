@@ -81,6 +81,24 @@ session_is_ready_acquire(const struct session *session)
     return __atomic_load_n(&session->ready_published, __ATOMIC_ACQUIRE) == 1U;
 }
 
+u64
+session_owner_id_load_acquire(const struct session *session)
+{
+    if (session == NULL)
+        return 0U;
+
+    return __atomic_load_n(&session->owner_id, __ATOMIC_ACQUIRE);
+}
+
+bool
+session_reclaimed_load_acquire(const struct session *session)
+{
+    if (session == NULL)
+        return false;
+
+    return __atomic_load_n(&session->reclaimed, __ATOMIC_ACQUIRE) == 1U;
+}
+
 u32
 session_retry_outcome_state_load_acquire(const struct session *session)
 {
@@ -183,6 +201,8 @@ struct session *session_create(struct process *leader)
                      0U,
                      __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.finalized_published, 0U, __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.owner_id, (u64)id, __ATOMIC_RELEASE);
+    __atomic_store_n(&session_slot.reclaimed, 0U, __ATOMIC_RELEASE);
     __atomic_store_n(&session_slot.recovery_eligibility,
                      0U,
                      __ATOMIC_RELEASE);

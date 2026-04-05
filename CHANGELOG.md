@@ -61,6 +61,15 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Future retry behavior requires new, explicitly bounded phase and architecture
   surface definitions with explicit acceptance criteria.
 
+#### Unreleased — Phase 31, Task 1 — Lifecycle introspection
+
+- Introduced read-only lifecycle introspection via
+  `include/kernul/lifecycle_introspection.h` and
+  `core/lifecycle_introspection.c`.
+- Introspection exposes stored lifecycle facts only.
+- Observation is acquire-ordered and readiness-gated.
+- No verification, enforcement, scheduling, authority, or behavior was added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

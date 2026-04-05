@@ -70,6 +70,7 @@ SRCS = arch/stub/arch.c              \
         core/session_retry_authorization_storage.c \
         core/session_retry_execution.c \
         core/session_retry_execution_result.c \
+        core/session_retry_outcome.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
         core/interactive_switch_operands.c \
@@ -135,11 +136,13 @@ OBJS = $(SRCS:.c=.o)
         test_session_retry_authorization_contract_compile.o \
         test_session_retry_authorization_include_ban.o \
         test_session_retry_authorization_storage_include_ban.o \
-        test_session_retry_execution_contract_compile.o \
-        test_session_retry_execution_include_ban.o \
-        test_session_retry_execution_result_contract_compile.o \
-        test_session_retry_execution_result_include_ban.o \
-        test_interactive_execution_target_contract_compile.o \
+         test_session_retry_execution_contract_compile.o \
+         test_session_retry_execution_include_ban.o \
+         test_session_retry_execution_result_contract_compile.o \
+         test_session_retry_execution_result_include_ban.o \
+         test_session_retry_outcome_contract_compile.o \
+         test_session_retry_outcome_include_ban.o \
+         test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
         test_interactive_runnable_contract_compile.o \
@@ -240,13 +243,16 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                              tests/console/test_session_retry_authorization_include_ban.o \
                              tests/console/test_session_retry_authorization_storage_include_ban.o \
                               tests/console/test_session_retry_authorization_link \
-                              tests/console/test_session_retry_execution_contract_compile.o \
-                              tests/console/test_session_retry_execution_include_ban.o \
-                              tests/console/test_session_retry_execution_link \
-                              tests/console/test_session_retry_execution_result_contract_compile.o \
-                              tests/console/test_session_retry_execution_result_include_ban.o \
-                              tests/console/test_session_retry_execution_result_link \
-                                tests/console/test_interactive_execution_target_contract_compile.o \
+                               tests/console/test_session_retry_execution_contract_compile.o \
+                               tests/console/test_session_retry_execution_include_ban.o \
+                               tests/console/test_session_retry_execution_link \
+                               tests/console/test_session_retry_execution_result_contract_compile.o \
+                               tests/console/test_session_retry_execution_result_include_ban.o \
+                               tests/console/test_session_retry_execution_result_link \
+                               tests/console/test_session_retry_outcome_contract_compile.o \
+                               tests/console/test_session_retry_outcome_include_ban.o \
+                               tests/console/test_session_retry_outcome_link \
+                                 tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
              tests/console/test_interactive_execution_link \
@@ -370,6 +376,9 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	@echo "test_session_retry_execution_result_contract_compile: compile-check passed."
 	@echo "test_session_retry_execution_result_include_ban: compile-check passed."
 	./tests/console/test_session_retry_execution_result_link && echo "test_session_retry_execution_result_link: passed." || echo "test_session_retry_execution_result_link: FAILED."
+	@echo "test_session_retry_outcome_contract_compile: compile-check passed."
+	@echo "test_session_retry_outcome_include_ban: compile-check passed."
+	./tests/console/test_session_retry_outcome_link && echo "test_session_retry_outcome_link: passed." || echo "test_session_retry_outcome_link: FAILED."
 	@echo "test_session_contract_compile: compile-check passed."
 	./tests/session/test_session_link && echo "test_session_link:  passed." || echo "test_session_link:  FAILED."
 	./tests/session/test_session_readiness_link && echo "test_session_readiness_link: passed." || echo "test_session_readiness_link: FAILED."
@@ -779,6 +788,16 @@ tests/console/test_session_retry_execution_result_link: tests/console/test_sessi
                                                         core/session_retry_execution_result.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_session_retry_outcome_contract_compile.o: tests/console/test_session_retry_outcome_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_retry_outcome_include_ban.o: tests/console/test_session_retry_outcome_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_session_retry_outcome_link: tests/console/test_session_retry_outcome_link.c \
+                                                core/session_retry_outcome.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -930,6 +949,8 @@ test_session_retry_execution_contract_compile.o: tests/console/test_session_retr
 test_session_retry_execution_include_ban.o: tests/console/test_session_retry_execution_include_ban.o
 test_session_retry_execution_result_contract_compile.o: tests/console/test_session_retry_execution_result_contract_compile.o
 test_session_retry_execution_result_include_ban.o: tests/console/test_session_retry_execution_result_include_ban.o
+test_session_retry_outcome_contract_compile.o: tests/console/test_session_retry_outcome_contract_compile.o
+test_session_retry_outcome_include_ban.o: tests/console/test_session_retry_outcome_include_ban.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -1033,6 +1054,9 @@ clean:
 	      tests/console/test_session_retry_execution_result_contract_compile.o \
 	      tests/console/test_session_retry_execution_result_include_ban.o \
 	      tests/console/test_session_retry_execution_result_link \
+	      tests/console/test_session_retry_outcome_contract_compile.o \
+	      tests/console/test_session_retry_outcome_include_ban.o \
+	      tests/console/test_session_retry_outcome_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
 	      tests/console/test_interactive_execution_contract_compile.o \

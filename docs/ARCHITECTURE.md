@@ -617,3 +617,39 @@ Compatibility is demonstrated through:
 * verified interfaces
 
 Compatibility is never assumed.
+
+---
+
+# 12. Session retry lifecycle freeze boundary
+
+The retry lifecycle is complete and frozen through outcome observation.
+
+The canonical retry lifecycle consists of exactly:
+
+1. Retry execution
+2. Retry execution result publication
+3. Retry outcome recording
+4. Retry outcome observation
+
+Observation is passive and read-only.
+
+No retry behavior beyond observation exists in this run.
+
+Explicit non-features:
+
+- retry scheduling
+- retry coordination
+- retry escalation
+- retry loops
+- retry policy automation
+- retry outcome reaction
+
+Observation does not imply handling.
+
+Outcome existence does not imply action.
+
+Any future introduction of behavior beyond observation requires:
+
+- a new, explicitly named phase
+- a new architectural surface
+- explicit acceptance criteria

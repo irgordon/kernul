@@ -18,16 +18,9 @@
  *   - Execution result is transient in this phase and not lifecycle-stored.
  */
 
-#include <kernul/types.h>
+#include <kernul/session_retry_execution_result.h>
 
 struct session;
-
-typedef enum session_retry_execution_result {
-    SESSION_RETRY_EXEC_OK = 0,
-    SESSION_RETRY_EXEC_NOT_READY,
-    SESSION_RETRY_EXEC_NOT_AUTHORIZED,
-    SESSION_RETRY_EXEC_FAILED,
-} session_retry_execution_result_t;
 
 session_retry_execution_result_t
 session_execute_retry(struct session *session);

@@ -59,6 +59,7 @@
 #include <kernul/session_recovery_outcome.h>
 #include <kernul/session_retry_policy.h>
 #include <kernul/session_retry_authorization.h>
+#include <kernul/session_retry_execution_result.h>
 
 struct process;
 struct interactive_runnable;
@@ -107,6 +108,7 @@ struct session {
     u64 recovery_outcome_timestamp;
     u32 retry_policy_state;
     u32 retry_authorization_state;
+    u64 retry_execution_result_publication;
     u32 ready_published;
     enum session_terminal_cause terminal_cause;
     struct session_owned_resource_registry ownership;

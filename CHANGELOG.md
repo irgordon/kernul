@@ -70,6 +70,14 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Observation is acquire-ordered and readiness-gated.
 - No verification, enforcement, scheduling, authority, or behavior was added.
 
+#### Unreleased — Phase 32, Task 1 — Lifecycle invariant verification
+
+- Introduced passive lifecycle invariant verification via
+  `include/kernul/lifecycle_verification.h` and
+  `core/lifecycle_verification.c`.
+- Verification consumes introspection snapshots only.
+- No enforcement or behavior was added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

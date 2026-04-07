@@ -89,6 +89,15 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No new lifecycle storage, authority, scheduling, coordination, or
   behavioral execution paths were added.
 
+#### Unreleased — Phase 34, Task 1 — Lifecycle boundary assertion
+
+- Introduced diagnostic lifecycle boundary assertion via
+  `include/kernul/lifecycle_assertion.h` and
+  `core/lifecycle_assertion.c`.
+- Deterministic evaluation order and result precedence are defined.
+- Assertions are caller-scoped and informational only.
+- No enforcement, execution-flow control, or behavioral policy was added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

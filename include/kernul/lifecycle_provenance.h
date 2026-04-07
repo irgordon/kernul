@@ -22,6 +22,7 @@ typedef struct lifecycle_provenance {
     uint64_t readiness_timestamp;
 
     /* ownership */
+    /* Derived from immutable owner-id publication as ownership provenance. */
     uint64_t ownership_timestamp;
     uint64_t reclamation_timestamp;
 
@@ -46,6 +47,9 @@ typedef struct lifecycle_provenance {
  *
  * Timestamp semantics:
  * - 0 means the corresponding transition is absent/not observed.
+ * - Where a recorded lifecycle timestamp exists, it is exposed directly.
+ * - Otherwise, the value is a derived monotonic transition-order marker from
+ *   canonical lifecycle state/publication facts in that lifecycle dimension.
  * - Monotonicity is guaranteed only within a lifecycle dimension.
  * - Cross-dimension ordering is not guaranteed.
  */

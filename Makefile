@@ -73,6 +73,7 @@ SRCS = arch/stub/arch.c              \
         core/session_retry_outcome.c \
         core/session_retry_outcome_observation.c \
         core/lifecycle_introspection.c \
+        core/lifecycle_verification.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
         core/interactive_switch_operands.c \
@@ -148,6 +149,8 @@ OBJS = $(SRCS:.c=.o)
          test_session_retry_outcome_observation_include_ban.o \
          test_lifecycle_introspection_contract_compile.o \
          test_lifecycle_introspection_include_ban.o \
+         test_lifecycle_verification_contract_compile.o \
+         test_lifecycle_verification_include_ban.o \
          test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
@@ -258,13 +261,16 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                                 tests/console/test_session_retry_outcome_contract_compile.o \
                                 tests/console/test_session_retry_outcome_include_ban.o \
                                 tests/console/test_session_retry_outcome_link \
-                                tests/console/test_session_retry_outcome_observation_contract_compile.o \
-                                tests/console/test_session_retry_outcome_observation_include_ban.o \
-                                tests/console/test_session_retry_outcome_observation_link \
-                                tests/console/test_lifecycle_introspection_contract_compile.o \
-                                tests/console/test_lifecycle_introspection_include_ban.o \
-                                tests/console/test_lifecycle_introspection_link \
-                                  tests/console/test_interactive_execution_target_contract_compile.o \
+                                 tests/console/test_session_retry_outcome_observation_contract_compile.o \
+                                 tests/console/test_session_retry_outcome_observation_include_ban.o \
+                                 tests/console/test_session_retry_outcome_observation_link \
+                                 tests/console/test_lifecycle_introspection_contract_compile.o \
+                                 tests/console/test_lifecycle_introspection_include_ban.o \
+                                 tests/console/test_lifecycle_introspection_link \
+                                 tests/console/test_lifecycle_verification_contract_compile.o \
+                                 tests/console/test_lifecycle_verification_include_ban.o \
+                                 tests/console/test_lifecycle_verification_link \
+                                   tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
              tests/console/test_interactive_execution_link \
@@ -397,6 +403,9 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	@echo "test_lifecycle_introspection_contract_compile: compile-check passed."
 	@echo "test_lifecycle_introspection_include_ban: compile-check passed."
 	./tests/console/test_lifecycle_introspection_link && echo "test_lifecycle_introspection_link: passed." || echo "test_lifecycle_introspection_link: FAILED."
+	@echo "test_lifecycle_verification_contract_compile: compile-check passed."
+	@echo "test_lifecycle_verification_include_ban: compile-check passed."
+	./tests/console/test_lifecycle_verification_link && echo "test_lifecycle_verification_link: passed." || echo "test_lifecycle_verification_link: FAILED."
 	@echo "test_session_contract_compile: compile-check passed."
 	./tests/session/test_session_link && echo "test_session_link:  passed." || echo "test_session_link:  FAILED."
 	./tests/session/test_session_readiness_link && echo "test_session_readiness_link: passed." || echo "test_session_readiness_link: FAILED."
@@ -836,6 +845,16 @@ tests/console/test_lifecycle_introspection_link: tests/console/test_lifecycle_in
                                                  core/lifecycle_introspection.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_lifecycle_verification_contract_compile.o: tests/console/test_lifecycle_verification_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_lifecycle_verification_include_ban.o: tests/console/test_lifecycle_verification_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_lifecycle_verification_link: tests/console/test_lifecycle_verification_link.c \
+                                                core/lifecycle_verification.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -993,6 +1012,8 @@ test_session_retry_outcome_observation_contract_compile.o: tests/console/test_se
 test_session_retry_outcome_observation_include_ban.o: tests/console/test_session_retry_outcome_observation_include_ban.o
 test_lifecycle_introspection_contract_compile.o: tests/console/test_lifecycle_introspection_contract_compile.o
 test_lifecycle_introspection_include_ban.o: tests/console/test_lifecycle_introspection_include_ban.o
+test_lifecycle_verification_contract_compile.o: tests/console/test_lifecycle_verification_contract_compile.o
+test_lifecycle_verification_include_ban.o: tests/console/test_lifecycle_verification_include_ban.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -1105,6 +1126,9 @@ clean:
 	      tests/console/test_lifecycle_introspection_contract_compile.o \
 	      tests/console/test_lifecycle_introspection_include_ban.o \
 	      tests/console/test_lifecycle_introspection_link \
+	      tests/console/test_lifecycle_verification_contract_compile.o \
+	      tests/console/test_lifecycle_verification_include_ban.o \
+	      tests/console/test_lifecycle_verification_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
 	      tests/console/test_interactive_execution_contract_compile.o \

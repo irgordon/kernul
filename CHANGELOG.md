@@ -78,6 +78,17 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Verification consumes introspection snapshots only.
 - No enforcement or behavior was added.
 
+#### Unreleased — Phase 33, Task 1 — Lifecycle provenance
+
+- Introduced read-only lifecycle provenance via
+  `include/kernul/lifecycle_provenance.h` and
+  `core/lifecycle_provenance.c`.
+- Provenance is derived from existing lifecycle facts only.
+- Timestamp semantics and absent-state rules are explicitly defined:
+  zero means transition not observed; per-dimension monotonicity only.
+- No new lifecycle storage, authority, scheduling, coordination, or
+  behavioral execution paths were added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

@@ -44,8 +44,8 @@ lifecycle_verify(const lifecycle_snapshot_t *snapshot)
     if (snapshot->retry_executed && !snapshot->retry_authorized)
         return LIFECYCLE_VERIFY_VIOLATION;
 
-    if (snapshot->retry_outcome != LIFECYCLE_RETRY_OUTCOME_UNSET &&
-        snapshot->retry_execution_result == LIFECYCLE_RETRY_EXECUTION_RESULT_UNSET) {
+    if (snapshot->retry_outcome != LIFECYCLE_RETRY_OUTCOME_UNSET
+        && snapshot->retry_execution_result == LIFECYCLE_RETRY_EXECUTION_RESULT_UNSET) {
         return LIFECYCLE_VERIFY_VIOLATION;
     }
 

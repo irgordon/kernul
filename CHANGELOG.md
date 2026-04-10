@@ -98,6 +98,18 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Assertions are caller-scoped and informational only.
 - No enforcement, execution-flow control, or behavioral policy was added.
 
+#### Unreleased — Phase 35, Task 1 — Lifecycle freeze enforcement
+
+- Introduced compile-time lifecycle freeze enforcement guard via
+  `include/kernul/lifecycle_freeze_enforcement.h` and
+  `core/lifecycle_freeze_enforcement.c`.
+- Added canonical freeze baseline metadata and governance versioning in
+  `include/kernul/lifecycle_freeze_baseline.h`.
+- Enforcement is static only (compile-time/link-time) and adds no runtime
+  behavior.
+- Frozen lifecycle layout and signature surfaces are mechanically protected by
+  static assertions.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

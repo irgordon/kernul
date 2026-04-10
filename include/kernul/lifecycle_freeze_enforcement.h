@@ -9,8 +9,8 @@
  */
 
 /* Advisory marker macros. */
-#define LIFECYCLE_FROZEN __attribute__((annotate("kernul_lifecycle_frozen")))
-#define LIFECYCLE_FROZEN_FN __attribute__((annotate("kernul_lifecycle_frozen_fn")))
+#define LIFECYCLE_FROZEN
+#define LIFECYCLE_FROZEN_FN
 
 /* Static assertion helper. */
 #define LIFECYCLE_FREEZE_ASSERT(cond, msg) _Static_assert((cond), msg)

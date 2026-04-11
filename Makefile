@@ -77,6 +77,7 @@ SRCS = arch/stub/arch.c              \
         core/lifecycle_provenance.c \
         core/lifecycle_assertion.c \
         core/lifecycle_freeze_enforcement.c \
+        core/lifecycle_documentation.c \
         core/interactive_execution_target.c \
         core/interactive_execution.c  \
         core/interactive_switch_operands.c \
@@ -160,6 +161,8 @@ OBJS = $(SRCS:.c=.o)
          test_lifecycle_assertion_include_ban.o \
          test_lifecycle_freeze_enforcement_contract_compile.o \
          test_lifecycle_freeze_enforcement_include_ban.o \
+         test_lifecycle_documentation_contract_compile.o \
+         test_lifecycle_documentation_include_ban.o \
          test_interactive_execution_target_contract_compile.o \
         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
@@ -288,6 +291,9 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                                   tests/console/test_lifecycle_freeze_enforcement_contract_compile.o \
                                   tests/console/test_lifecycle_freeze_enforcement_include_ban.o \
                                   tests/console/test_lifecycle_freeze_enforcement_link \
+                                  tests/console/test_lifecycle_documentation_contract_compile.o \
+                                  tests/console/test_lifecycle_documentation_include_ban.o \
+                                  tests/console/test_lifecycle_documentation_link \
                                   tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
@@ -433,6 +439,9 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
 	@echo "test_lifecycle_freeze_enforcement_contract_compile: compile-check passed."
 	@echo "test_lifecycle_freeze_enforcement_include_ban: compile-check passed."
 	./tests/console/test_lifecycle_freeze_enforcement_link && echo "test_lifecycle_freeze_enforcement_link: passed." || echo "test_lifecycle_freeze_enforcement_link: FAILED."
+	@echo "test_lifecycle_documentation_contract_compile: compile-check passed."
+	@echo "test_lifecycle_documentation_include_ban: compile-check passed."
+	./tests/console/test_lifecycle_documentation_link && echo "test_lifecycle_documentation_link: passed." || echo "test_lifecycle_documentation_link: FAILED."
 	@echo "test_session_contract_compile: compile-check passed."
 	./tests/session/test_session_link && echo "test_session_link:  passed." || echo "test_session_link:  FAILED."
 	./tests/session/test_session_readiness_link && echo "test_session_readiness_link: passed." || echo "test_session_readiness_link: FAILED."
@@ -912,6 +921,16 @@ tests/console/test_lifecycle_freeze_enforcement_link: tests/console/test_lifecyc
                                                        core/lifecycle_freeze_enforcement.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
 
+tests/console/test_lifecycle_documentation_contract_compile.o: tests/console/test_lifecycle_documentation_contract_compile.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_lifecycle_documentation_include_ban.o: tests/console/test_lifecycle_documentation_include_ban.c
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+tests/console/test_lifecycle_documentation_link: tests/console/test_lifecycle_documentation_link.c \
+                                                  core/lifecycle_documentation.c
+	$(CC) $(TEST_CFLAGS) $^ -o $@
+
 tests/console/test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.c
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -1077,6 +1096,8 @@ test_lifecycle_assertion_contract_compile.o: tests/console/test_lifecycle_assert
 test_lifecycle_assertion_include_ban.o: tests/console/test_lifecycle_assertion_include_ban.o
 test_lifecycle_freeze_enforcement_contract_compile.o: tests/console/test_lifecycle_freeze_enforcement_contract_compile.o
 test_lifecycle_freeze_enforcement_include_ban.o: tests/console/test_lifecycle_freeze_enforcement_include_ban.o
+test_lifecycle_documentation_contract_compile.o: tests/console/test_lifecycle_documentation_contract_compile.o
+test_lifecycle_documentation_include_ban.o: tests/console/test_lifecycle_documentation_include_ban.o
 test_interactive_execution_target_contract_compile.o: tests/console/test_interactive_execution_target_contract_compile.o
 test_interactive_execution_contract_compile.o: tests/console/test_interactive_execution_contract_compile.o
 test_interactive_switch_operands_contract_compile.o: tests/console/test_interactive_switch_operands_contract_compile.o
@@ -1201,6 +1222,9 @@ clean:
 	      tests/console/test_lifecycle_freeze_enforcement_contract_compile.o \
 	      tests/console/test_lifecycle_freeze_enforcement_include_ban.o \
 	      tests/console/test_lifecycle_freeze_enforcement_link \
+	      tests/console/test_lifecycle_documentation_contract_compile.o \
+	      tests/console/test_lifecycle_documentation_include_ban.o \
+	      tests/console/test_lifecycle_documentation_link \
 	      tests/console/test_interactive_execution_target_contract_compile.o \
 	      tests/console/test_interactive_execution_target_link \
 	      tests/console/test_interactive_execution_contract_compile.o \

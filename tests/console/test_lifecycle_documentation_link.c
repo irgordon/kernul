@@ -7,9 +7,11 @@
 
 #include <kernul/lifecycle_documentation.h>
 
+#define LIFECYCLE_DOC_TEST_BUFFER_SIZE 4096U
+
 int main(void)
 {
-    char output[4096];
+    char output[LIFECYCLE_DOC_TEST_BUFFER_SIZE];
     lifecycle_documentation_t doc = {
         .buffer = output,
         .capacity = sizeof(output),

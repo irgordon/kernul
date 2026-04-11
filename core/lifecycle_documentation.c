@@ -5,6 +5,7 @@
  */
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include <kernul/lifecycle_documentation.h>
 #include <kernul/lifecycle_introspection.h>
@@ -25,6 +26,8 @@ typedef struct lifecycle_doc_writer {
 static bool
 writer_append_char(lifecycle_doc_writer_t *writer, char ch)
 {
+    if (writer->length == SIZE_MAX)
+        return false;
     if (writer->length == writer->capacity)
         return false;
 
@@ -325,7 +328,7 @@ lifecycle_generate_documentation(
     }
 
     dry_run.buffer = NULL;
-    dry_run.capacity = (size_t)-1;
+    dry_run.capacity = SIZE_MAX;
     dry_run.length = 0U;
     if (!lifecycle_documentation_render(&dry_run)) {
         doc->length = 0U;

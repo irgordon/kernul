@@ -110,6 +110,16 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Frozen lifecycle layout and signature surfaces are mechanically protected by
   static assertions.
 
+#### Unreleased — Phase 36, Task 1 — Lifecycle documentation synthesis
+
+- Introduced deterministic lifecycle documentation synthesis via
+  `include/kernul/lifecycle_documentation.h` and
+  `core/lifecycle_documentation.c`.
+- Documentation is derived exclusively from canonical frozen lifecycle inputs.
+- Defined a caller-owned documentation buffer model with deterministic failure
+  for invalid inputs and insufficient capacity.
+- Added no new lifecycle state and no new lifecycle behavior.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

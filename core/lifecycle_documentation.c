@@ -15,7 +15,9 @@
 #include <kernul/lifecycle_freeze_baseline.h>
 
 #define LIFECYCLE_DOC_PHASE_FIRST 0U
+/* Phase map is frozen through phase 35 for this synthesis surface. */
 #define LIFECYCLE_DOC_PHASE_LAST  35U
+#define MAX_U64_DECIMAL_DIGITS    20U
 
 typedef struct lifecycle_doc_writer {
     char *buffer;
@@ -56,7 +58,7 @@ writer_append_cstr(lifecycle_doc_writer_t *writer, const char *text)
 static bool
 writer_append_u64(lifecycle_doc_writer_t *writer, u64 value)
 {
-    char digits[32];
+    char digits[MAX_U64_DECIMAL_DIGITS];
     size_t digit_count;
     u64 work;
 

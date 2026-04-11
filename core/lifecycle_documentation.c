@@ -76,12 +76,6 @@ writer_append_u64(lifecycle_doc_writer_t *writer, u64 value)
 }
 
 static bool
-writer_append_usize(lifecycle_doc_writer_t *writer, size_t value)
-{
-    return writer_append_u64(writer, (u64)value);
-}
-
-static bool
 writer_append_line_u64(lifecycle_doc_writer_t *writer, const char *key, u64 value)
 {
     if (!writer_append_cstr(writer, key))

@@ -72,23 +72,29 @@ writer_append_u64(lifecycle_export_writer_t *writer, u64 value)
     return true;
 }
 
+static u64
+s64_to_magnitude(s64 value)
+{
+    if (value >= 0)
+        return (u64)value;
+
+    /*
+     * Compute absolute value without signed overflow when value is the
+     * minimum representable s64.
+     */
+    return (u64)(-(value + 1)) + 1U;
+}
+
 static bool
 writer_append_s64(lifecycle_export_writer_t *writer, s64 value)
 {
-    u64 magnitude;
-
     if (value < 0) {
         if (!writer_append_char(writer, '-'))
             return false;
-        /*
-         * Compute absolute value without signed overflow when value is the
-         * minimum representable s64.
-         */
-        magnitude = (u64)(-(value + 1)) + 1U;
-        return writer_append_u64(writer, magnitude);
+        return writer_append_u64(writer, s64_to_magnitude(value));
     }
 
-    return writer_append_u64(writer, (u64)value);
+    return writer_append_u64(writer, s64_to_magnitude(value));
 }
 
 static bool

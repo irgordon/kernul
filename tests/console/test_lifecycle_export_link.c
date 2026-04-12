@@ -13,6 +13,7 @@
 int main(void)
 {
     size_t i;
+    static const char expected_prefix[] = "freeze_version: ";
     char output_a[LIFECYCLE_EXPORT_TEST_BUFFER_SIZE];
     char output_b[LIFECYCLE_EXPORT_TEST_BUFFER_SIZE];
     lifecycle_audit_report_t report = {0};
@@ -48,9 +49,10 @@ int main(void)
         return 1;
     if (export_a.length == 0U)
         return 1;
-    /* Serialized output must begin with the canonical "freeze_version" key. */
-    if (output_a[0] != 'f')
-        return 1;
+    for (i = 0U; i < (sizeof(expected_prefix) - 1U); i++) {
+        if (output_a[i] != expected_prefix[i])
+            return 1;
+    }
 
     if (lifecycle_serialize_audit_report(&report, &export_b) != LIFECYCLE_EXPORT_OK)
         return 1;
@@ -62,6 +64,22 @@ int main(void)
     }
 
     report.freeze_version = LIFECYCLE_FREEZE_VERSION + 1U;
+    export_b.length = 123U;
+    if (lifecycle_serialize_audit_report(&report, &export_b) != LIFECYCLE_EXPORT_FAILED)
+        return 1;
+    if (export_b.length != 0U)
+        return 1;
+
+    report.freeze_version = LIFECYCLE_FREEZE_VERSION;
+    export_b.buffer = NULL;
+    export_b.length = 123U;
+    if (lifecycle_serialize_audit_report(&report, &export_b) != LIFECYCLE_EXPORT_FAILED)
+        return 1;
+    if (export_b.length != 0U)
+        return 1;
+
+    export_b.buffer = output_b;
+    export_b.capacity = 0U;
     export_b.length = 123U;
     if (lifecycle_serialize_audit_report(&report, &export_b) != LIFECYCLE_EXPORT_FAILED)
         return 1;

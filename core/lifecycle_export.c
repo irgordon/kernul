@@ -11,6 +11,7 @@
 #define LIFECYCLE_EXPORT_MAX_U64_DECIMAL_DIGITS 20U
 
 typedef struct lifecycle_export_writer {
+    /* buffer may be NULL for dry-run sizing; capacity bounds are still enforced */
     char *buffer;
     size_t capacity;
     size_t length;

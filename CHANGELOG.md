@@ -135,6 +135,13 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Schema stability is tied to freeze version.
 - No new lifecycle metadata or meaning was added.
 
+#### Unreleased — Phase 39, Task 1 — Lifecycle extension declaration surface
+
+- Introduced inert, declarative lifecycle extension declaration surface via
+  `include/kernul/lifecycle_extension.h` and `core/lifecycle_extension.c`.
+- Extension declarations are freeze-version-aware and non-executable.
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

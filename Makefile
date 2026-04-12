@@ -175,8 +175,8 @@ OBJS = $(SRCS:.c=.o)
          test_lifecycle_extension_include_ban.o \
          test_lifecycle_governance_contract_compile.o \
          test_lifecycle_governance_include_ban.o \
-          test_interactive_execution_target_contract_compile.o \
-        test_interactive_execution_contract_compile.o \
+         test_interactive_execution_target_contract_compile.o \
+         test_interactive_execution_contract_compile.o \
         test_interactive_switch_operands_contract_compile.o \
         test_interactive_runnable_contract_compile.o \
         test_interactive_readiness_contract_compile.o \
@@ -308,17 +308,17 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                                    tests/console/test_lifecycle_documentation_link \
                                    tests/console/test_lifecycle_audit_contract_compile.o \
                                    tests/console/test_lifecycle_audit_include_ban.o \
-                                    tests/console/test_lifecycle_audit_link \
-                                    tests/console/test_lifecycle_export_contract_compile.o \
-                                    tests/console/test_lifecycle_export_include_ban.o \
-                                     tests/console/test_lifecycle_export_link \
-                                     tests/console/test_lifecycle_extension_contract_compile.o \
-                                     tests/console/test_lifecycle_extension_include_ban.o \
-                                     tests/console/test_lifecycle_extension_link \
-                                     tests/console/test_lifecycle_governance_contract_compile.o \
-                                     tests/console/test_lifecycle_governance_include_ban.o \
-                                     tests/console/test_lifecycle_governance_link \
-                                     tests/console/test_interactive_execution_target_contract_compile.o \
+                                     tests/console/test_lifecycle_audit_link \
+                                     tests/console/test_lifecycle_export_contract_compile.o \
+                                     tests/console/test_lifecycle_export_include_ban.o \
+                                    tests/console/test_lifecycle_export_link \
+                                    tests/console/test_lifecycle_extension_contract_compile.o \
+                                    tests/console/test_lifecycle_extension_include_ban.o \
+                                    tests/console/test_lifecycle_extension_link \
+                                    tests/console/test_lifecycle_governance_contract_compile.o \
+                                    tests/console/test_lifecycle_governance_include_ban.o \
+                                    tests/console/test_lifecycle_governance_link \
+                                    tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
              tests/console/test_interactive_execution_link \

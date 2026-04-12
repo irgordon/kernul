@@ -48,6 +48,7 @@ int main(void)
         return 1;
     if (export_a.length == 0U)
         return 1;
+    /* Serialized output must begin with the canonical "freeze_version" key. */
     if (output_a[0] != 'f')
         return 1;
 

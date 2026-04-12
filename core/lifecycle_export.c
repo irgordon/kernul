@@ -79,6 +79,10 @@ writer_append_s64(lifecycle_export_writer_t *writer, s64 value)
     if (value < 0) {
         if (!writer_append_char(writer, '-'))
             return false;
+        /*
+         * Compute absolute value without signed overflow when value is the
+         * minimum representable s64.
+         */
         magnitude = (u64)(-(value + 1)) + 1U;
         return writer_append_u64(writer, magnitude);
     }

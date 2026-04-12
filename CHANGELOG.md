@@ -128,6 +128,13 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Freeze version is copied from canonical baseline (`LIFECYCLE_FREEZE_VERSION`).
 - No new lifecycle metadata or meaning was added.
 
+#### Unreleased — Phase 38, Task 1 — Lifecycle export serialization surface
+
+- Introduced deterministic, versioned lifecycle export serialization surface.
+- Export format is canonical text with fixed ordering.
+- Schema stability is tied to freeze version.
+- No new lifecycle metadata or meaning was added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

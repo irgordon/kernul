@@ -120,6 +120,14 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
   for invalid inputs and insufficient capacity.
 - Added no new lifecycle state and no new lifecycle behavior.
 
+#### Unreleased — Phase 37, Task 1 — Lifecycle audit surface
+
+- Introduced deterministic, snapshot-scoped lifecycle audit surface via
+  `include/kernul/lifecycle_audit.h` and `core/lifecycle_audit.c`.
+- Audit reports are derived exclusively from caller-supplied diagnostic inputs.
+- Freeze version is copied from canonical baseline (`LIFECYCLE_FREEZE_VERSION`).
+- No new lifecycle metadata or meaning was added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

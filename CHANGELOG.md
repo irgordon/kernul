@@ -142,6 +142,13 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Extension declarations are freeze-version-aware and non-executable.
 - No new lifecycle state, lifecycle meaning, or executable semantics were added.
 
+#### Unreleased — Phase 40, Task 1 — Lifecycle governance consolidation surface
+
+- Introduced descriptive, inert governance consolidation surface via
+  `include/kernul/lifecycle_governance.h` and `core/lifecycle_governance.c`.
+- Summary references governance surfaces without adding lifecycle meaning.
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

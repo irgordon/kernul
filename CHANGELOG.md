@@ -149,6 +149,14 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Summary references governance surfaces without adding lifecycle meaning.
 - No new lifecycle state, lifecycle meaning, or executable semantics were added.
 
+#### Unreleased — Phase 41, Task 1 — Governance index surface
+
+- Introduced descriptive, inert governance index surface via
+  `include/kernul/lifecycle_governance_index.h` and
+  `core/lifecycle_governance_index.c`.
+- Index enumerates governance surfaces (31–40) in canonical ascending phase order.
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

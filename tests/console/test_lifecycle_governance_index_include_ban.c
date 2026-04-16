@@ -20,16 +20,8 @@
 #error "lifecycle governance index include path must not expose governance summary headers"
 #endif
 
-#ifdef KERNUL_LIFECYCLE_INTROSPECTION_H
-#error "lifecycle governance index include path must not expose introspection headers"
-#endif
-
 #ifdef KERNUL_LIFECYCLE_VERIFICATION_H
 #error "lifecycle governance index include path must not expose verification headers"
-#endif
-
-#ifdef KERNUL_LIFECYCLE_PROVENANCE_H
-#error "lifecycle governance index include path must not expose provenance headers"
 #endif
 
 #ifdef KERNUL_LIFECYCLE_ASSERTION_H

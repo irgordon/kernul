@@ -173,6 +173,14 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Records freeze-version association for governance surfaces (31–40).
 - No new lifecycle state, lifecycle meaning, or executable semantics were added.
 
+#### Unreleased — Phase 44, Task 1 — Governance schema surface
+
+- Introduced descriptive, inert governance schema surface via
+  `include/kernul/lifecycle_governance_schema.h` and
+  `core/lifecycle_governance_schema.c`.
+- Records schema summaries for governance surfaces (31–43).
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
 #### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
 
 - Introduced a session resource ownership registry via

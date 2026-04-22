@@ -335,14 +335,14 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
                                      tests/console/test_lifecycle_governance_index_link \
                                      tests/console/test_lifecycle_governance_provenance_contract_compile.o \
                                      tests/console/test_lifecycle_governance_provenance_include_ban.o \
-                                      tests/console/test_lifecycle_governance_provenance_link \
-                                      tests/console/test_lifecycle_governance_compatibility_contract_compile.o \
-                                      tests/console/test_lifecycle_governance_compatibility_include_ban.o \
-                                      tests/console/test_lifecycle_governance_compatibility_link \
-                                      tests/console/test_lifecycle_governance_schema_contract_compile.o \
-                                      tests/console/test_lifecycle_governance_schema_include_ban.o \
-                                      tests/console/test_lifecycle_governance_schema_link \
-                                      tests/console/test_interactive_execution_target_contract_compile.o \
+                                     tests/console/test_lifecycle_governance_provenance_link \
+                                     tests/console/test_lifecycle_governance_compatibility_contract_compile.o \
+                                     tests/console/test_lifecycle_governance_compatibility_include_ban.o \
+                                     tests/console/test_lifecycle_governance_compatibility_link \
+                                     tests/console/test_lifecycle_governance_schema_contract_compile.o \
+                                     tests/console/test_lifecycle_governance_schema_include_ban.o \
+                                     tests/console/test_lifecycle_governance_schema_link \
+                                     tests/console/test_interactive_execution_target_contract_compile.o \
                 tests/console/test_interactive_execution_target_link \
               tests/console/test_interactive_execution_contract_compile.o \
              tests/console/test_interactive_execution_link \

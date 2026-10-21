@@ -107,7 +107,17 @@ SRCS = arch/stub/arch.c              \
 
 OBJS = $(SRCS:.c=.o)
 
-.PHONY: all test clean test_sched_api.o test_cpu_state_api.o \
+GOVERNANCE_TEST_BIN = build/tests/test_governance_consistency
+GOVERNANCE_TEST_SRCS = tests/governance/test_governance_consistency.c \
+                       core/lifecycle_governance_index.c \
+                       core/lifecycle_governance_provenance.c \
+                       core/lifecycle_governance_compatibility.c \
+                       core/lifecycle_governance_schema.c \
+                       core/lifecycle_governance_manifest.c
+GOVERNANCE_TEST_HEADERS = $(wildcard include/kernul/lifecycle*.h) \
+                         include/kernul/types.h include/kernul/compiler.h
+
+.PHONY: all test test-governance clean test_sched_api.o test_cpu_state_api.o \
         test_init_contract_compile.o \
         test_interactive_scheduler_container_contract_compile.o \
         test_interactive_scheduler_state_contract_compile.o \
@@ -212,7 +222,16 @@ all: $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
+# Phase 46 consumes immutable metadata only; it has no session or scheduler linkage.
+test-governance: $(GOVERNANCE_TEST_BIN)
+	./$(GOVERNANCE_TEST_BIN)
+	@echo "test_governance_consistency: passed."
+
+$(GOVERNANCE_TEST_BIN): $(GOVERNANCE_TEST_SRCS) $(GOVERNANCE_TEST_HEADERS)
+	@mkdir -p $(@D)
+	$(CC) $(TEST_CFLAGS) $(GOVERNANCE_TEST_SRCS) -o $@
+
+test: test-governance tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
       tests/test_runq tests/test_sched_api.o tests/test_sched \
        tests/test_cpu_state_api.o tests/test_idle \
        tests/init/test_init_contract_compile.o \
@@ -381,183 +400,183 @@ test: tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
       tests/syscall/test_sys_dispatch_link \
       tests/arch/x86_64/test_arch_syscall_enter_link \
       tests/arch/aarch64/test_arch_syscall_enter_link
-	./tests/test_boot     && echo "test_boot:          passed." || echo "test_boot:          FAILED."
-	./tests/test_list     && echo "test_list:          passed." || echo "test_list:          FAILED."
-	./tests/test_spinlock && echo "test_spinlock:      passed." || echo "test_spinlock:      FAILED."
-	./tests/test_thread   && echo "test_thread:        passed." || echo "test_thread:        FAILED."
-	./tests/test_runq     && echo "test_runq:          passed." || echo "test_runq:          FAILED."
+	./tests/test_boot     && echo "test_boot:          passed." || { echo "test_boot:          FAILED."; exit 1; }
+	./tests/test_list     && echo "test_list:          passed." || { echo "test_list:          FAILED."; exit 1; }
+	./tests/test_spinlock && echo "test_spinlock:      passed." || { echo "test_spinlock:      FAILED."; exit 1; }
+	./tests/test_thread   && echo "test_thread:        passed." || { echo "test_thread:        FAILED."; exit 1; }
+	./tests/test_runq     && echo "test_runq:          passed." || { echo "test_runq:          FAILED."; exit 1; }
 	@echo "test_sched_api:      compile-check passed."
-	./tests/test_sched    && echo "test_sched:         passed." || echo "test_sched:         FAILED."
+	./tests/test_sched    && echo "test_sched:         passed." || { echo "test_sched:         FAILED."; exit 1; }
 	@echo "test_cpu_state_api:  compile-check passed."
-	./tests/test_idle     && echo "test_idle:          passed." || echo "test_idle:          FAILED."
+	./tests/test_idle     && echo "test_idle:          passed." || { echo "test_idle:          FAILED."; exit 1; }
 	@echo "test_init_contract_compile: compile-check passed."
-	./tests/init/test_init_link && echo "test_init_link:     passed." || echo "test_init_link:     FAILED."
+	./tests/init/test_init_link && echo "test_init_link:     passed." || { echo "test_init_link:     FAILED."; exit 1; }
 	@echo "test_interactive_scheduler_container_contract_compile: compile-check passed."
-	./tests/console/test_interactive_scheduler_container_link && echo "test_interactive_scheduler_container_link: passed." || echo "test_interactive_scheduler_container_link: FAILED."
+	./tests/console/test_interactive_scheduler_container_link && echo "test_interactive_scheduler_container_link: passed." || { echo "test_interactive_scheduler_container_link: FAILED."; exit 1; }
 	@echo "test_address_space_contract_compile: compile-check passed."
-	./tests/address_space/test_address_space_link && echo "test_address_space_link: passed." || echo "test_address_space_link: FAILED."
+	./tests/address_space/test_address_space_link && echo "test_address_space_link: passed." || { echo "test_address_space_link: FAILED."; exit 1; }
 	@echo "test_interactive_scheduler_state_contract_compile: compile-check passed."
-	./tests/console/test_interactive_scheduler_state_link && echo "test_interactive_scheduler_state_link: passed." || echo "test_interactive_scheduler_state_link: FAILED."
+	./tests/console/test_interactive_scheduler_state_link && echo "test_interactive_scheduler_state_link: passed." || { echo "test_interactive_scheduler_state_link: FAILED."; exit 1; }
 	@echo "test_interactive_admission_contract_compile: compile-check passed."
-	./tests/console/test_interactive_admission_link && echo "test_interactive_admission_link: passed." || echo "test_interactive_admission_link: FAILED."
+	./tests/console/test_interactive_admission_link && echo "test_interactive_admission_link: passed." || { echo "test_interactive_admission_link: FAILED."; exit 1; }
 	@echo "test_interactive_activation_contract_compile: compile-check passed."
-	./tests/console/test_interactive_activation_link && echo "test_interactive_activation_link: passed." || echo "test_interactive_activation_link: FAILED."
+	./tests/console/test_interactive_activation_link && echo "test_interactive_activation_link: passed." || { echo "test_interactive_activation_link: FAILED."; exit 1; }
 	@echo "test_interactive_console_contract_compile: compile-check passed."
-	./tests/console/test_interactive_console_link && echo "test_interactive_console_link: passed." || echo "test_interactive_console_link: FAILED."
+	./tests/console/test_interactive_console_link && echo "test_interactive_console_link: passed." || { echo "test_interactive_console_link: FAILED."; exit 1; }
 	@echo "test_interactive_dispatch_contract_compile: compile-check passed."
-	./tests/console/test_interactive_dispatch_link && echo "test_interactive_dispatch_link: passed." || echo "test_interactive_dispatch_link: FAILED."
+	./tests/console/test_interactive_dispatch_link && echo "test_interactive_dispatch_link: passed." || { echo "test_interactive_dispatch_link: FAILED."; exit 1; }
 	@echo "test_interactive_selection_contract_compile: compile-check passed."
-	./tests/console/test_interactive_selection_link && echo "test_interactive_selection_link: passed." || echo "test_interactive_selection_link: FAILED."
+	./tests/console/test_interactive_selection_link && echo "test_interactive_selection_link: passed." || { echo "test_interactive_selection_link: FAILED."; exit 1; }
 	@echo "test_interactive_selection_handoff_binding_contract_compile: compile-check passed."
-	./tests/console/test_interactive_selection_handoff_binding_link && echo "test_interactive_selection_handoff_binding_link: passed." || echo "test_interactive_selection_handoff_binding_link: FAILED."
+	./tests/console/test_interactive_selection_handoff_binding_link && echo "test_interactive_selection_handoff_binding_link: passed." || { echo "test_interactive_selection_handoff_binding_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_handoff_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_handoff_link && echo "test_interactive_execution_handoff_link: passed." || echo "test_interactive_execution_handoff_link: FAILED."
+	./tests/console/test_interactive_execution_handoff_link && echo "test_interactive_execution_handoff_link: passed." || { echo "test_interactive_execution_handoff_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_transfer_operands_view_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_transfer_operands_view_link && echo "test_interactive_execution_transfer_operands_view_link: passed." || echo "test_interactive_execution_transfer_operands_view_link: FAILED."
+	./tests/console/test_interactive_execution_transfer_operands_view_link && echo "test_interactive_execution_transfer_operands_view_link: passed." || { echo "test_interactive_execution_transfer_operands_view_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_transfer_initiation_gate_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_transfer_initiation_gate_link && echo "test_interactive_execution_transfer_initiation_gate_link: passed." || echo "test_interactive_execution_transfer_initiation_gate_link: FAILED."
+	./tests/console/test_interactive_execution_transfer_initiation_gate_link && echo "test_interactive_execution_transfer_initiation_gate_link: passed." || { echo "test_interactive_execution_transfer_initiation_gate_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_outcome_record_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_outcome_record_link && echo "test_interactive_execution_outcome_record_link: passed." || echo "test_interactive_execution_outcome_record_link: FAILED."
+	./tests/console/test_interactive_execution_outcome_record_link && echo "test_interactive_execution_outcome_record_link: passed." || { echo "test_interactive_execution_outcome_record_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_outcome_view_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_outcome_view_link && echo "test_interactive_execution_outcome_view_link: passed." || echo "test_interactive_execution_outcome_view_link: FAILED."
+	./tests/console/test_interactive_execution_outcome_view_link && echo "test_interactive_execution_outcome_view_link: passed." || { echo "test_interactive_execution_outcome_view_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_outcome_aggregate_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_outcome_aggregate_link && echo "test_interactive_execution_outcome_aggregate_link: passed." || echo "test_interactive_execution_outcome_aggregate_link: FAILED."
+	./tests/console/test_interactive_execution_outcome_aggregate_link && echo "test_interactive_execution_outcome_aggregate_link: passed." || { echo "test_interactive_execution_outcome_aggregate_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_failure_ack_gate_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_failure_ack_gate_link && echo "test_interactive_execution_failure_ack_gate_link: passed." || echo "test_interactive_execution_failure_ack_gate_link: FAILED."
+	./tests/console/test_interactive_execution_failure_ack_gate_link && echo "test_interactive_execution_failure_ack_gate_link: passed." || { echo "test_interactive_execution_failure_ack_gate_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_failure_initiation_gate_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_failure_initiation_gate_link && echo "test_interactive_execution_failure_initiation_gate_link: passed." || echo "test_interactive_execution_failure_initiation_gate_link: FAILED."
+	./tests/console/test_interactive_execution_failure_initiation_gate_link && echo "test_interactive_execution_failure_initiation_gate_link: passed." || { echo "test_interactive_execution_failure_initiation_gate_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_completion_ack_gate_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_completion_ack_gate_link && echo "test_interactive_execution_completion_ack_gate_link: passed." || echo "test_interactive_execution_completion_ack_gate_link: FAILED."
+	./tests/console/test_interactive_execution_completion_ack_gate_link && echo "test_interactive_execution_completion_ack_gate_link: passed." || { echo "test_interactive_execution_completion_ack_gate_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_completion_initiation_gate_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_completion_initiation_gate_link && echo "test_interactive_execution_completion_initiation_gate_link: passed." || echo "test_interactive_execution_completion_initiation_gate_link: FAILED."
+	./tests/console/test_interactive_execution_completion_initiation_gate_link && echo "test_interactive_execution_completion_initiation_gate_link: passed." || { echo "test_interactive_execution_completion_initiation_gate_link: FAILED."; exit 1; }
 	@echo "test_session_terminal_state_contract_compile: compile-check passed."
-	./tests/console/test_session_terminal_state_link && echo "test_session_terminal_state_link: passed." || echo "test_session_terminal_state_link: FAILED."
+	./tests/console/test_session_terminal_state_link && echo "test_session_terminal_state_link: passed." || { echo "test_session_terminal_state_link: FAILED."; exit 1; }
 	@echo "test_session_finalization_contract_compile: compile-check passed."
-	./tests/console/test_session_finalization_link && echo "test_session_finalization_link: passed." || echo "test_session_finalization_link: FAILED."
+	./tests/console/test_session_finalization_link && echo "test_session_finalization_link: passed." || { echo "test_session_finalization_link: FAILED."; exit 1; }
 	@echo "test_session_terminal_cause_contract_compile: compile-check passed."
-	./tests/console/test_session_terminal_cause_link && echo "test_session_terminal_cause_link: passed." || echo "test_session_terminal_cause_link: FAILED."
+	./tests/console/test_session_terminal_cause_link && echo "test_session_terminal_cause_link: passed." || { echo "test_session_terminal_cause_link: FAILED."; exit 1; }
 	@echo "test_session_ownership_contract_compile: compile-check passed."
-	./tests/console/test_session_ownership_link && echo "test_session_ownership_link: passed." || echo "test_session_ownership_link: FAILED."
+	./tests/console/test_session_ownership_link && echo "test_session_ownership_link: passed." || { echo "test_session_ownership_link: FAILED."; exit 1; }
 	@echo "test_session_reclamation_contract_compile: compile-check passed."
 	@echo "test_session_reclamation_include_ban: compile-check passed."
-	./tests/console/test_session_reclamation_link && echo "test_session_reclamation_link: passed." || echo "test_session_reclamation_link: FAILED."
+	./tests/console/test_session_reclamation_link && echo "test_session_reclamation_link: passed." || { echo "test_session_reclamation_link: FAILED."; exit 1; }
 	@echo "test_session_recovery_eligibility_contract_compile: compile-check passed."
 	@echo "test_session_recovery_eligibility_include_ban: compile-check passed."
-	./tests/console/test_session_recovery_eligibility_link && echo "test_session_recovery_eligibility_link: passed." || echo "test_session_recovery_eligibility_link: FAILED."
+	./tests/console/test_session_recovery_eligibility_link && echo "test_session_recovery_eligibility_link: passed." || { echo "test_session_recovery_eligibility_link: FAILED."; exit 1; }
 	@echo "test_session_recovery_authorization_contract_compile: compile-check passed."
 	@echo "test_session_recovery_authorization_include_ban: compile-check passed."
-	./tests/console/test_session_recovery_authorization_link && echo "test_session_recovery_authorization_link: passed." || echo "test_session_recovery_authorization_link: FAILED."
+	./tests/console/test_session_recovery_authorization_link && echo "test_session_recovery_authorization_link: passed." || { echo "test_session_recovery_authorization_link: FAILED."; exit 1; }
 	@echo "test_session_recovery_execution_contract_compile: compile-check passed."
 	@echo "test_session_recovery_execution_include_ban: compile-check passed."
 	@echo "test_session_recovery_execution_storage_include_ban: compile-check passed."
-	./tests/console/test_session_recovery_execution_link && echo "test_session_recovery_execution_link: passed." || echo "test_session_recovery_execution_link: FAILED."
+	./tests/console/test_session_recovery_execution_link && echo "test_session_recovery_execution_link: passed." || { echo "test_session_recovery_execution_link: FAILED."; exit 1; }
 	@echo "test_session_recovery_outcome_contract_compile: compile-check passed."
 	@echo "test_session_recovery_outcome_include_ban: compile-check passed."
 	@echo "test_session_recovery_outcome_storage_include_ban: compile-check passed."
-	./tests/console/test_session_recovery_outcome_link && echo "test_session_recovery_outcome_link: passed." || echo "test_session_recovery_outcome_link: FAILED."
+	./tests/console/test_session_recovery_outcome_link && echo "test_session_recovery_outcome_link: passed." || { echo "test_session_recovery_outcome_link: FAILED."; exit 1; }
 	@echo "test_session_recovery_outcome_observe_contract_compile: compile-check passed."
 	@echo "test_session_recovery_outcome_observe_include_ban: compile-check passed."
-	./tests/console/test_session_recovery_outcome_observe_link && echo "test_session_recovery_outcome_observe_link: passed." || echo "test_session_recovery_outcome_observe_link: FAILED."
+	./tests/console/test_session_recovery_outcome_observe_link && echo "test_session_recovery_outcome_observe_link: passed." || { echo "test_session_recovery_outcome_observe_link: FAILED."; exit 1; }
 	@echo "test_session_retry_policy_contract_compile: compile-check passed."
 	@echo "test_session_retry_policy_include_ban: compile-check passed."
 	@echo "test_session_retry_policy_storage_include_ban: compile-check passed."
-	./tests/console/test_session_retry_policy_link && echo "test_session_retry_policy_link: passed." || echo "test_session_retry_policy_link: FAILED."
+	./tests/console/test_session_retry_policy_link && echo "test_session_retry_policy_link: passed." || { echo "test_session_retry_policy_link: FAILED."; exit 1; }
 	@echo "test_session_retry_authorization_contract_compile: compile-check passed."
 	@echo "test_session_retry_authorization_include_ban: compile-check passed."
 	@echo "test_session_retry_authorization_storage_include_ban: compile-check passed."
-	./tests/console/test_session_retry_authorization_link && echo "test_session_retry_authorization_link: passed." || echo "test_session_retry_authorization_link: FAILED."
+	./tests/console/test_session_retry_authorization_link && echo "test_session_retry_authorization_link: passed." || { echo "test_session_retry_authorization_link: FAILED."; exit 1; }
 	@echo "test_session_retry_execution_contract_compile: compile-check passed."
 	@echo "test_session_retry_execution_include_ban: compile-check passed."
-	./tests/console/test_session_retry_execution_link && echo "test_session_retry_execution_link: passed." || echo "test_session_retry_execution_link: FAILED."
+	./tests/console/test_session_retry_execution_link && echo "test_session_retry_execution_link: passed." || { echo "test_session_retry_execution_link: FAILED."; exit 1; }
 	@echo "test_session_retry_execution_result_contract_compile: compile-check passed."
 	@echo "test_session_retry_execution_result_include_ban: compile-check passed."
-	./tests/console/test_session_retry_execution_result_link && echo "test_session_retry_execution_result_link: passed." || echo "test_session_retry_execution_result_link: FAILED."
+	./tests/console/test_session_retry_execution_result_link && echo "test_session_retry_execution_result_link: passed." || { echo "test_session_retry_execution_result_link: FAILED."; exit 1; }
 	@echo "test_session_retry_outcome_contract_compile: compile-check passed."
 	@echo "test_session_retry_outcome_include_ban: compile-check passed."
-	./tests/console/test_session_retry_outcome_link && echo "test_session_retry_outcome_link: passed." || echo "test_session_retry_outcome_link: FAILED."
+	./tests/console/test_session_retry_outcome_link && echo "test_session_retry_outcome_link: passed." || { echo "test_session_retry_outcome_link: FAILED."; exit 1; }
 	@echo "test_session_retry_outcome_observation_contract_compile: compile-check passed."
 	@echo "test_session_retry_outcome_observation_include_ban: compile-check passed."
-	./tests/console/test_session_retry_outcome_observation_link && echo "test_session_retry_outcome_observation_link: passed." || echo "test_session_retry_outcome_observation_link: FAILED."
+	./tests/console/test_session_retry_outcome_observation_link && echo "test_session_retry_outcome_observation_link: passed." || { echo "test_session_retry_outcome_observation_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_introspection_contract_compile: compile-check passed."
 	@echo "test_lifecycle_introspection_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_introspection_link && echo "test_lifecycle_introspection_link: passed." || echo "test_lifecycle_introspection_link: FAILED."
+	./tests/console/test_lifecycle_introspection_link && echo "test_lifecycle_introspection_link: passed." || { echo "test_lifecycle_introspection_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_verification_contract_compile: compile-check passed."
 	@echo "test_lifecycle_verification_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_verification_link && echo "test_lifecycle_verification_link: passed." || echo "test_lifecycle_verification_link: FAILED."
+	./tests/console/test_lifecycle_verification_link && echo "test_lifecycle_verification_link: passed." || { echo "test_lifecycle_verification_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_provenance_contract_compile: compile-check passed."
 	@echo "test_lifecycle_provenance_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_provenance_link && echo "test_lifecycle_provenance_link: passed." || echo "test_lifecycle_provenance_link: FAILED."
+	./tests/console/test_lifecycle_provenance_link && echo "test_lifecycle_provenance_link: passed." || { echo "test_lifecycle_provenance_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_assertion_contract_compile: compile-check passed."
 	@echo "test_lifecycle_assertion_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_assertion_link && echo "test_lifecycle_assertion_link: passed." || echo "test_lifecycle_assertion_link: FAILED."
+	./tests/console/test_lifecycle_assertion_link && echo "test_lifecycle_assertion_link: passed." || { echo "test_lifecycle_assertion_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_freeze_enforcement_contract_compile: compile-check passed."
 	@echo "test_lifecycle_freeze_enforcement_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_freeze_enforcement_link && echo "test_lifecycle_freeze_enforcement_link: passed." || echo "test_lifecycle_freeze_enforcement_link: FAILED."
+	./tests/console/test_lifecycle_freeze_enforcement_link && echo "test_lifecycle_freeze_enforcement_link: passed." || { echo "test_lifecycle_freeze_enforcement_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_documentation_contract_compile: compile-check passed."
 	@echo "test_lifecycle_documentation_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_documentation_link && echo "test_lifecycle_documentation_link: passed." || echo "test_lifecycle_documentation_link: FAILED."
+	./tests/console/test_lifecycle_documentation_link && echo "test_lifecycle_documentation_link: passed." || { echo "test_lifecycle_documentation_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_audit_contract_compile: compile-check passed."
 	@echo "test_lifecycle_audit_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_audit_link && echo "test_lifecycle_audit_link: passed." || echo "test_lifecycle_audit_link: FAILED."
+	./tests/console/test_lifecycle_audit_link && echo "test_lifecycle_audit_link: passed." || { echo "test_lifecycle_audit_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_export_contract_compile: compile-check passed."
 	@echo "test_lifecycle_export_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_export_link && echo "test_lifecycle_export_link: passed." || echo "test_lifecycle_export_link: FAILED."
+	./tests/console/test_lifecycle_export_link && echo "test_lifecycle_export_link: passed." || { echo "test_lifecycle_export_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_extension_contract_compile: compile-check passed."
 	@echo "test_lifecycle_extension_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_extension_link && echo "test_lifecycle_extension_link: passed." || echo "test_lifecycle_extension_link: FAILED."
+	./tests/console/test_lifecycle_extension_link && echo "test_lifecycle_extension_link: passed." || { echo "test_lifecycle_extension_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_governance_contract_compile: compile-check passed."
 	@echo "test_lifecycle_governance_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_governance_link && echo "test_lifecycle_governance_link: passed." || echo "test_lifecycle_governance_link: FAILED."
+	./tests/console/test_lifecycle_governance_link && echo "test_lifecycle_governance_link: passed." || { echo "test_lifecycle_governance_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_governance_index_contract_compile: compile-check passed."
 	@echo "test_lifecycle_governance_index_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_governance_index_link && echo "test_lifecycle_governance_index_link: passed." || echo "test_lifecycle_governance_index_link: FAILED."
+	./tests/console/test_lifecycle_governance_index_link && echo "test_lifecycle_governance_index_link: passed." || { echo "test_lifecycle_governance_index_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_governance_provenance_contract_compile: compile-check passed."
 	@echo "test_lifecycle_governance_provenance_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_governance_provenance_link && echo "test_lifecycle_governance_provenance_link: passed." || echo "test_lifecycle_governance_provenance_link: FAILED."
+	./tests/console/test_lifecycle_governance_provenance_link && echo "test_lifecycle_governance_provenance_link: passed." || { echo "test_lifecycle_governance_provenance_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_governance_compatibility_contract_compile: compile-check passed."
 	@echo "test_lifecycle_governance_compatibility_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_governance_compatibility_link && echo "test_lifecycle_governance_compatibility_link: passed." || echo "test_lifecycle_governance_compatibility_link: FAILED."
+	./tests/console/test_lifecycle_governance_compatibility_link && echo "test_lifecycle_governance_compatibility_link: passed." || { echo "test_lifecycle_governance_compatibility_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_governance_schema_contract_compile: compile-check passed."
 	@echo "test_lifecycle_governance_schema_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_governance_schema_link && echo "test_lifecycle_governance_schema_link: passed." || echo "test_lifecycle_governance_schema_link: FAILED."
+	./tests/console/test_lifecycle_governance_schema_link && echo "test_lifecycle_governance_schema_link: passed." || { echo "test_lifecycle_governance_schema_link: FAILED."; exit 1; }
 	@echo "test_lifecycle_governance_manifest_contract_compile: compile-check passed."
 	@echo "test_lifecycle_governance_manifest_include_ban: compile-check passed."
-	./tests/console/test_lifecycle_governance_manifest_link && echo "test_lifecycle_governance_manifest_link: passed." || echo "test_lifecycle_governance_manifest_link: FAILED."
+	./tests/console/test_lifecycle_governance_manifest_link && echo "test_lifecycle_governance_manifest_link: passed." || { echo "test_lifecycle_governance_manifest_link: FAILED."; exit 1; }
 	@echo "test_session_contract_compile: compile-check passed."
-	./tests/session/test_session_link && echo "test_session_link:  passed." || echo "test_session_link:  FAILED."
-	./tests/session/test_session_readiness_link && echo "test_session_readiness_link: passed." || echo "test_session_readiness_link: FAILED."
+	./tests/session/test_session_link && echo "test_session_link:  passed." || { echo "test_session_link:  FAILED."; exit 1; }
+	./tests/session/test_session_readiness_link && echo "test_session_readiness_link: passed." || { echo "test_session_readiness_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_target_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_target_link && echo "test_interactive_execution_target_link: passed." || echo "test_interactive_execution_target_link: FAILED."
+	./tests/console/test_interactive_execution_target_link && echo "test_interactive_execution_target_link: passed." || { echo "test_interactive_execution_target_link: FAILED."; exit 1; }
 	@echo "test_interactive_execution_contract_compile: compile-check passed."
-	./tests/console/test_interactive_execution_link && echo "test_interactive_execution_link: passed." || echo "test_interactive_execution_link: FAILED."
+	./tests/console/test_interactive_execution_link && echo "test_interactive_execution_link: passed." || { echo "test_interactive_execution_link: FAILED."; exit 1; }
 	@echo "test_interactive_switch_operands_contract_compile: compile-check passed."
-	./tests/console/test_interactive_switch_operands_link && echo "test_interactive_switch_operands_link: passed." || echo "test_interactive_switch_operands_link: FAILED."
+	./tests/console/test_interactive_switch_operands_link && echo "test_interactive_switch_operands_link: passed." || { echo "test_interactive_switch_operands_link: FAILED."; exit 1; }
 	@echo "test_interactive_runnable_contract_compile: compile-check passed."
-	./tests/console/test_interactive_runnable_link && echo "test_interactive_runnable_link: passed." || echo "test_interactive_runnable_link: FAILED."
+	./tests/console/test_interactive_runnable_link && echo "test_interactive_runnable_link: passed." || { echo "test_interactive_runnable_link: FAILED."; exit 1; }
 	@echo "test_interactive_readiness_contract_compile: compile-check passed."
-	./tests/console/test_interactive_readiness_link && echo "test_interactive_readiness_link: passed." || echo "test_interactive_readiness_link: FAILED."
+	./tests/console/test_interactive_readiness_link && echo "test_interactive_readiness_link: passed." || { echo "test_interactive_readiness_link: FAILED."; exit 1; }
 	@echo "test_fd_table_contract_compile: compile-check passed."
-	./tests/fd/test_fd_table_link && echo "test_fd_table_link: passed." || echo "test_fd_table_link: FAILED."
+	./tests/fd/test_fd_table_link && echo "test_fd_table_link: passed." || { echo "test_fd_table_link: FAILED."; exit 1; }
 	@echo "test_signal_contract_compile: compile-check passed."
-	./tests/signal/test_signal_link && echo "test_signal_link:   passed." || echo "test_signal_link:   FAILED."
+	./tests/signal/test_signal_link && echo "test_signal_link:   passed." || { echo "test_signal_link:   FAILED."; exit 1; }
 	@echo "test_session_contract_compile: compile-check passed."
-	./tests/session/test_session_link && echo "test_session_link:  passed." || echo "test_session_link:  FAILED."
+	./tests/session/test_session_link && echo "test_session_link:  passed." || { echo "test_session_link:  FAILED."; exit 1; }
 	@echo "test_vfs_contract_compile: compile-check passed."
-	./tests/vfs/test_vfs_link && echo "test_vfs_link:      passed." || echo "test_vfs_link:      FAILED."
+	./tests/vfs/test_vfs_link && echo "test_vfs_link:      passed." || { echo "test_vfs_link:      FAILED."; exit 1; }
 	@echo "test_pipe_contract_compile: compile-check passed."
-	./tests/pipe/test_pipe_link && echo "test_pipe_link:     passed." || echo "test_pipe_link:     FAILED."
+	./tests/pipe/test_pipe_link && echo "test_pipe_link:     passed." || { echo "test_pipe_link:     FAILED."; exit 1; }
 	@echo "test_terminal_contract_compile: compile-check passed."
-	./tests/terminal/test_terminal_link && echo "test_terminal_link: passed." || echo "test_terminal_link: FAILED."
+	./tests/terminal/test_terminal_link && echo "test_terminal_link: passed." || { echo "test_terminal_link: FAILED."; exit 1; }
 	@echo "test_controlling_terminal_contract_compile: compile-check passed."
-	./tests/terminal/test_controlling_terminal_link && echo "test_controlling_terminal_link: passed." || echo "test_controlling_terminal_link: FAILED."
+	./tests/terminal/test_controlling_terminal_link && echo "test_controlling_terminal_link: passed." || { echo "test_controlling_terminal_link: FAILED."; exit 1; }
 	@echo "test_process_contract_compile: compile-check passed."
-	./tests/process/test_process_link && echo "test_process_link:  passed." || echo "test_process_link:  FAILED."
+	./tests/process/test_process_link && echo "test_process_link:  passed." || { echo "test_process_link:  FAILED."; exit 1; }
 	@echo "test_elf_loader_contract_compile: compile-check passed."
-	./tests/elf/test_elf_loader_link && echo "test_elf_loader_link: passed." || echo "test_elf_loader_link: FAILED."
+	./tests/elf/test_elf_loader_link && echo "test_elf_loader_link: passed." || { echo "test_elf_loader_link: FAILED."; exit 1; }
 	@echo "test_syscall_contract_compile: compile-check passed."
-	./tests/syscall/test_sys_dispatch_link && echo "test_sys_dispatch_link: passed." || echo "test_sys_dispatch_link: FAILED."
-	./tests/arch/x86_64/test_arch_syscall_enter_link && echo "test_arch_syscall_enter_link(x86_64): passed." || echo "test_arch_syscall_enter_link(x86_64): FAILED."
-	./tests/arch/aarch64/test_arch_syscall_enter_link && echo "test_arch_syscall_enter_link(aarch64): passed." || echo "test_arch_syscall_enter_link(aarch64): FAILED."
+	./tests/syscall/test_sys_dispatch_link && echo "test_sys_dispatch_link: passed." || { echo "test_sys_dispatch_link: FAILED."; exit 1; }
+	./tests/arch/x86_64/test_arch_syscall_enter_link && echo "test_arch_syscall_enter_link(x86_64): passed." || { echo "test_arch_syscall_enter_link(x86_64): FAILED."; exit 1; }
+	./tests/arch/aarch64/test_arch_syscall_enter_link && echo "test_arch_syscall_enter_link(aarch64): passed." || { echo "test_arch_syscall_enter_link(aarch64): FAILED."; exit 1; }
 
 tests/test_boot: tests/test_boot.c arch/stub/arch.c core/assert.c init/boot.c mm/mm.c
 	$(CC) $(TEST_CFLAGS) $^ -o $@
@@ -1304,7 +1323,7 @@ test_elf_loader_contract_compile.o: tests/elf/test_elf_loader_contract_compile.o
 test_syscall_contract_compile.o: tests/syscall/test_syscall_contract_compile.o
 
 clean:
-	rm -f $(OBJS) \
+	rm -f $(GOVERNANCE_TEST_BIN) $(OBJS) \
 	      tests/test_boot tests/test_list tests/test_spinlock \
 	      tests/test_thread tests/test_runq tests/test_sched_api.o \
 	      tests/test_sched tests/test_cpu_state_api.o tests/test_idle \

@@ -1,8 +1,18 @@
 # KERNUL Roadmap
 
 Status: Pre-Alpha  
-Scope: Bootstrap through early compatibility milestones  
+Scope: Bootstrap, session lifecycle, and lifecycle governance
 Purpose: Define implementation order and stop-safe priorities
+
+Current implementation checkpoint: Phase 46, governance consistency verification.
+Phase 45 remains the latest kernel contract surface.
+The current changelog milestone is `v0.0.26`; the earlier milestone heading is
+corrected to `v0.0.25`. These milestones do not establish runtime or compatibility
+guarantees. Phase 46 below records the completed verification boundary.
+
+The bootstrap descriptions below retain their original completion rules.
+The execution and lifecycle ledgers record the boundaries actually implemented;
+a contract or stub does not establish a working shell or userspace execution.
 
 ---
 
@@ -223,7 +233,11 @@ A deterministic userspace entry boundary exists.
 
 # Phase 6 — Unix base semantics
 
-Status: Not Started
+Status: Complete (structural contracts)
+
+Evidence: `fd_table.h`, `vfs.h`, `pipe.h`, `signal.h`, `session.h`,
+`terminal.h`, and `controlling_terminal.h`, with compile and link tests under
+`tests/`. Runtime Unix I/O behavior remains outside these stub contracts.
 
 Purpose:
 
@@ -252,7 +266,13 @@ Core Unix semantics exist structurally and are testable.
 
 # Phase 7 — Shell viability
 
-Status: Not Started
+Status: In Progress (structural boundaries implemented)
+
+Interactive console, activation, readiness, admission, enqueue, dispatch,
+execution-target, and switch-operand contracts exist in `include/kernul/` and
+`core/`. A functional interactive shell, real context transfer, terminal job
+control, and process-signal integration are still required by the completion
+rule below.
 
 Purpose:
 
@@ -277,9 +297,13 @@ The kernel supports a functional interactive shell path.
 
 ---
 
-# Phase 8 — Compatibility expansion
+# Compatibility expansion — deferred forecast
 
 Status: Not Started
+
+The original Phase 8 compatibility forecast was superseded by the execution
+transfer boundary recorded in the implemented ledger below. Compatibility
+expansion remains a future milestone and has no assigned phase number.
 
 Purpose:
 
@@ -301,6 +325,75 @@ Constraints:
 Phase completion rule:
 
 Compatibility is demonstrated through measurable behavior, not assumption.
+
+---
+
+# Implemented execution boundary ledger (Phases 8–14)
+
+These are implemented contract and stub boundaries, not claims of working
+userspace execution or shell compatibility.
+
+| Phase | Implemented boundary | Primary surface |
+| :--- | :--- | :--- |
+| 8 | Execution transfer and explicit selection | `interactive_execution.h`, `interactive_selection.h` |
+| 9 | Scheduler state, runnable container, and container selection | `interactive_scheduler_state.h`, `interactive_scheduler_container.h` |
+| 10 | Selection handoff, transfer operands, and initiation gate | `interactive_execution_handoff.h`, `interactive_execution_transfer_initiation_gate.h` |
+| 11 | Execution outcome publication, view, and aggregation | `interactive_execution_outcome_record.h`, `interactive_execution_outcome_view.h`, `interactive_execution_outcome_aggregate.h` |
+| 12 | Failure and completion acknowledgment gates | `interactive_execution_failure_ack_gate.h`, `interactive_execution_completion_ack_gate.h` |
+| 13 | Acknowledgment-driven initiation gating | `interactive_execution_failure_initiation_gate.h`, `interactive_execution_completion_initiation_gate.h` |
+| 14 | Terminal session state and cause publication | `session_terminal_state.h`, `session_terminal_cause.h` |
+
+---
+
+# Phase 46 — Governance consistency verification
+
+Status: Complete
+
+Purpose:
+
+Verify that the existing immutable governance tables agree across their public
+surfaces before adding another lifecycle or execution boundary.
+
+Surface:
+
+- `tests/governance/test_governance_consistency.c`
+- `make test-governance`, also required by `make test`
+
+Acceptance criteria:
+
+- The index, provenance, and compatibility tables agree on ordered phase
+  identities and surface names for Phases 31–40.
+- Every compatibility entry references `LIFECYCLE_FREEZE_VERSION`.
+- Structured schema entries resolve to the same names in the index or manifest.
+  Phases 32 and 35 have no structured payload and are intentionally absent from
+  the schema; its canonical structured-surface count remains eleven.
+- The manifest binds Phases 41–44 to their respective index, provenance,
+  compatibility, and schema roles.
+- A mismatched identity, freeze version, or role fails verification.
+- Runtime test failures propagate as a nonzero `make test` result.
+- The strict freestanding build and hosted test suite pass with the local
+  compiler. Metadata used only by compile-time checks remains warning-clean.
+
+Constraints:
+
+- Hosted verification only; no new kernel API or lifecycle storage.
+- No session or scheduler linkage, authority, scheduling, retry automation, or
+  userspace execution.
+- Existing frozen contracts and table contents retain their semantics.
+
+Phase completion rule:
+
+The cross-surface checks pass, deliberate metadata drift is rejected, and a
+runtime test failure is demonstrated to fail the test command.
+
+Verification evidence (2026-10-21):
+
+- `make -B all` passes with strict freestanding warnings enabled.
+- `make -B test` passes 100 compile checks and 78 runtime test invocations.
+- Seven isolated mutations of phase identities, names, freeze association, and
+  role binding are rejected by the integration test.
+- Injected command failures return nonzero status in all 77 pre-existing
+  runtime test recipes.
 
 ---
 
@@ -334,9 +427,9 @@ At the end of each task, the repository must remain:
 
 ---
 
-# Canonical implemented phase ledger (session lifecycle boundaries)
+# Canonical implemented phase ledger (lifecycle and governance boundaries)
 
-Implemented canonical sequence (frozen for this run):
+Implemented canonical sequence:
 
 1. Phase 15 — session finalization publication
 2. Phase 16 — ownership declaration
@@ -353,6 +446,27 @@ Implemented canonical sequence (frozen for this run):
 13. Phase 28 — retry outcome recording
 14. Phase 29 — retry outcome observation (read-only)
 15. Phase 30 — retry lifecycle freeze and architectural consolidation
+16. Phase 31 — read-only lifecycle introspection
+17. Phase 32 — passive lifecycle invariant verification
+18. Phase 33 — read-only lifecycle provenance
+19. Phase 34 — diagnostic lifecycle boundary assertion
+20. Phase 35 — compile-time lifecycle freeze enforcement
+21. Phase 36 — deterministic lifecycle documentation synthesis
+22. Phase 37 — snapshot-scoped lifecycle audit
+23. Phase 38 — deterministic lifecycle export serialization
+24. Phase 39 — inert lifecycle extension declaration
+25. Phase 40 — inert lifecycle governance consolidation
+26. Phase 41 — governance index for Phases 31–40
+27. Phase 42 — governance provenance for Phases 31–40
+28. Phase 43 — governance compatibility for Phases 31–40
+29. Phase 44 — governance schema for structured surfaces in Phases 31–43
+30. Phase 45 — governance manifest for metadata surfaces in Phases 41–44
+
+Phase 25 is the historical freeze through retry authorization; Phases 26–30
+explicitly introduced and then froze the remaining retry boundaries. The
+canonical lifecycle numbering above takes precedence over earlier forecasts.
+Earlier phase maps may use separate historical numbering schemes; new work
+uses the canonical implementation phases recorded here.
 
 Lifecycle stopping points (frozen):
 

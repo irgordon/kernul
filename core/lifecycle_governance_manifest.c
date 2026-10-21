@@ -6,6 +6,7 @@
  */
 
 #include <kernul/lifecycle_governance_manifest.h>
+#include <kernul/compiler.h>
 
 #define LIFECYCLE_GOVERNANCE_MANIFEST_FIRST_PHASE 41U
 #define LIFECYCLE_GOVERNANCE_MANIFEST_LAST_PHASE 44U
@@ -26,7 +27,8 @@ static const char SURFACE_ROLE_PROVENANCE[] = "provenance";
 static const char SURFACE_ROLE_COMPATIBILITY[] = "compatibility";
 static const char SURFACE_ROLE_SCHEMA[] = "schema";
 
-static const char *const lifecycle_governance_manifest_surface_role_vocabulary[] = {
+/* Compile-time vocabulary validation does not require emitted storage. */
+static const char *const lifecycle_governance_manifest_surface_role_vocabulary[] KERN_UNUSED = {
     SURFACE_ROLE_INDEX,
     SURFACE_ROLE_PROVENANCE,
     SURFACE_ROLE_COMPATIBILITY,

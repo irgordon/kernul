@@ -5,6 +5,7 @@
  */
 
 #include <kernul/lifecycle_governance_schema.h>
+#include <kernul/compiler.h>
 
 #define LIFECYCLE_GOVERNANCE_SCHEMA_FIRST_PHASE 31U
 #define LIFECYCLE_GOVERNANCE_SCHEMA_LAST_PHASE 43U
@@ -22,7 +23,8 @@ static const char FIELD_ROLE_BUFFER_LENGTH[] = "buffer_length";
 static const char FIELD_ROLE_PHASE_REFERENCE[] = "phase_reference";
 static const char FIELD_ROLE_DESCRIPTOR_TEXT[] = "descriptor_text";
 
-static const char *const lifecycle_governance_schema_field_role_vocabulary[] = {
+/* Compile-time vocabulary validation does not require emitted storage. */
+static const char *const lifecycle_governance_schema_field_role_vocabulary[] KERN_UNUSED = {
     FIELD_ROLE_STATE_FLAG,
     FIELD_ROLE_STATE_VALUE,
     FIELD_ROLE_STATUS_CODE,

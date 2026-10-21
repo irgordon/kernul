@@ -2,18 +2,240 @@
 
 All notable changes to KERNUL are documented in this file.
 
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+with `[Add]`, `[Change]`, and `[Fix]` tags for individual phase entries.
 
 KERNUL does not yet follow Semantic Versioning. Version numbers reflect
 phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
-## [v0.0.2] — 2026-04-02
+## [v0.0.26] — 2026-10-21
 
-### Added — Phase 15: Terminal lifecycle action boundary
+### [Add] — Phase 46: Governance consistency verification
 
-#### Unreleased — Phase 25, Task 1 — Recovery and retry lifecycle freeze & invariants lock
+- Added `tests/governance/test_governance_consistency.c` and
+  `make test-governance`, also run by `make test`.
+- Cross-checks ordered phase identities, surface names, freeze-version
+  associations, schema references, and manifest role bindings across the
+  immutable governance tables.
+- Verification is hosted only and introduces no kernel API or lifecycle state.
+
+### [Fix] — Changelog and build verification
+
+- Corrected the historical milestone heading to `v0.0.25` and replaced all
+  historical provisional headings with `[Add]`, `[Change]`, or `[Fix]` tags.
+- Assigned Phase 46 and its supporting cleanup to the `v0.0.26` milestone.
+- Ordered Phase 15–45 entries by canonical phase while preserving their bodies.
+- Runtime test failures now propagate to `make test` instead of being hidden
+  by a successful failure-message command.
+- Marked compile-time-only schema and manifest vocabularies with `KERN_UNUSED`
+  so strict Clang builds accept their intentionally unneeded storage.
+
+### [Change] — Roadmap reconciliation
+
+- Recorded implemented execution and governance boundaries through Phase 45,
+  corrected Phase 6 contract status, and documented unfinished shell behavior.
+- Kept compatibility expansion as a deferred milestone after its original
+  Phase 8 forecast was superseded by execution-transfer work.
+- Defined and completed the Phase 46 verification boundary. The strict build,
+  100 compile checks, and 78 runtime test invocations pass. Seven isolated
+  metadata mutations are rejected, and all 77 existing runtime recipes are
+  confirmed to propagate failure.
+
+---
+
+## [v0.0.25] — 2026-04-02
+
+### Session lifecycle and governance — Phases 15–45
+
+#### [Add] — Phase 15, Task 1 — Terminal session finalization publication
+
+- Introduced terminal session finalization marker publication through
+  `include/kernul/session_finalization.h` and
+  `core/session_finalization.c`.
+- Finalization publication is explicit-invocation only and terminal-guarded:
+  `session_publish_finalized_if_terminal(struct session *)` is a no-op unless
+  `session_is_terminal_acquire(const struct session *)` is true.
+- Finalized marker publication is single-assignment, monotonic, and
+  irreversible for session lifetime; terminal does not imply finalized.
+- Finalized marker storage is session-owned and atomically ordered with
+  explicit release publication and acquire observation semantics.
+- No cleanup, retry/restart, scheduling, or additional lifecycle actions are
+  introduced by this boundary.
+
+#### [Add] — Phase 16, Task 1 — Session resource ownership declaration
+
+- Introduced a session resource ownership registry via
+  `include/kernul/session_ownership.h` and `core/session_ownership.c`.
+- Ownership is declarative, idempotent, and monotonic:
+  repeated registration of the same `resource_id_t` returns
+  `SESSION_OWNERSHIP_REGISTER_ALREADY_PRESENT` with no duplicate publication.
+- Ownership storage is explicitly capacity-bounded with fixed per-session
+  capacity (`SESSION_OWNERSHIP_FIXED_CAPACITY`) and deterministic overflow
+  (`SESSION_OWNERSHIP_REGISTER_CAPACITY_EXCEEDED`).
+- Ownership declaration is informational only and does not imply allocation
+  authority, reclamation intent, cleanup, retry, scheduling, or lifecycle
+  behavior.
+
+#### [Add] — Phase 17, Task 1 — Session resource reclamation (explicit, local)
+
+- Introduced explicit session resource reclamation via
+  `include/kernul/session_reclamation.h` and `core/session_reclamation.c`.
+- Reclamation is finalized-only and ownership-bounded:
+  `session_reclaim_resource_if_finalized(struct session *, resource_id_t)`
+  returns deterministic guard outcomes for NULL, not-finalized, and not-owned
+  paths.
+- Reclaim primitive contract is constrained to deterministic, synchronous,
+  idempotent-per-identity behavior with external effect visibility on return;
+  no deferred teardown or hidden completion path is introduced.
+- Reclaim primitive behavior is identity-local and must not depend on session
+  lifecycle state beyond the provided resource identity.
+- Reclamation attempts do not mutate the ownership registry; ownership remains
+  historical and observable after both success and failure.
+- Reclamation failure does not reopen lifecycle transitions and does not alter
+  finalization state.
+- No retries, scheduling, coordination, or new synchronization channels are
+  introduced.
+
+#### [Add] — Phase 18, Task 1 — Session recovery eligibility declaration
+
+- Introduced declarative recovery eligibility via
+  `include/kernul/session_recovery_eligibility.h` and
+  `core/session_recovery_eligibility.c`.
+- Recovery eligibility is finalized-only, single-assignment, and tri-state:
+  `SESSION_RECOVERY_ELIGIBILITY_UNSET`,
+  `SESSION_RECOVERY_ELIGIBLE`, and
+  `SESSION_RECOVERY_INELIGIBLE`.
+- Declaration is informational only and does not initiate recovery or alter
+  lifecycle state.
+- No retries, scheduling, coordination, or lifecycle mutation behavior was
+  introduced by this boundary.
+
+#### [Add] — Phase 19, Task 1 — Explicit recovery attempt authorization
+
+- Introduced explicit recovery attempt authorization via
+  `include/kernul/session_recovery_authorization.h` and
+  `core/session_recovery_authorization.c`.
+- Authorization is finalized-only, eligibility-gated, single-use, and
+  irreversible.
+- `AUTHORIZED` is capability-only: permission to attempt recovery, not a
+  trigger or scheduling signal.
+- Consumption is explicit, safe, idempotent, and monotonic through terminal
+  `CONSUMED` state.
+- No retries, coordination, scheduling, recovery execution logic, or lifecycle
+  mutation behavior was introduced by this boundary.
+
+#### [Add] — Phase 20, Task 1 — Explicit recovery execution (single attempt)
+
+- Introduced explicit single-attempt recovery execution via
+  `include/kernul/session_recovery_execution.h` and
+  `core/session_recovery_execution.c`.
+- Execution consumes authorization before recovery attempt and is irreversible.
+- Execution effects are synchronous and visible before
+  `session_execute_recovery(struct session *)` returns.
+- Execution outcome is informational only and does not mutate eligibility or
+  authorization state beyond the authorization consumption transition.
+- Recovery execution primitive is constrained from invoking authorization or
+  eligibility APIs.
+- No retries, scheduling, coordination, or policy evaluation behavior was
+  introduced by this boundary.
+
+#### [Add] — Phase 21, Task 1 — Recovery outcome recording
+
+- Introduced immutable recovery outcome recording via
+  `include/kernul/session_recovery_outcome.h` and
+  `core/session_recovery_outcome.c`.
+- Recovery outcome storage is initialized to
+  `SESSION_RECOVERY_NOT_ATTEMPTED` before session visibility.
+- Outcome recording is single-assignment, terminal, and published only after
+  recovery execution completion is observed with acquire semantics.
+- Outcome publication and observation use explicit release/acquire visibility.
+- Outcome is declarative lifecycle meaning only and introduces no authority,
+  retry, scheduling, or coordination behavior.
+
+#### [Fix] — Phase 21, Task 1.5 — Hardening: readiness boundary, authority purity, visibility contracts
+
+- Hardened session publication boundaries by making slot reservation and
+  observer-visible readiness explicit and distinct via
+  `session_publish_ready_release(struct session *)` and
+  `session_is_ready_acquire(const struct session *)`.
+- Enforced readiness-gated observation: lifecycle observers and identity
+  getters treat not-ready the same as NULL-safe defaults and do not derive
+  authoritative lifecycle facts from those values.
+- Hardened ownership visibility contract as normative: entry writes publish
+  through release `ownership.count`, and readers acquire `ownership.count`
+  before scanning only `[0, count-1]`.
+- Hardened recovery execution authority purity: authorization consumption is
+  the sole authority gate for execution attempt.
+- Hardened completion/result contract: completion is release-published,
+  completion observation is acquire, and post-completion result is stable and
+  visible to acquire observers.
+- Hardened recovery outcome recording path: execution result is observed once
+  per call and single-assignment authority is centralized in CAS publish helper.
+- Added storage-helper hardening constraints and include-ban tests to keep
+  execution/outcome storage helpers mechanical-only and isolated from semantic
+  lifecycle/retry/scheduler/coordination surfaces.
+- Canonical implemented phase sequence is:
+  Phase 15 finalization publication; Phase 16 ownership declaration;
+  Phase 17 reclamation; Phase 18 recovery eligibility;
+  Phase 19 recovery authorization; Phase 20 recovery execution;
+  Phase 21 recovery outcome recording.
+- Forecast deviation note: Phase 19 introduced recovery authorization semantics
+  in place of the originally forecast retry action, and Phase 20 introduced
+  bounded recovery execution in place of the originally forecast scheduler
+  observation surface; the scheduler observation surface remains unimplemented
+  and unassigned to a phase.
+
+#### [Add] — Phase 22, Task 1 — Recovery outcome observation surface
+
+- Introduced read-only recovery outcome observation snapshot via
+  `include/kernul/session_recovery_outcome_observe.h` and
+  `core/session_recovery_outcome_observe.c`.
+- Observation is readiness-gated and acquire-ordered for readiness, completion,
+  execution result observation, outcome state, and timestamp reads.
+- Snapshot reports immutable recovery outcome, outcome publication timestamp,
+  and execution attempt count.
+- Attempt count is derived from completion observation only and remains bounded
+  to `0` or `1`.
+- Outcome timestamp is immutable metadata published with outcome and never
+  mutated afterward.
+- Observation is passive and introduces no authority, retries, scheduling, or
+  coordination behavior.
+
+#### [Add] — Phase 23, Task 1 — Retry policy declaration (meaning only)
+
+- Introduced declarative retry policy marker via
+  `include/kernul/session_retry_policy.h` and
+  `core/session_retry_policy.c`.
+- Retry policy storage is initialized to `SESSION_RETRY_UNSET` before session
+  readiness publication.
+- Retry policy declaration is readiness-gated, NULL-safe, atomic, and
+  single-assignment with monotonic transitions:
+  `SESSION_RETRY_UNSET` -> `SESSION_RETRY_ALLOWED` or
+  `SESSION_RETRY_UNSET` -> `SESSION_RETRY_FORBIDDEN`.
+- Retry policy observation is readiness-gated via centralized session
+  observation policy and is side-effect free.
+- No authority, retry execution, scheduling, coordination, or recovery outcome
+  mutation behavior was introduced by this boundary.
+
+#### [Add] — Phase 24, Task 1 — Retry authorization capability (authority only)
+
+- Introduced explicit single-use retry authorization capability via
+  `include/kernul/session_retry_authorization.h` and
+  `core/session_retry_authorization.c`.
+- Retry authorization storage is initialized to `SESSION_RETRY_AUTH_NONE`
+  before session readiness publication.
+- Grant/consume/observe paths are readiness-gated, NULL-safe, and policy-checked
+  against retry policy via direct read-only acquire observation.
+- Grant and consume each perform exactly one CAS transition attempt with no
+  retry loops and deterministic collapse under contention.
+- Authorization observation is side-effect free and performs readiness gating
+  plus acquire state load only.
+- No retry execution, scheduling, or coordination behavior was introduced by
+  this boundary.
+
+#### [Change] — Phase 25, Task 1 — Recovery and retry lifecycle freeze & invariants lock
 
 - Declared the canonical lifecycle sequence complete and frozen for this run:
   1) session finalization publication; 2) ownership declaration;
@@ -53,314 +275,7 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No code paths, authority, execution, or scheduling behavior were added by
   this task.
 
-#### Unreleased — Phase 30, Task 1 — Retry lifecycle freeze and architectural consolidation
-
-- Retry lifecycle frozen through outcome observation.
-- Retry outcome observation is passive and read-only.
-- No retry behavior beyond observation exists in this run.
-- Future retry behavior requires new, explicitly bounded phase and architecture
-  surface definitions with explicit acceptance criteria.
-
-#### Unreleased — Phase 31, Task 1 — Lifecycle introspection
-
-- Introduced read-only lifecycle introspection via
-  `include/kernul/lifecycle_introspection.h` and
-  `core/lifecycle_introspection.c`.
-- Introspection exposes stored lifecycle facts only.
-- Observation is acquire-ordered and readiness-gated.
-- No verification, enforcement, scheduling, authority, or behavior was added.
-
-#### Unreleased — Phase 32, Task 1 — Lifecycle invariant verification
-
-- Introduced passive lifecycle invariant verification via
-  `include/kernul/lifecycle_verification.h` and
-  `core/lifecycle_verification.c`.
-- Verification consumes introspection snapshots only.
-- No enforcement or behavior was added.
-
-#### Unreleased — Phase 33, Task 1 — Lifecycle provenance
-
-- Introduced read-only lifecycle provenance via
-  `include/kernul/lifecycle_provenance.h` and
-  `core/lifecycle_provenance.c`.
-- Provenance is derived from existing lifecycle facts only.
-- Timestamp semantics and absent-state rules are explicitly defined:
-  zero means transition not observed; per-dimension monotonicity only.
-- No new lifecycle storage, authority, scheduling, coordination, or
-  behavioral execution paths were added.
-
-#### Unreleased — Phase 34, Task 1 — Lifecycle boundary assertion
-
-- Introduced diagnostic lifecycle boundary assertion via
-  `include/kernul/lifecycle_assertion.h` and
-  `core/lifecycle_assertion.c`.
-- Deterministic evaluation order and result precedence are defined.
-- Assertions are caller-scoped and informational only.
-- No enforcement, execution-flow control, or behavioral policy was added.
-
-#### Unreleased — Phase 35, Task 1 — Lifecycle freeze enforcement
-
-- Introduced compile-time lifecycle freeze enforcement guard via
-  `include/kernul/lifecycle_freeze_enforcement.h` and
-  `core/lifecycle_freeze_enforcement.c`.
-- Added canonical freeze baseline metadata and governance versioning in
-  `include/kernul/lifecycle_freeze_baseline.h`.
-- Enforcement is static only (compile-time/link-time) and adds no runtime
-  behavior.
-- Frozen lifecycle layout and signature surfaces are mechanically protected by
-  static assertions.
-
-#### Unreleased — Phase 36, Task 1 — Lifecycle documentation synthesis
-
-- Introduced deterministic lifecycle documentation synthesis via
-  `include/kernul/lifecycle_documentation.h` and
-  `core/lifecycle_documentation.c`.
-- Documentation is derived exclusively from canonical frozen lifecycle inputs.
-- Defined a caller-owned documentation buffer model with deterministic failure
-  for invalid inputs and insufficient capacity.
-- Added no new lifecycle state and no new lifecycle behavior.
-
-#### Unreleased — Phase 37, Task 1 — Lifecycle audit surface
-
-- Introduced deterministic, snapshot-scoped lifecycle audit surface via
-  `include/kernul/lifecycle_audit.h` and `core/lifecycle_audit.c`.
-- Audit reports are derived exclusively from caller-supplied diagnostic inputs.
-- Freeze version is copied from canonical baseline (`LIFECYCLE_FREEZE_VERSION`).
-- No new lifecycle metadata or meaning was added.
-
-#### Unreleased — Phase 38, Task 1 — Lifecycle export serialization surface
-
-- Introduced deterministic, versioned lifecycle export serialization surface.
-- Export format is canonical text with fixed ordering.
-- Schema stability is tied to freeze version.
-- No new lifecycle metadata or meaning was added.
-
-#### Unreleased — Phase 39, Task 1 — Lifecycle extension declaration surface
-
-- Introduced inert, declarative lifecycle extension declaration surface via
-  `include/kernul/lifecycle_extension.h` and `core/lifecycle_extension.c`.
-- Extension declarations are freeze-version-aware and non-executable.
-- No new lifecycle state, lifecycle meaning, or executable semantics were added.
-
-#### Unreleased — Phase 40, Task 1 — Lifecycle governance consolidation surface
-
-- Introduced descriptive, inert governance consolidation surface via
-  `include/kernul/lifecycle_governance.h` and `core/lifecycle_governance.c`.
-- Summary references governance surfaces without adding lifecycle meaning.
-- No new lifecycle state, lifecycle meaning, or executable semantics were added.
-
-#### Unreleased — Phase 41, Task 1 — Governance index surface
-
-- Introduced descriptive, inert governance index surface via
-  `include/kernul/lifecycle_governance_index.h` and
-  `core/lifecycle_governance_index.c`.
-- Index enumerates governance surfaces (31–40) in canonical ascending phase order.
-- No new lifecycle state, lifecycle meaning, or executable semantics were added.
-
-#### Unreleased — Phase 42, Task 1 — Governance provenance surface
-
-- Introduced descriptive, inert governance provenance surface via
-  `include/kernul/lifecycle_governance_provenance.h` and
-  `core/lifecycle_governance_provenance.c`.
-- Provenance records origins and purposes of governance surfaces (31–40).
-- No new lifecycle state, lifecycle meaning, or executable semantics were added.
-
-#### Unreleased — Phase 43, Task 1 — Governance compatibility surface
-
-- Introduced descriptive, inert governance compatibility surface via
-  `include/kernul/lifecycle_governance_compatibility.h` and
-  `core/lifecycle_governance_compatibility.c`.
-- Records freeze-version association for governance surfaces (31–40).
-- No new lifecycle state, lifecycle meaning, or executable semantics were added.
-
-#### Unreleased — Phase 44, Task 1 — Governance schema surface
-
-- Introduced descriptive, inert governance schema surface via
-  `include/kernul/lifecycle_governance_schema.h` and
-  `core/lifecycle_governance_schema.c`.
-- Records schema summaries for governance surfaces (31–43).
-- No new lifecycle state, lifecycle meaning, or executable semantics were added.
-
-#### Unreleased — Phase 45, Task 1 — Governance manifest surface
-
-- Introduced descriptive, inert governance manifest surface via
-  `include/kernul/lifecycle_governance_manifest.h` and
-  `core/lifecycle_governance_manifest.c`.
-- Enumerates metadata surfaces (41–44) as a stable entry point.
-- No new lifecycle state, lifecycle meaning, or executable semantics were added.
-
-#### Unreleased — Phase 16, Task 1 — Session resource ownership declaration
-
-- Introduced a session resource ownership registry via
-  `include/kernul/session_ownership.h` and `core/session_ownership.c`.
-- Ownership is declarative, idempotent, and monotonic:
-  repeated registration of the same `resource_id_t` returns
-  `SESSION_OWNERSHIP_REGISTER_ALREADY_PRESENT` with no duplicate publication.
-- Ownership storage is explicitly capacity-bounded with fixed per-session
-  capacity (`SESSION_OWNERSHIP_FIXED_CAPACITY`) and deterministic overflow
-  (`SESSION_OWNERSHIP_REGISTER_CAPACITY_EXCEEDED`).
-- Ownership declaration is informational only and does not imply allocation
-  authority, reclamation intent, cleanup, retry, scheduling, or lifecycle
-  behavior.
-
-#### Unreleased — Phase 17, Task 1 — Session resource reclamation (explicit, local)
-
-- Introduced explicit session resource reclamation via
-  `include/kernul/session_reclamation.h` and `core/session_reclamation.c`.
-- Reclamation is finalized-only and ownership-bounded:
-  `session_reclaim_resource_if_finalized(struct session *, resource_id_t)`
-  returns deterministic guard outcomes for NULL, not-finalized, and not-owned
-  paths.
-- Reclaim primitive contract is constrained to deterministic, synchronous,
-  idempotent-per-identity behavior with external effect visibility on return;
-  no deferred teardown or hidden completion path is introduced.
-- Reclaim primitive behavior is identity-local and must not depend on session
-  lifecycle state beyond the provided resource identity.
-- Reclamation attempts do not mutate the ownership registry; ownership remains
-  historical and observable after both success and failure.
-- Reclamation failure does not reopen lifecycle transitions and does not alter
-  finalization state.
-- No retries, scheduling, coordination, or new synchronization channels are
-  introduced.
-
-#### Unreleased — Phase 18, Task 1 — Session recovery eligibility declaration
-
-- Introduced declarative recovery eligibility via
-  `include/kernul/session_recovery_eligibility.h` and
-  `core/session_recovery_eligibility.c`.
-- Recovery eligibility is finalized-only, single-assignment, and tri-state:
-  `SESSION_RECOVERY_ELIGIBILITY_UNSET`,
-  `SESSION_RECOVERY_ELIGIBLE`, and
-  `SESSION_RECOVERY_INELIGIBLE`.
-- Declaration is informational only and does not initiate recovery or alter
-  lifecycle state.
-- No retries, scheduling, coordination, or lifecycle mutation behavior was
-  introduced by this boundary.
-
-#### Unreleased — Phase 19, Task 1 — Explicit recovery attempt authorization
-
-- Introduced explicit recovery attempt authorization via
-  `include/kernul/session_recovery_authorization.h` and
-  `core/session_recovery_authorization.c`.
-- Authorization is finalized-only, eligibility-gated, single-use, and
-  irreversible.
-- `AUTHORIZED` is capability-only: permission to attempt recovery, not a
-  trigger or scheduling signal.
-- Consumption is explicit, safe, idempotent, and monotonic through terminal
-  `CONSUMED` state.
-- No retries, coordination, scheduling, recovery execution logic, or lifecycle
-  mutation behavior was introduced by this boundary.
-
-#### Unreleased — Phase 20, Task 1 — Explicit recovery execution (single attempt)
-
-- Introduced explicit single-attempt recovery execution via
-  `include/kernul/session_recovery_execution.h` and
-  `core/session_recovery_execution.c`.
-- Execution consumes authorization before recovery attempt and is irreversible.
-- Execution effects are synchronous and visible before
-  `session_execute_recovery(struct session *)` returns.
-- Execution outcome is informational only and does not mutate eligibility or
-  authorization state beyond the authorization consumption transition.
-- Recovery execution primitive is constrained from invoking authorization or
-  eligibility APIs.
-- No retries, scheduling, coordination, or policy evaluation behavior was
-  introduced by this boundary.
-
-#### Unreleased — Phase 21, Task 1 — Recovery outcome recording
-
-- Introduced immutable recovery outcome recording via
-  `include/kernul/session_recovery_outcome.h` and
-  `core/session_recovery_outcome.c`.
-- Recovery outcome storage is initialized to
-  `SESSION_RECOVERY_NOT_ATTEMPTED` before session visibility.
-- Outcome recording is single-assignment, terminal, and published only after
-  recovery execution completion is observed with acquire semantics.
-- Outcome publication and observation use explicit release/acquire visibility.
-- Outcome is declarative lifecycle meaning only and introduces no authority,
-  retry, scheduling, or coordination behavior.
-
-#### Unreleased — Phase 21, Task 1.5 — Hardening: readiness boundary, authority purity, visibility contracts
-
-- Hardened session publication boundaries by making slot reservation and
-  observer-visible readiness explicit and distinct via
-  `session_publish_ready_release(struct session *)` and
-  `session_is_ready_acquire(const struct session *)`.
-- Enforced readiness-gated observation: lifecycle observers and identity
-  getters treat not-ready the same as NULL-safe defaults and do not derive
-  authoritative lifecycle facts from those values.
-- Hardened ownership visibility contract as normative: entry writes publish
-  through release `ownership.count`, and readers acquire `ownership.count`
-  before scanning only `[0, count-1]`.
-- Hardened recovery execution authority purity: authorization consumption is
-  the sole authority gate for execution attempt.
-- Hardened completion/result contract: completion is release-published,
-  completion observation is acquire, and post-completion result is stable and
-  visible to acquire observers.
-- Hardened recovery outcome recording path: execution result is observed once
-  per call and single-assignment authority is centralized in CAS publish helper.
-- Added storage-helper hardening constraints and include-ban tests to keep
-  execution/outcome storage helpers mechanical-only and isolated from semantic
-  lifecycle/retry/scheduler/coordination surfaces.
-- Canonical implemented phase sequence is:
-  Phase 15 finalization publication; Phase 16 ownership declaration;
-  Phase 17 reclamation; Phase 18 recovery eligibility;
-  Phase 19 recovery authorization; Phase 20 recovery execution;
-  Phase 21 recovery outcome recording.
-- Forecast deviation note: Phase 19 introduced recovery authorization semantics
-  in place of the originally forecast retry action, and Phase 20 introduced
-  bounded recovery execution in place of the originally forecast scheduler
-  observation surface; the scheduler observation surface remains unimplemented
-  and unassigned to a phase.
-
-#### Unreleased — Phase 22, Task 1 — Recovery outcome observation surface
-
-- Introduced read-only recovery outcome observation snapshot via
-  `include/kernul/session_recovery_outcome_observe.h` and
-  `core/session_recovery_outcome_observe.c`.
-- Observation is readiness-gated and acquire-ordered for readiness, completion,
-  execution result observation, outcome state, and timestamp reads.
-- Snapshot reports immutable recovery outcome, outcome publication timestamp,
-  and execution attempt count.
-- Attempt count is derived from completion observation only and remains bounded
-  to `0` or `1`.
-- Outcome timestamp is immutable metadata published with outcome and never
-  mutated afterward.
-- Observation is passive and introduces no authority, retries, scheduling, or
-  coordination behavior.
-
-#### Unreleased — Phase 23, Task 1 — Retry policy declaration (meaning only)
-
-- Introduced declarative retry policy marker via
-  `include/kernul/session_retry_policy.h` and
-  `core/session_retry_policy.c`.
-- Retry policy storage is initialized to `SESSION_RETRY_UNSET` before session
-  readiness publication.
-- Retry policy declaration is readiness-gated, NULL-safe, atomic, and
-  single-assignment with monotonic transitions:
-  `SESSION_RETRY_UNSET` -> `SESSION_RETRY_ALLOWED` or
-  `SESSION_RETRY_UNSET` -> `SESSION_RETRY_FORBIDDEN`.
-- Retry policy observation is readiness-gated via centralized session
-  observation policy and is side-effect free.
-- No authority, retry execution, scheduling, coordination, or recovery outcome
-  mutation behavior was introduced by this boundary.
-
-#### Unreleased — Phase 24, Task 1 — Retry authorization capability (authority only)
-
-- Introduced explicit single-use retry authorization capability via
-  `include/kernul/session_retry_authorization.h` and
-  `core/session_retry_authorization.c`.
-- Retry authorization storage is initialized to `SESSION_RETRY_AUTH_NONE`
-  before session readiness publication.
-- Grant/consume/observe paths are readiness-gated, NULL-safe, and policy-checked
-  against retry policy via direct read-only acquire observation.
-- Grant and consume each perform exactly one CAS transition attempt with no
-  retry loops and deterministic collapse under contention.
-- Authorization observation is side-effect free and performs readiness gating
-  plus acquire state load only.
-- No retry execution, scheduling, or coordination behavior was introduced by
-  this boundary.
-
-#### Unreleased — Phase 26, Task 1 — Retry execution (single-attempt)
+#### [Add] — Phase 26, Task 1 — Retry execution (single-attempt)
 
 - Introduced explicit single-attempt retry execution via
   `include/kernul/session_retry_execution.h` and
@@ -379,7 +294,7 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retry scheduling, coordination, policy inference, or recovery lifecycle
   mutation behavior was introduced by this boundary.
 
-#### Unreleased — Phase 27, Task 1 — Retry execution result publication (final)
+#### [Add] — Phase 27, Task 1 — Retry execution result publication (final)
 
 - Introduced immutable retry execution result publication via
   `include/kernul/session_retry_execution_result.h` and
@@ -396,7 +311,7 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retry observation behavior, scheduling behavior, or coordination behavior
   was introduced by this boundary.
 
-#### Unreleased — Phase 28, Task 1 — Retry outcome recording
+#### [Add] — Phase 28, Task 1 — Retry outcome recording
 
 - Introduced immutable retry outcome recording via
   `include/kernul/session_retry_outcome.h` and
@@ -421,7 +336,7 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - No retry outcome observation API, scheduling, coordination, or escalation
   behavior was introduced by this boundary.
 
-#### Unreleased — Phase 29, Task 1 — Retry outcome observation
+#### [Add] — Phase 29, Task 1 — Retry outcome observation
 
 - Introduced read-only retry outcome observation via
   `include/kernul/session_retry_outcome_observation.h` and
@@ -435,20 +350,141 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 - Added compile-time contract, include-ban, and link-time dependency tests for
   retry outcome observation.
 
-#### Phase 15, Task 1 — Terminal session finalization publication
+#### [Change] — Phase 30, Task 1 — Retry lifecycle freeze and architectural consolidation
 
-- Introduced terminal session finalization marker publication through
-  `include/kernul/session_finalization.h` and
-  `core/session_finalization.c`.
-- Finalization publication is explicit-invocation only and terminal-guarded:
-  `session_publish_finalized_if_terminal(struct session *)` is a no-op unless
-  `session_is_terminal_acquire(const struct session *)` is true.
-- Finalized marker publication is single-assignment, monotonic, and
-  irreversible for session lifetime; terminal does not imply finalized.
-- Finalized marker storage is session-owned and atomically ordered with
-  explicit release publication and acquire observation semantics.
-- No cleanup, retry/restart, scheduling, or additional lifecycle actions are
-  introduced by this boundary.
+- Retry lifecycle frozen through outcome observation.
+- Retry outcome observation is passive and read-only.
+- No retry behavior beyond observation exists in this run.
+- Future retry behavior requires new, explicitly bounded phase and architecture
+  surface definitions with explicit acceptance criteria.
+
+#### [Add] — Phase 31, Task 1 — Lifecycle introspection
+
+- Introduced read-only lifecycle introspection via
+  `include/kernul/lifecycle_introspection.h` and
+  `core/lifecycle_introspection.c`.
+- Introspection exposes stored lifecycle facts only.
+- Observation is acquire-ordered and readiness-gated.
+- No verification, enforcement, scheduling, authority, or behavior was added.
+
+#### [Add] — Phase 32, Task 1 — Lifecycle invariant verification
+
+- Introduced passive lifecycle invariant verification via
+  `include/kernul/lifecycle_verification.h` and
+  `core/lifecycle_verification.c`.
+- Verification consumes introspection snapshots only.
+- No enforcement or behavior was added.
+
+#### [Add] — Phase 33, Task 1 — Lifecycle provenance
+
+- Introduced read-only lifecycle provenance via
+  `include/kernul/lifecycle_provenance.h` and
+  `core/lifecycle_provenance.c`.
+- Provenance is derived from existing lifecycle facts only.
+- Timestamp semantics and absent-state rules are explicitly defined:
+  zero means transition not observed; per-dimension monotonicity only.
+- No new lifecycle storage, authority, scheduling, coordination, or
+  behavioral execution paths were added.
+
+#### [Add] — Phase 34, Task 1 — Lifecycle boundary assertion
+
+- Introduced diagnostic lifecycle boundary assertion via
+  `include/kernul/lifecycle_assertion.h` and
+  `core/lifecycle_assertion.c`.
+- Deterministic evaluation order and result precedence are defined.
+- Assertions are caller-scoped and informational only.
+- No enforcement, execution-flow control, or behavioral policy was added.
+
+#### [Add] — Phase 35, Task 1 — Lifecycle freeze enforcement
+
+- Introduced compile-time lifecycle freeze enforcement guard via
+  `include/kernul/lifecycle_freeze_enforcement.h` and
+  `core/lifecycle_freeze_enforcement.c`.
+- Added canonical freeze baseline metadata and governance versioning in
+  `include/kernul/lifecycle_freeze_baseline.h`.
+- Enforcement is static only (compile-time/link-time) and adds no runtime
+  behavior.
+- Frozen lifecycle layout and signature surfaces are mechanically protected by
+  static assertions.
+
+#### [Add] — Phase 36, Task 1 — Lifecycle documentation synthesis
+
+- Introduced deterministic lifecycle documentation synthesis via
+  `include/kernul/lifecycle_documentation.h` and
+  `core/lifecycle_documentation.c`.
+- Documentation is derived exclusively from canonical frozen lifecycle inputs.
+- Defined a caller-owned documentation buffer model with deterministic failure
+  for invalid inputs and insufficient capacity.
+- Added no new lifecycle state and no new lifecycle behavior.
+
+#### [Add] — Phase 37, Task 1 — Lifecycle audit surface
+
+- Introduced deterministic, snapshot-scoped lifecycle audit surface via
+  `include/kernul/lifecycle_audit.h` and `core/lifecycle_audit.c`.
+- Audit reports are derived exclusively from caller-supplied diagnostic inputs.
+- Freeze version is copied from canonical baseline (`LIFECYCLE_FREEZE_VERSION`).
+- No new lifecycle metadata or meaning was added.
+
+#### [Add] — Phase 38, Task 1 — Lifecycle export serialization surface
+
+- Introduced deterministic, versioned lifecycle export serialization surface.
+- Export format is canonical text with fixed ordering.
+- Schema stability is tied to freeze version.
+- No new lifecycle metadata or meaning was added.
+
+#### [Add] — Phase 39, Task 1 — Lifecycle extension declaration surface
+
+- Introduced inert, declarative lifecycle extension declaration surface via
+  `include/kernul/lifecycle_extension.h` and `core/lifecycle_extension.c`.
+- Extension declarations are freeze-version-aware and non-executable.
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
+#### [Add] — Phase 40, Task 1 — Lifecycle governance consolidation surface
+
+- Introduced descriptive, inert governance consolidation surface via
+  `include/kernul/lifecycle_governance.h` and `core/lifecycle_governance.c`.
+- Summary references governance surfaces without adding lifecycle meaning.
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
+#### [Add] — Phase 41, Task 1 — Governance index surface
+
+- Introduced descriptive, inert governance index surface via
+  `include/kernul/lifecycle_governance_index.h` and
+  `core/lifecycle_governance_index.c`.
+- Index enumerates governance surfaces (31–40) in canonical ascending phase order.
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
+#### [Add] — Phase 42, Task 1 — Governance provenance surface
+
+- Introduced descriptive, inert governance provenance surface via
+  `include/kernul/lifecycle_governance_provenance.h` and
+  `core/lifecycle_governance_provenance.c`.
+- Provenance records origins and purposes of governance surfaces (31–40).
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
+#### [Add] — Phase 43, Task 1 — Governance compatibility surface
+
+- Introduced descriptive, inert governance compatibility surface via
+  `include/kernul/lifecycle_governance_compatibility.h` and
+  `core/lifecycle_governance_compatibility.c`.
+- Records freeze-version association for governance surfaces (31–40).
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
+#### [Add] — Phase 44, Task 1 — Governance schema surface
+
+- Introduced descriptive, inert governance schema surface via
+  `include/kernul/lifecycle_governance_schema.h` and
+  `core/lifecycle_governance_schema.c`.
+- Records schema summaries for governance surfaces (31–43).
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
+
+#### [Add] — Phase 45, Task 1 — Governance manifest surface
+
+- Introduced descriptive, inert governance manifest surface via
+  `include/kernul/lifecycle_governance_manifest.h` and
+  `core/lifecycle_governance_manifest.c`.
+- Enumerates metadata surfaces (41–44) as a stable entry point.
+- No new lifecycle state, lifecycle meaning, or executable semantics were added.
 
 ---
 

@@ -29,6 +29,7 @@
  */
 
 #include <kernul/types.h>
+#include <kernul/compiler.h>
 
 /* -------------------------------------------------------------------------
  * Physical memory region type
@@ -107,5 +108,14 @@ typedef struct {
  * FAILURE: returns KERN_EINVAL; caller must panic()
  */
 kern_err_t boot_info_validate(const boot_info_t *info);
+
+/*
+ * kernel_main() - Validate the handoff, initialize the PMM, and halt.
+ * Context: early boot, one CPU; architecture entry establishes the C stack
+ * and calls arch_early_init() first. The handoff is borrowed for this call.
+ * Sleep: no. Allocation: no. Caller locks: none. Does not return.
+ * Invalid handoff or absent usable memory halts before PMM initialization.
+ */
+KERN_NORETURN void kernel_main(const boot_info_t *info);
 
 #endif /* KERNUL_BOOT_H */

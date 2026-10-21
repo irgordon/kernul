@@ -62,6 +62,18 @@ This makes KERNUL the perfect foundation for anyone who wants to learn, build, o
 
 KERNUL is currently in **very early development.** We aren't in a rush to add "features" just to check a box. Right now, our focus is on **quality over quantity.** We are perfecting the foundation, ensuring every part of the system is stable, predictable, and honest. 
 
+Build the x86_64 bootstrap executable with Clang and LLD installed:
+
+```sh
+make kernel
+make test-bootstrap
+```
+
+The output is `build/kernel/x86_64/kernul.elf`. This is the linkage milestone;
+bootloader startup and handoff are the next task. `KERNEL_CC` and `KERNEL_LD`
+can select installed tool versions. The hosted `make all` and `make test`
+targets remain separate from the real architecture build.
+
 ---
 
 ## **Open by Design**

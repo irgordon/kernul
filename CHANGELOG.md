@@ -10,6 +10,31 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
+## [v0.0.28] — 2026-10-21
+
+### [Add] — Phase 47, Task 1: Freestanding x86_64 executable linkage
+
+- `make kernel` now cross-compiles the real bootstrap and x86_64 architecture
+  implementation with Clang and links `build/kernel/x86_64/kernul.elf` with LLD.
+- Added an architecture-owned ELF linker layout with separate code/data
+  permissions, zero-fill BSS, a non-executable stack declaration, and
+  `kernel_main` as the entry symbol. The flat load/link base is 1 MiB.
+- Isolated kernel objects and header dependencies from the hosted stub build;
+  linker warnings and unresolved symbols fail the build. CI builds this target.
+
+### [Change] — Bootstrap entry separation
+
+- Refactored `kernel_main` into top-down orchestration, domain decisions, and
+  primitive range helpers while preserving validation, largest-usable-range
+  selection, PMM initialization, and terminal halt behavior.
+- Added the kernel entry declaration and a focused `make test-bootstrap` check
+  for valid memory selection, invalid handoffs, and absent usable memory.
+
+This task completes linkage only. Architecture startup, stack establishment,
+bootloader handoff, and guest boot execution remain in the next tasks.
+
+---
+
 ## [v0.0.27] — 2026-10-21
 
 ### [Change] — Production roadmap and desktop foundations

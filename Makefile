@@ -25,6 +25,31 @@ TEST_CFLAGS = -std=c11 -Wall -Wextra -Werror \
               -Iarch/stub                      \
               -DKERNUL_STUB_TARGET
 
+# Real bootstrap executable: separate ELF tools/objects from the hosted stub target.
+# Override KERNEL_CC/KERNEL_LD to select installed Clang/LLD versions.
+KERNEL_CC ?= clang
+KERNEL_LD ?= ld.lld
+KERNEL_BUILD_DIR = build/kernel/x86_64
+KERNEL_ELF = $(KERNEL_BUILD_DIR)/kernul.elf
+KERNEL_LINKER_SCRIPT = arch/x86_64/kernel.ld
+KERNEL_CFLAGS = --target=x86_64-unknown-none-elf \
+                -std=c11 -Wall -Wextra -Wpedantic -Werror -O2 \
+                -ffreestanding -fno-builtin -fno-stack-protector \
+                -fno-pic -fno-pie -fno-unwind-tables \
+                -fno-asynchronous-unwind-tables -mno-red-zone \
+                -mgeneral-regs-only -Iinclude -Iarch/x86_64 \
+                -DKERNUL_X86_64_TARGET
+KERNEL_LDFLAGS = -m elf_x86_64 -static --no-dynamic-linker \
+                 --no-undefined --fatal-warnings -z max-page-size=0x1000
+KERNEL_SRCS = init/main.c init/boot.c mm/mm.c arch/x86_64/arch.c
+KERNEL_OBJS = $(addprefix $(KERNEL_BUILD_DIR)/,$(KERNEL_SRCS:.c=.o))
+
+BOOTSTRAP_TEST_BIN = build/tests/test_kernel_bootstrap
+BOOTSTRAP_TEST_SRCS = tests/test_kernel_bootstrap.c init/main.c init/boot.c
+BOOTSTRAP_TEST_HEADERS = include/kernul/boot.h include/kernul/arch.h \
+                         include/kernul/mm.h include/kernul/errors.h \
+                         include/kernul/types.h include/kernul/compiler.h
+
 SRCS = arch/stub/arch.c              \
         core/assert.c                 \
         core/address_space.c          \
@@ -117,7 +142,7 @@ GOVERNANCE_TEST_SRCS = tests/governance/test_governance_consistency.c \
 GOVERNANCE_TEST_HEADERS = $(wildcard include/kernul/lifecycle*.h) \
                          include/kernul/types.h include/kernul/compiler.h
 
-.PHONY: all test test-governance clean test_sched_api.o test_cpu_state_api.o \
+.PHONY: all kernel test test-bootstrap test-governance clean test_sched_api.o test_cpu_state_api.o \
         test_init_contract_compile.o \
         test_interactive_scheduler_container_contract_compile.o \
         test_interactive_scheduler_state_contract_compile.o \
@@ -222,6 +247,23 @@ all: $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+kernel: $(KERNEL_ELF)
+
+$(KERNEL_ELF): $(KERNEL_OBJS) $(KERNEL_LINKER_SCRIPT)
+	$(KERNEL_LD) $(KERNEL_LDFLAGS) -T $(KERNEL_LINKER_SCRIPT) $(KERNEL_OBJS) -o $@
+
+$(KERNEL_BUILD_DIR)/%.o: %.c Makefile
+	@mkdir -p $(@D)
+	$(KERNEL_CC) $(KERNEL_CFLAGS) -MMD -MP -c $< -o $@
+
+test-bootstrap: $(BOOTSTRAP_TEST_BIN)
+	./$(BOOTSTRAP_TEST_BIN)
+	@echo "test_kernel_bootstrap: passed."
+
+$(BOOTSTRAP_TEST_BIN): $(BOOTSTRAP_TEST_SRCS) $(BOOTSTRAP_TEST_HEADERS) Makefile
+	@mkdir -p $(@D)
+	$(CC) $(TEST_CFLAGS) $(BOOTSTRAP_TEST_SRCS) -o $@
+
 # Phase 46 consumes immutable metadata only; it has no session or scheduler linkage.
 test-governance: $(GOVERNANCE_TEST_BIN)
 	./$(GOVERNANCE_TEST_BIN)
@@ -231,7 +273,7 @@ $(GOVERNANCE_TEST_BIN): $(GOVERNANCE_TEST_SRCS) $(GOVERNANCE_TEST_HEADERS)
 	@mkdir -p $(@D)
 	$(CC) $(TEST_CFLAGS) $(GOVERNANCE_TEST_SRCS) -o $@
 
-test: test-governance tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
+test: test-bootstrap test-governance tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
       tests/test_runq tests/test_sched_api.o tests/test_sched \
        tests/test_cpu_state_api.o tests/test_idle \
        tests/init/test_init_contract_compile.o \
@@ -1323,7 +1365,7 @@ test_elf_loader_contract_compile.o: tests/elf/test_elf_loader_contract_compile.o
 test_syscall_contract_compile.o: tests/syscall/test_syscall_contract_compile.o
 
 clean:
-	rm -f $(GOVERNANCE_TEST_BIN) $(OBJS) \
+	rm -f $(KERNEL_ELF) $(KERNEL_OBJS) $(KERNEL_OBJS:.o=.d) $(BOOTSTRAP_TEST_BIN) $(GOVERNANCE_TEST_BIN) $(OBJS) \
 	      tests/test_boot tests/test_list tests/test_spinlock \
 	      tests/test_thread tests/test_runq tests/test_sched_api.o \
 	      tests/test_sched tests/test_cpu_state_api.o tests/test_idle \
@@ -1493,3 +1535,6 @@ clean:
 	      tests/syscall/test_sys_dispatch_link \
 	      tests/arch/x86_64/test_arch_syscall_enter_link \
 	      tests/arch/aarch64/test_arch_syscall_enter_link
+
+# Track only headers consumed by the real bootstrap sources.
+-include $(KERNEL_OBJS:.o=.d)

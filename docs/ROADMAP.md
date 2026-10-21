@@ -1,12 +1,13 @@
 # KERNUL Roadmap
 
 Status: Pre-Alpha. Planning revision: `v0.0.27` (2026-10-21).
-Implemented checkpoint: Phase 46, recorded in `v0.0.26`.
-Next implementation task: **47.1 — Link a real freestanding kernel executable**.
+Implemented checkpoint: Task 47.1, recorded in `v0.0.28`.
+Next implementation task: **47.2 — Architecture boot entry and handoff protocol**.
 
 This is the active phase plan. Phases 0–46 retain their historical identities;
 their completed contracts do not establish bootability or application support.
-Phases 47 onward below are planned, not implemented. Versions are exit gates,
+Phase 47 is in progress: Task 47.1 is complete; the remaining tasks and later
+phases are planned, not implemented. Versions are exit gates,
 not calendar promises or percentages of completion.
 
 ## Release direction
@@ -55,7 +56,7 @@ workload demonstrates that the bounded initial target cannot meet its needs.
 
 | Priority | Work | Evidence in the current tree | Alignment / disposition |
 | :--- | :--- | :--- | :--- |
-| P0 — execution blocker | Executable, architecture entry, boot handoff, diagnostics | `Makefile` builds `$(OBJS)` with `arch/stub`; `init/main.c` is absent from `SRCS`; no tracked assembly entry or linker script exists | Finish the runtime obligations behind historical Phases 0–1 in Phase 47 |
+| P0 — execution blocker | Executable, architecture entry, boot handoff, diagnostics | `make kernel` now links the real bootstrap ELF separately from hosted stubs; architecture entry, firmware handoff, and diagnostics are still missing | Finish the runtime obligations behind historical Phases 0–1 in Phase 47 |
 | P0 — corruption blocker | Physical ownership/reclaim, allocation, page permissions, faults | `mm/mm.c` is a bump allocator with a no-op free; `address_space_alloc()` always returns NULL | Turn Phase 2/5 shapes into working memory in Phases 48–49 |
 | P0 — execution blocker | Real CPU switching, interrupts, user entry, syscalls | Hardware CPU-state headers are placeholders; `sched_yield()` changes bookkeeping without switching; `sys_dispatch()` always returns `KERN_ENOSYS` | Complete Phase 4/5 runtime work in Phases 50–52, then safe asynchronous execution in Phase 54 |
 | P0 — process blocker | Process allocation, ELF load, execution, exit/reap | `process_alloc()` always returns NULL; `elf_image_validate()` marks images unsupported; `init_launch()` cannot launch a process | Phase 52 owns the explicit extension of the old init stop boundary |
@@ -84,9 +85,9 @@ an unrelated repository-wide refactor.
 
 Existing abstraction debt is assigned to the work that needs it:
 
-- [High] `kernel_main()` in `init/main.c:76` mixes boot sequencing with direct
-  terminal/memory operations and handoff-field access at lines 87–105. Phase 47
-  must separate the entry flow from those mechanisms when it becomes linked.
+- Task 47.1 resolved `kernel_main()` abstraction mixing: orchestration now
+  calls domain steps, with memory selection and primitive operations below it.
+  The entry's validation/PMM/halt behavior is preserved.
 - [High] `init_launch()` in `core/init.c:17` mixes launch sequencing, member
   assignment, cleanup, and status handling at lines 23–48. Phase 52 must keep
   composition and ownership decisions above allocation/mapping mechanisms.
@@ -94,7 +95,7 @@ Existing abstraction debt is assigned to the work that needs it:
   clearing and character-by-character label construction at lines 83–99.
   Phase 50 must separate initialization decisions from storage operations.
 
-These are recorded implementation obligations, not claims of completed fixes.
+The remaining items are implementation obligations, not completed fixes.
 Keep the step-down ordering, layer call rules, named constants, and function
 size limits from `AGENTS.md` at each changed boundary. Do not add layers that
 hide allocation, locks, interrupt state, or ownership cost.
@@ -138,12 +139,12 @@ storage/network tasks may proceed once their actual I/O prerequisites exist.
 
 ## Phase 47 — Bootable architecture target (`v0.1.0`)
 
-Priority: P0. Status: Not started. Depends on the existing boot contract only.
+Priority: P0. Status: In progress; Task 47.1 complete. Depends on the existing boot contract only.
 
 | Task | One surface | Completion evidence |
 | :--- | :--- | :--- |
-| **47.1 — next** | Freestanding x86_64 executable linkage | A real ELF executable links bootstrap code, including `init/main.c`, against architecture-owned implementations; no stub architecture or unresolved hosted symbols. Verify the image format, entry symbol, and load segments once. This task does not claim the image boots |
-| 47.2 | Architecture boot entry | Choose and pin one existing bootloader/handoff protocol; establish the stack, C-entry state, and exception stop behavior. Keep the instruction/ABI work in `arch/` |
+| **47.1 — complete** | Freestanding x86_64 executable linkage | A real ELF executable links bootstrap code, including `init/main.c`, against architecture-owned implementations; no stub architecture or unresolved hosted symbols. Verify the image format, entry symbol, and load segments once. This task does not claim the image boots |
+| **47.2 — next** | Architecture boot entry | Choose and pin one existing bootloader/handoff protocol; establish the stack, C-entry state, and exception stop behavior. Keep the instruction/ABI work in `arch/` |
 | 47.3 | Boot-info handoff adapter | Populate validated memory regions and kernel reservations with an explicit lifetime; consume firmware/device-tree data only as required by the selected target |
 | 47.4 | Early diagnostic output | The guest emits a known boot marker and a meaningful fatal-stop reason through its own serial backend |
 | 47.5 | Guest bootstrap composition | The chosen QEMU image reaches `kernel_main()` and its documented stop; invalid handoff takes a diagnosed terminal path |

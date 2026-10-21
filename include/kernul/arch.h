@@ -35,8 +35,8 @@ KERN_NORETURN void arch_halt(void);
 /* -------------------------------------------------------------------------
  * arch_early_init() §2.9.2
  *
- * Minimal architecture bring-up. Called once from init/main.c before any
- * subsystem initialization.
+ * Minimal architecture bring-up. Called once by architecture entry before
+ * kernel_main() and any subsystem initialization.
  *
  * Contract:
  *   - Callable exactly once.

@@ -10,6 +10,29 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
+## [v0.0.27] — 2026-10-21
+
+### [Change] — Production roadmap and desktop foundations
+
+- Reprioritized the active roadmap around boot, owned/protected memory, real
+  execution, Unix I/O, a usable shell, persistence, and networking, using
+  implementation gaps in the current tree as evidence.
+- Preserved the historical Phase 0–46 identities and session lifecycle freeze;
+  planned Phases 47–63 define functional milestones through `v1.0.0`.
+- Assigned the next implementation task to Phase 47.1: link a real
+  freestanding x86_64 kernel executable instead of stopping at stub objects.
+- Made protected shared buffers, local IPC, blocking events, display ownership,
+  and keyboard/pointer input a pre-release requirement for later desktop UI.
+  Planned Phases 64–66 cover the subsequent userspace desktop track.
+- Aligned the ABI strategy with bounded compatibility claims and the desktop
+  foundation workload. Added a functionality-based verification budget that
+  excludes speculative tests and repeated unchanged checks.
+
+This milestone updates planning and documentation only. It implements no new
+kernel behavior and does not claim completion of the future release gates.
+
+---
+
 ## [v0.0.26] — 2026-10-21
 
 ### [Add] — Phase 46: Governance consistency verification

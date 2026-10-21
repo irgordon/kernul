@@ -1,0 +1,4 @@
+Source: https://github.com/limine-bootloader/limine-protocol
+Commit: 3a0526b700e356f0eac1b71a77697b3fd1c707a3
+File: include/limine.h (unmodified)
+License: 0BSD, retained in the header.

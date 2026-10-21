@@ -37,7 +37,7 @@ jobs:
       - name: Install pinned toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc make clang lld
+          sudo apt-get install -y gcc make clang lld xorriso
 
       - name: Show toolchain versions
         run: |
@@ -47,7 +47,7 @@ jobs:
       - name: Build
         run: |
           make all
-          make kernel
+          make boot-image
 
       - name: Run deterministic test suite
         run: |

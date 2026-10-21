@@ -69,10 +69,23 @@ make kernel
 make test-bootstrap
 ```
 
-The output is `build/kernel/x86_64/kernul.elf`. This is the linkage milestone;
-bootloader startup and handoff are the next task. `KERNEL_CC` and `KERNEL_LD`
+The output is `build/kernel/x86_64/kernul.elf`. `KERNEL_CC` and `KERNEL_LD`
 can select installed tool versions. The hosted `make all` and `make test`
 targets remain separate from the real architecture build.
+
+With `xorriso`, `curl`, and `shasum` available, build the UEFI boot image:
+
+```sh
+make boot-image
+make run OVMF_CODE=/path/to/uefi-code.fd OVMF_VARS=/path/to/uefi-vars-template.fd
+```
+
+The first image build downloads and checksum-verifies pinned Limine 12.9.3.
+`make run` uses QEMU and matching UEFI code/variable firmware files; it copies
+the variable template into `build/` before use. The image is
+`build/kernel/x86_64/kernul.iso`. Startup installs the kernel-owned stack and
+early descriptor tables, then halts. Memory-map handoff and kernel diagnostics
+are the next tasks; this stage does not launch userspace.
 
 ---
 

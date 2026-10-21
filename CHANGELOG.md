@@ -10,6 +10,33 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
+## [v0.0.29] — 2026-10-21
+
+### [Add] — Phase 47, Task 2: x86_64 architecture boot entry
+
+- Added a Limine entry stub with an image-owned 16 KiB aligned stack and GDT,
+  followed by a C entry that installs the early IDT and checks base revision 6.
+- Added terminal exception gates and an assembly stop entry that aligns the
+  stack and routes faults through `arch_halt()` without attempting recovery.
+- Added `make boot-image` and `make run` for a UEFI ISO and QEMU execution.
+  Limine 12.9.3 release binaries are SHA-256 pinned; the unmodified protocol
+  header is vendored at a fixed commit with its original 0BSD license.
+- Verified UEFI q35 entry and direct invalid-instruction exception dispatch on
+  the kernel-owned stack and descriptor tables. CI also builds the boot image.
+
+### [Change] — Bootloader-compatible executable layout
+
+- Switched the ELF entry to `_start` and the virtual link base to
+  `0xffffffff80000000`, with the x86_64 kernel code model and retained writable
+  request markers. Limine supplies physical backing and higher-half mappings.
+- Preset GDT accessed bits so exception entry does not require writing the
+  read-only descriptor page. Firmware variables are copied before local runs.
+
+The architecture stage stops before memory-map conversion. Task 47.3 supplies
+that adapter; no synthetic `boot_info` or userspace execution is introduced.
+
+---
+
 ## [v0.0.28] — 2026-10-21
 
 ### [Add] — Phase 47, Task 1: Freestanding x86_64 executable linkage

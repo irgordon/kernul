@@ -37,12 +37,28 @@ KERNEL_CFLAGS = --target=x86_64-unknown-none-elf \
                 -ffreestanding -fno-builtin -fno-stack-protector \
                 -fno-pic -fno-pie -fno-unwind-tables \
                 -fno-asynchronous-unwind-tables -mno-red-zone \
-                -mgeneral-regs-only -Iinclude -Iarch/x86_64 \
+                -mgeneral-regs-only -mcmodel=kernel -Iinclude -Iarch/x86_64 \
+                -Ithird_party/limine-protocol/include \
                 -DKERNUL_X86_64_TARGET
 KERNEL_LDFLAGS = -m elf_x86_64 -static --no-dynamic-linker \
                  --no-undefined --fatal-warnings -z max-page-size=0x1000
-KERNEL_SRCS = init/main.c init/boot.c mm/mm.c arch/x86_64/arch.c
-KERNEL_OBJS = $(addprefix $(KERNEL_BUILD_DIR)/,$(KERNEL_SRCS:.c=.o))
+KERNEL_SRCS = init/main.c init/boot.c mm/mm.c arch/x86_64/arch.c arch/x86_64/boot.c
+KERNEL_ASM_SRCS = arch/x86_64/entry.S
+KERNEL_ASFLAGS = --target=x86_64-unknown-none-elf
+KERNEL_OBJS = $(addprefix $(KERNEL_BUILD_DIR)/,$(KERNEL_SRCS:.c=.o) $(KERNEL_ASM_SRCS:.S=.o))
+
+# Limine release binaries are fetched only when building the boot image.
+LIMINE_VERSION = 12.9.3
+LIMINE_SHA256 = 9f42fe9ea2e84d71056529969b1d5c24ba9a2287ffcc01bcce58b0ef8aa98b1d
+LIMINE_ARCHIVE = build/deps/limine-$(LIMINE_VERSION)-binary.tar.gz
+LIMINE_DIR = build/deps/limine-$(LIMINE_VERSION)
+LIMINE_URL = https://github.com/limine-bootloader/limine/releases/download/v$(LIMINE_VERSION)/limine-binary.tar.gz
+KERNEL_ISO = $(KERNEL_BUILD_DIR)/kernul.iso
+KERNEL_ISO_ROOT = $(KERNEL_BUILD_DIR)/iso-root
+XORRISO ?= xorriso
+QEMU ?= qemu-system-x86_64
+OVMF_CODE ?=
+OVMF_VARS ?=
 
 BOOTSTRAP_TEST_BIN = build/tests/test_kernel_bootstrap
 BOOTSTRAP_TEST_SRCS = tests/test_kernel_bootstrap.c init/main.c init/boot.c
@@ -142,7 +158,7 @@ GOVERNANCE_TEST_SRCS = tests/governance/test_governance_consistency.c \
 GOVERNANCE_TEST_HEADERS = $(wildcard include/kernul/lifecycle*.h) \
                          include/kernul/types.h include/kernul/compiler.h
 
-.PHONY: all kernel test test-bootstrap test-governance clean test_sched_api.o test_cpu_state_api.o \
+.PHONY: all kernel boot-image run test test-bootstrap test-governance clean test_sched_api.o test_cpu_state_api.o \
         test_init_contract_compile.o \
         test_interactive_scheduler_container_contract_compile.o \
         test_interactive_scheduler_state_contract_compile.o \
@@ -255,6 +271,42 @@ $(KERNEL_ELF): $(KERNEL_OBJS) $(KERNEL_LINKER_SCRIPT)
 $(KERNEL_BUILD_DIR)/%.o: %.c Makefile
 	@mkdir -p $(@D)
 	$(KERNEL_CC) $(KERNEL_CFLAGS) -MMD -MP -c $< -o $@
+
+$(KERNEL_BUILD_DIR)/%.o: %.S Makefile
+	@mkdir -p $(@D)
+	$(KERNEL_CC) $(KERNEL_ASFLAGS) -MMD -MP -c $< -o $@
+
+boot-image: $(KERNEL_ISO)
+
+run: $(KERNEL_ISO)
+	@test -f "$(OVMF_CODE)" || { echo "Set OVMF_CODE to the UEFI code firmware file."; exit 1; }
+	@test -f "$(OVMF_VARS)" || { echo "Set OVMF_VARS to its matching writable-variable template."; exit 1; }
+	cp "$(OVMF_VARS)" $(KERNEL_BUILD_DIR)/uefi-vars.fd
+	$(QEMU) -machine q35 -accel tcg -cpu qemu64 -m 256M -smp 1 \
+	    -drive if=pflash,format=raw,readonly=on,file="$(OVMF_CODE)" \
+	    -drive if=pflash,format=raw,file=$(KERNEL_BUILD_DIR)/uefi-vars.fd \
+	    -cdrom $(KERNEL_ISO) -boot d -no-reboot -no-shutdown
+
+$(KERNEL_ISO): $(KERNEL_ELF) arch/x86_64/limine.conf $(LIMINE_DIR)/.unpacked Makefile
+	@mkdir -p $(KERNEL_ISO_ROOT)/boot/limine $(KERNEL_ISO_ROOT)/EFI/BOOT
+	cp $(KERNEL_ELF) $(KERNEL_ISO_ROOT)/boot/kernul.elf
+	cp arch/x86_64/limine.conf $(KERNEL_ISO_ROOT)/boot/limine/limine.conf
+	cp $(LIMINE_DIR)/BOOTX64.EFI $(KERNEL_ISO_ROOT)/EFI/BOOT/BOOTX64.EFI
+	cp $(LIMINE_DIR)/limine-uefi-cd.bin $(LIMINE_DIR)/LICENSE $(LIMINE_DIR)/3RDPARTY.md $(KERNEL_ISO_ROOT)/boot/limine/
+	$(XORRISO) -as mkisofs -R -r -J -e boot/limine/limine-uefi-cd.bin \
+	    -no-emul-boot -efi-boot-part --efi-boot-image --protective-msdos-label \
+	    $(KERNEL_ISO_ROOT) -o $@
+
+$(LIMINE_ARCHIVE):
+	@mkdir -p $(@D)
+	curl --fail --location --silent --show-error --max-time 60 --output $@.tmp $(LIMINE_URL)
+	printf '%s  %s\n' '$(LIMINE_SHA256)' '$@.tmp' | shasum -a 256 -c -
+	mv $@.tmp $@
+
+$(LIMINE_DIR)/.unpacked: $(LIMINE_ARCHIVE)
+	@mkdir -p $(@D)
+	tar -xzf $< --strip-components=1 -C $(@D)
+	touch $@
 
 test-bootstrap: $(BOOTSTRAP_TEST_BIN)
 	./$(BOOTSTRAP_TEST_BIN)
@@ -1365,7 +1417,8 @@ test_elf_loader_contract_compile.o: tests/elf/test_elf_loader_contract_compile.o
 test_syscall_contract_compile.o: tests/syscall/test_syscall_contract_compile.o
 
 clean:
-	rm -f $(KERNEL_ELF) $(KERNEL_OBJS) $(KERNEL_OBJS:.o=.d) $(BOOTSTRAP_TEST_BIN) $(GOVERNANCE_TEST_BIN) $(OBJS) \
+	rm -rf $(KERNEL_ISO_ROOT)
+	rm -f $(KERNEL_BUILD_DIR)/uefi-vars.fd $(KERNEL_ISO) $(KERNEL_ELF) $(KERNEL_OBJS) $(KERNEL_OBJS:.o=.d) $(BOOTSTRAP_TEST_BIN) $(GOVERNANCE_TEST_BIN) $(OBJS) \
 	      tests/test_boot tests/test_list tests/test_spinlock \
 	      tests/test_thread tests/test_runq tests/test_sched_api.o \
 	      tests/test_sched tests/test_cpu_state_api.o tests/test_idle \

@@ -4,8 +4,11 @@
  * writes the handoff with interrupts disabled; it is immutable after a
  * successful conversion and lives for the kernel's lifetime. No locks or
  * allocation are needed, and no bootloader pointers are retained in it.
+ * Diagnostics are best effort: a failed UART write must not prevent the
+ * terminal halt. Return codes are deliberately discarded at these stops.
  */
 
+#include "boot_console.h"
 #include "boot_info.h"
 #include <kernul/arch.h>
 #include <kernul/compiler.h>
@@ -14,6 +17,15 @@
 #include <limine.h>
 
 #define BOOT_PROTOCOL_REVISION 6U
+
+static const char BOOT_ENTRY_MESSAGE[] = "kernul: boot entry (x86_64)\r\n";
+static const char UNSUPPORTED_PROTOCOL_MESSAGE[] =
+    "kernul: fatal: unsupported Limine base revision\r\n";
+static const char INVALID_HANDOFF_MESSAGE[] =
+    "kernul: fatal: invalid Limine memory handoff\r\n";
+static const char HANDOFF_STOP_MESSAGE[] =
+    "kernul: handoff valid; stop before kernel_main\r\n";
+static const char EARLY_EXCEPTION_MESSAGE[] = "kernul: fatal: early CPU exception\r\n";
 
 __attribute__((used, section(".limine_requests_start"), aligned(8)))
 static volatile u64 limine_requests_start[] = LIMINE_REQUESTS_START_MARKER;
@@ -40,9 +52,12 @@ extern const u8 __kernel_end[];
 static boot_info_t boot_info;
 
 static void initialize_boot_architecture(void);
+static void initialize_boot_diagnostics(void);
 static void halt_on_unsupported_protocol(void);
 static void prepare_boot_handoff(void);
 static KERN_NORETURN void halt_after_boot_handoff(void);
+static void initialize_exception_diagnostics(void);
+static KERN_NORETURN void halt_after_early_exception(void);
 static bool boot_protocol_is_supported(void);
 static kern_err_t copy_boot_protocol_handoff(void);
 
@@ -50,9 +65,17 @@ static kern_err_t copy_boot_protocol_handoff(void);
 KERN_NORETURN void arch_boot_entry(void)
 {
     initialize_boot_architecture();
+    initialize_boot_diagnostics();
     halt_on_unsupported_protocol();
     prepare_boot_handoff();
     halt_after_boot_handoff();
+}
+
+/* The assembly exception entry supplies an aligned stack and never resumes. */
+KERN_NORETURN void arch_boot_exception_stop(void)
+{
+    initialize_exception_diagnostics();
+    halt_after_early_exception();
 }
 
 static void initialize_boot_architecture(void)
@@ -60,21 +83,44 @@ static void initialize_boot_architecture(void)
     arch_early_init();
 }
 
+static void initialize_boot_diagnostics(void)
+{
+    arch_boot_console_init();
+    (void)arch_boot_console_write(BOOT_ENTRY_MESSAGE);
+}
+
 static void halt_on_unsupported_protocol(void)
 {
-    if (!boot_protocol_is_supported())
-        arch_halt();
+    if (boot_protocol_is_supported())
+        return;
+    (void)arch_boot_console_write(UNSUPPORTED_PROTOCOL_MESSAGE);
+    arch_halt();
 }
 
 static void prepare_boot_handoff(void)
 {
-    if (copy_boot_protocol_handoff() != KERN_OK)
-        arch_halt();
+    if (copy_boot_protocol_handoff() == KERN_OK)
+        return;
+    (void)arch_boot_console_write(INVALID_HANDOFF_MESSAGE);
+    arch_halt();
 }
 
-/* Diagnostics and kernel_main composition belong to Tasks 47.4 and 47.5. */
+/* Task 47.5 composes kernel_main after this validated handoff. */
 static KERN_NORETURN void halt_after_boot_handoff(void)
 {
+    (void)arch_boot_console_write(HANDOFF_STOP_MESSAGE);
+    arch_halt();
+}
+
+static void initialize_exception_diagnostics(void)
+{
+    /* A terminal exception can precede normal console initialization. */
+    arch_boot_console_init();
+}
+
+static KERN_NORETURN void halt_after_early_exception(void)
+{
+    (void)arch_boot_console_write(EARLY_EXCEPTION_MESSAGE);
     arch_halt();
 }
 

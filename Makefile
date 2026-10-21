@@ -43,7 +43,7 @@ KERNEL_CFLAGS = --target=x86_64-unknown-none-elf \
 KERNEL_LDFLAGS = -m elf_x86_64 -static --no-dynamic-linker \
                  --no-undefined --fatal-warnings -z max-page-size=0x1000
 KERNEL_SRCS = init/main.c init/boot.c mm/mm.c arch/x86_64/arch.c \
-              arch/x86_64/boot.c arch/x86_64/boot_info.c
+              arch/x86_64/boot.c arch/x86_64/boot_info.c arch/x86_64/boot_console.c
 KERNEL_ASM_SRCS = arch/x86_64/entry.S
 KERNEL_ASFLAGS = --target=x86_64-unknown-none-elf
 KERNEL_OBJS = $(addprefix $(KERNEL_BUILD_DIR)/,$(KERNEL_SRCS:.c=.o) $(KERNEL_ASM_SRCS:.S=.o))
@@ -289,7 +289,7 @@ run: $(KERNEL_ISO)
 	@test -f "$(OVMF_CODE)" || { echo "Set OVMF_CODE to the UEFI code firmware file."; exit 1; }
 	@test -f "$(OVMF_VARS)" || { echo "Set OVMF_VARS to its matching writable-variable template."; exit 1; }
 	cp "$(OVMF_VARS)" $(KERNEL_BUILD_DIR)/uefi-vars.fd
-	$(QEMU) -machine q35 -accel tcg -cpu qemu64 -m 256M -smp 1 \
+	$(QEMU) -machine q35 -accel tcg -cpu qemu64 -m 256M -smp 1 -serial stdio \
 	    -drive if=pflash,format=raw,readonly=on,file="$(OVMF_CODE)" \
 	    -drive if=pflash,format=raw,file=$(KERNEL_BUILD_DIR)/uefi-vars.fd \
 	    -cdrom $(KERNEL_ISO) -boot d -no-reboot -no-shutdown

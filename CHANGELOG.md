@@ -10,6 +10,25 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
+## [v0.0.31] — 2026-10-21
+
+### [Add] — Phase 47, Task 4: Early diagnostic output
+
+- Added an architecture-private COM1 backend for the q35 target: 115200 baud,
+  8N1, UART interrupts disabled, bounded transmit polling and final drain.
+  No allocator, timer, firmware output, or general console API is required.
+- Emit guest-owned entry and validated-handoff stop markers, with fatal reasons
+  for unsupported Limine revision, invalid handoff, and early CPU exceptions.
+  Every terminal path still ends at `arch_halt()`; failed output is best effort.
+- Expose COM1 on the host terminal through `make run`.
+- Verify normal serial markers, a missing handoff response, and direct
+  invalid-instruction exception output in the real UEFI q35 guest.
+
+Startup still stops before `kernel_main()` and PMM activation. Task 47.5 owns
+that composition; runtime console/input support and exception dumps are deferred.
+
+---
+
 ## [v0.0.30] — 2026-10-21
 
 ### [Add] — Phase 47, Task 3: Boot-info handoff adapter

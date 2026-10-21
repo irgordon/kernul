@@ -27,7 +27,7 @@ arch_exception_stop:
     cli
     cld
     andq $-STACK_ALIGNMENT, %rsp
-    call arch_halt
+    call arch_boot_exception_stop
     jmp arch_halt
 .size arch_exception_stop, . - arch_exception_stop
 

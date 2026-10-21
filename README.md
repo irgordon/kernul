@@ -88,7 +88,12 @@ early descriptor tables, copies and validates Limine's memory map into
 kernel-owned storage, then halts before `kernel_main()`. The adapter preserves
 the 32-region boot contract and reserves the loaded image and bootloader,
 firmware, and device memory. Invalid or oversized maps halt without activating
-the PMM. Guest serial diagnostics are next; this stage does not launch userspace.
+the PMM. `make run` prints guest diagnostics on the host terminal through COM1
+(115200 baud, 8N1), including `kernul: boot entry (x86_64)` and
+`kernul: handoff valid; stop before kernel_main`. Protocol/handoff failures and
+early CPU exceptions print a fatal reason before halting. Serial output uses
+bounded polling and is best effort. Common bootstrap composition is next;
+this stage does not launch userspace.
 
 ---
 

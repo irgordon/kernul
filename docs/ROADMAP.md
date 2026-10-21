@@ -1,12 +1,12 @@
 # KERNUL Roadmap
 
 Status: Pre-Alpha. Planning revision: `v0.0.27` (2026-10-21).
-Implemented checkpoint: Task 47.3, recorded in `v0.0.30`.
-Next implementation task: **47.4 — Early diagnostic output**.
+Implemented checkpoint: Task 47.4, recorded in `v0.0.31`.
+Next implementation task: **47.5 — Guest bootstrap composition**.
 
 This is the active phase plan. Phases 0–46 retain their historical identities;
 their completed contracts do not establish bootability or application support.
-Phase 47 is in progress: Tasks 47.1–47.3 are complete; the remaining tasks and later
+Phase 47 is in progress: Tasks 47.1–47.4 are complete; the remaining tasks and later
 phases are planned, not implemented. Versions are exit gates,
 not calendar promises or percentages of completion.
 
@@ -56,7 +56,7 @@ workload demonstrates that the bounded initial target cannot meet its needs.
 
 | Priority | Work | Evidence in the current tree | Alignment / disposition |
 | :--- | :--- | :--- | :--- |
-| P0 — execution blocker | Executable, architecture entry, boot handoff, diagnostics | `make boot-image` now boots pinned Limine into an owned stack/GDT/IDT and validates a copied memory handoff; diagnostics and common bootstrap composition remain | Finish the runtime obligations behind historical Phases 0–1 in Phase 47 |
+| P0 — execution blocker | Executable, architecture entry, boot handoff, diagnostics | `make boot-image` now boots pinned Limine into an owned stack/GDT/IDT, validates a copied memory handoff, and emits COM1 boot/fatal diagnostics; common bootstrap composition remains | Finish the runtime obligations behind historical Phases 0–1 in Phase 47 |
 | P0 — corruption blocker | Physical ownership/reclaim, allocation, page permissions, faults | `mm/mm.c` is a bump allocator with a no-op free; `address_space_alloc()` always returns NULL | Turn Phase 2/5 shapes into working memory in Phases 48–49 |
 | P0 — execution blocker | Real CPU switching, interrupts, user entry, syscalls | Hardware CPU-state headers are placeholders; `sched_yield()` changes bookkeeping without switching; `sys_dispatch()` always returns `KERN_ENOSYS` | Complete Phase 4/5 runtime work in Phases 50–52, then safe asynchronous execution in Phase 54 |
 | P0 — process blocker | Process allocation, ELF load, execution, exit/reap | `process_alloc()` always returns NULL; `elf_image_validate()` marks images unsupported; `init_launch()` cannot launch a process | Phase 52 owns the explicit extension of the old init stop boundary |
@@ -139,15 +139,15 @@ storage/network tasks may proceed once their actual I/O prerequisites exist.
 
 ## Phase 47 — Bootable architecture target (`v0.1.0`)
 
-Priority: P0. Status: In progress; Tasks 47.1–47.3 complete. Depends on the existing boot contract only.
+Priority: P0. Status: In progress; Tasks 47.1–47.4 complete. Depends on the existing boot contract only.
 
 | Task | One surface | Completion evidence |
 | :--- | :--- | :--- |
 | **47.1 — complete** | Freestanding x86_64 executable linkage | A real ELF executable links bootstrap code, including `init/main.c`, against architecture-owned implementations; no stub architecture or unresolved hosted symbols. Verify the image format, entry symbol, and load segments once. This task does not claim the image boots |
 | **47.2 — complete** | Architecture boot entry | Choose and pin one existing bootloader/handoff protocol; establish the stack, C-entry state, and exception stop behavior. Keep the instruction/ABI work in `arch/` |
 | **47.3 — complete** | Boot-info handoff adapter | Populate validated memory regions and kernel reservations with an explicit lifetime; consume firmware/device-tree data only as required by the selected target |
-| **47.4 — next** | Early diagnostic output | The guest emits a known boot marker and a meaningful fatal-stop reason through its own serial backend |
-| 47.5 | Guest bootstrap composition | The chosen QEMU image reaches `kernel_main()` and its documented stop; invalid handoff takes a diagnosed terminal path |
+| **47.4 — complete** | Early diagnostic output | The guest emits a known boot marker and a meaningful fatal-stop reason through its own serial backend |
+| **47.5 — next** | Guest bootstrap composition | The chosen QEMU image reaches `kernel_main()` and its documented stop; invalid handoff takes a diagnosed terminal path |
 
 Task 47.2 uses Limine 12.9.3 with a pinned protocol header and base revision 6.
 The x86_64 image now links in the higher half and enters through `_start`.
@@ -163,7 +163,17 @@ and overlaps after outward reservation rounding are rejected rather than
 normalized. The reference UEFI q35 guest supplies 32 entries and passes this
 adapter. Focused hosted checks cover reservation/lifetime preservation and
 the bounds/overlap failure paths. The guest halts after conversion, before
-`kernel_main()` or PMM activation; diagnostics and composition remain 47.4–47.5.
+`kernel_main()` or PMM activation; composition remains Task 47.5.
+
+Task 47.4 adds the q35 COM1 backend at port `0x3f8`, 115200 baud, 8N1.
+Guest-owned output identifies C entry, the validated-handoff stop, unsupported
+protocol, invalid handoff, and terminal early CPU exceptions. Transmission and
+the final UART drain use bounded polling; output is best effort, with no timer,
+IRQ driver, allocation, firmware service, or general console/input API.
+`make run` exposes COM1 on the host terminal. Real UEFI q35 checks verify the
+normal markers, a missing-response fatal path, and a direct invalid-instruction
+exception diagnostic followed by `arch_halt()`. Exception output is generic;
+vector/register dumps and runtime console behavior remain outside this task.
 
 Keep the hosted stub target available for the existing contracts. Add the real
 executable target separately. Do not involve scheduler, VFS, networking, or

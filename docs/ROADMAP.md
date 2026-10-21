@@ -1,14 +1,14 @@
 # KERNUL Roadmap
 
 Status: Pre-Alpha. Planning revision: `v0.0.27` (2026-10-21).
-Implemented checkpoint: Task 47.4, recorded in `v0.0.31`.
-Next implementation task: **47.5 — Guest bootstrap composition**.
+Implemented checkpoint: Task 47.5, recorded in `v0.0.32`.
+Next implementation task: **48.1 — Validated usable/reserved region ownership**.
 
 This is the active phase plan. Phases 0–46 retain their historical identities;
 their completed contracts do not establish bootability or application support.
-Phase 47 is in progress: Tasks 47.1–47.4 are complete; the remaining tasks and later
-phases are planned, not implemented. Versions are exit gates,
-not calendar promises or percentages of completion.
+Phase 47's boot gate is complete: Tasks 47.1–47.5 are verified on the selected
+x86_64 UEFI q35 target. Phases 48 and later are planned, not implemented.
+Versions are exit gates, not calendar promises or percentages of completion.
 
 ## Release direction
 
@@ -56,8 +56,8 @@ workload demonstrates that the bounded initial target cannot meet its needs.
 
 | Priority | Work | Evidence in the current tree | Alignment / disposition |
 | :--- | :--- | :--- | :--- |
-| P0 — execution blocker | Executable, architecture entry, boot handoff, diagnostics | `make boot-image` now boots pinned Limine into an owned stack/GDT/IDT, validates a copied memory handoff, and emits COM1 boot/fatal diagnostics; common bootstrap composition remains | Finish the runtime obligations behind historical Phases 0–1 in Phase 47 |
-| P0 — corruption blocker | Physical ownership/reclaim, allocation, page permissions, faults | `mm/mm.c` is a bump allocator with a no-op free; `address_space_alloc()` always returns NULL | Turn Phase 2/5 shapes into working memory in Phases 48–49 |
+| P0 — boot gate met | Executable, architecture entry, boot handoff, diagnostics | The selected UEFI q35 image reaches `kernel_main()`, PMM stub initialization, and `arch_halt()`; invalid Limine handoff is diagnosed before common entry | Phase 47 complete; preserve this boot path while implementing its dependent runtime surfaces |
+| P0 — corruption blocker | Physical ownership/reclaim, allocation, page permissions, faults | `mm_phys_init()` ignores `mem_start`; its kernel-end bump can lie outside the selected usable region. Free is a no-op; `address_space_alloc()` always returns NULL | Task 48.1 must establish physical ownership before page allocation; Phases 48–49 complete allocation/mappings |
 | P0 — execution blocker | Real CPU switching, interrupts, user entry, syscalls | Hardware CPU-state headers are placeholders; `sched_yield()` changes bookkeeping without switching; `sys_dispatch()` always returns `KERN_ENOSYS` | Complete Phase 4/5 runtime work in Phases 50–52, then safe asynchronous execution in Phase 54 |
 | P0 — process blocker | Process allocation, ELF load, execution, exit/reap | `process_alloc()` always returns NULL; `elf_image_validate()` marks images unsupported; `init_launch()` cannot launch a process | Phase 52 owns the explicit extension of the old init stop boundary |
 | P1 — required for v1.0 | Unix I/O, shell, persistent storage, networking | VFS operations return `KERN_ENOSYS`; Phase 6 contracts and Phase 7 surfaces exist without a working shell | Phases 53–57 close the original Unix/shell/compatibility goals |
@@ -104,7 +104,7 @@ hide allocation, locks, interrupt state, or ownership cost.
 
 | Version goal | Planned phases | Exit gate |
 | :--- | :--- | :--- |
-| `v0.1.0` | 47 | A real x86_64 kernel image boots through a documented handoff and produces guest-owned serial diagnostics |
+| `v0.1.0` | 47 | Boot gate met at Task 47.5 (`v0.0.32` implementation checkpoint): a real x86_64 kernel image boots through a documented handoff and produces guest-owned serial diagnostics |
 | `v0.2.0` | 48–49 | Reserved memory stays protected; frames and mappings are reclaimable; access permissions and faults work |
 | `v0.3.0` | 50 | Real kernel threads switch stacks/registers; bootstrap establishes current only through a switch |
 | `v0.4.0` | 51–52 | A userspace program executes syscalls; a real ELF init launches, exits, and is reaped |
@@ -139,7 +139,7 @@ storage/network tasks may proceed once their actual I/O prerequisites exist.
 
 ## Phase 47 — Bootable architecture target (`v0.1.0`)
 
-Priority: P0. Status: In progress; Tasks 47.1–47.4 complete. Depends on the existing boot contract only.
+Priority: P0. Status: Complete on the selected x86_64 UEFI q35 target; Tasks 47.1–47.5 verified. Depends on the existing boot contract only.
 
 | Task | One surface | Completion evidence |
 | :--- | :--- | :--- |
@@ -147,7 +147,7 @@ Priority: P0. Status: In progress; Tasks 47.1–47.4 complete. Depends on the ex
 | **47.2 — complete** | Architecture boot entry | Choose and pin one existing bootloader/handoff protocol; establish the stack, C-entry state, and exception stop behavior. Keep the instruction/ABI work in `arch/` |
 | **47.3 — complete** | Boot-info handoff adapter | Populate validated memory regions and kernel reservations with an explicit lifetime; consume firmware/device-tree data only as required by the selected target |
 | **47.4 — complete** | Early diagnostic output | The guest emits a known boot marker and a meaningful fatal-stop reason through its own serial backend |
-| **47.5 — next** | Guest bootstrap composition | The chosen QEMU image reaches `kernel_main()` and its documented stop; invalid handoff takes a diagnosed terminal path |
+| **47.5 — complete** | Guest bootstrap composition | The chosen QEMU image reaches `kernel_main()` and its documented stop; invalid handoff takes a diagnosed terminal path |
 
 Task 47.2 uses Limine 12.9.3 with a pinned protocol header and base revision 6.
 The x86_64 image now links in the higher half and enters through `_start`.
@@ -162,11 +162,11 @@ The existing 32-region limit is retained. Overflow, unaligned usable ranges,
 and overlaps after outward reservation rounding are rejected rather than
 normalized. The reference UEFI q35 guest supplies 32 entries and passes this
 adapter. Focused hosted checks cover reservation/lifetime preservation and
-the bounds/overlap failure paths. The guest halts after conversion, before
-`kernel_main()` or PMM activation; composition remains Task 47.5.
+the bounds/overlap failure paths. Task 47.5 now transfers the validated handoff
+to the existing common bootstrap.
 
 Task 47.4 adds the q35 COM1 backend at port `0x3f8`, 115200 baud, 8N1.
-Guest-owned output identifies C entry, the validated-handoff stop, unsupported
+Guest-owned output identifies C entry, the validated handoff, unsupported
 protocol, invalid handoff, and terminal early CPU exceptions. Transmission and
 the final UART drain use bounded polling; output is best effort, with no timer,
 IRQ driver, allocation, firmware service, or general console/input API.
@@ -174,6 +174,22 @@ IRQ driver, allocation, firmware service, or general console/input API.
 normal markers, a missing-response fatal path, and a direct invalid-instruction
 exception diagnostic followed by `arch_halt()`. Exception output is generic;
 vector/register dumps and runtime console behavior remain outside this task.
+
+Task 47.5 returns the immutable image-owned handoff from architecture setup;
+`_start` passes it to `kernel_main()` using the x86_64 calling convention.
+Common validation, largest-usable-range selection, PMM initialization, and
+terminal halt keep their existing order and public contracts. Guest checks
+observe the actual common entry, aligned stack, disabled interrupts, PMM
+arguments, and final CPU halt. A missing Limine response emits the fatal reason
+without reaching common entry or changing PMM state. The hosted bootstrap
+contract check also passes. No page allocation, scheduler/current-thread state,
+context switch, or userspace launch is activated.
+
+The PMM remains a stub: its bump pointer starts at the kernel's end and ignores
+the selected range's start. In the reference guest, the kernel is above the
+largest usable region, leaving this stub exhausted. This boot-only checkpoint
+does not establish physical allocation correctness; Task 48.1 must correct the
+ownership handoff before allocation is used.
 
 Keep the hosted stub target available for the existing contracts. Add the real
 executable target separately. Do not involve scheduler, VFS, networking, or
@@ -184,6 +200,10 @@ or speculative platform abstraction.
 ## Phase 48 — Physical ownership and allocation (`v0.2.0`)
 
 Priority: P0. Depends on 47.
+
+Next task: **48.1 — Validated usable/reserved region ownership**. The existing
+PMM's kernel-end bump must not substitute for the selected usable range's
+bounds. Establish valid ownership before enabling any page allocation.
 
 Ordered surfaces: (1) validated usable/reserved region ownership; (2) physical
 frame allocation/reclaim; (3) the minimal object allocator required by processes

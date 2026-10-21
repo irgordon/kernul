@@ -17,6 +17,9 @@ _start:
     xorl %ebp, %ebp
     lgdt arch_boot_gdtr(%rip)
     call arch_boot_entry
+    /* Transfer the borrowed handoff using the x86_64 System V C ABI. */
+    movq %rax, %rdi
+    call kernel_main
     jmp arch_halt
 .size _start, . - _start
 

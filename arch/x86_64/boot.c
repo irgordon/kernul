@@ -11,6 +11,7 @@
 #include "boot_console.h"
 #include "boot_info.h"
 #include <kernul/arch.h>
+#include <kernul/boot.h>
 #include <kernul/compiler.h>
 #include <kernul/errors.h>
 #include <kernul/types.h>
@@ -23,8 +24,8 @@ static const char UNSUPPORTED_PROTOCOL_MESSAGE[] =
     "kernul: fatal: unsupported Limine base revision\r\n";
 static const char INVALID_HANDOFF_MESSAGE[] =
     "kernul: fatal: invalid Limine memory handoff\r\n";
-static const char HANDOFF_STOP_MESSAGE[] =
-    "kernul: handoff valid; stop before kernel_main\r\n";
+static const char HANDOFF_READY_MESSAGE[] =
+    "kernul: handoff valid; entering kernel_main\r\n";
 static const char EARLY_EXCEPTION_MESSAGE[] = "kernul: fatal: early CPU exception\r\n";
 
 __attribute__((used, section(".limine_requests_start"), aligned(8)))
@@ -55,20 +56,25 @@ static void initialize_boot_architecture(void);
 static void initialize_boot_diagnostics(void);
 static void halt_on_unsupported_protocol(void);
 static void prepare_boot_handoff(void);
-static KERN_NORETURN void halt_after_boot_handoff(void);
+static const boot_info_t *prepare_common_bootstrap(void);
 static void initialize_exception_diagnostics(void);
 static KERN_NORETURN void halt_after_early_exception(void);
 static bool boot_protocol_is_supported(void);
 static kern_err_t copy_boot_protocol_handoff(void);
 
-/* Called only by _start; common bootstrap composition remains Task 47.5. */
-KERN_NORETURN void arch_boot_entry(void)
+/*
+ * Called only by _start on the image-owned stack, with interrupts disabled.
+ * Returns a borrowed, immutable image-owned handoff for kernel_main(); storage
+ * stays reserved for the kernel lifetime. Failure halts without returning.
+ * No allocation, locks, or sleep. _start owns the calling-convention transfer.
+ */
+const boot_info_t *arch_boot_entry(void)
 {
     initialize_boot_architecture();
     initialize_boot_diagnostics();
     halt_on_unsupported_protocol();
     prepare_boot_handoff();
-    halt_after_boot_handoff();
+    return prepare_common_bootstrap();
 }
 
 /* The assembly exception entry supplies an aligned stack and never resumes. */
@@ -105,11 +111,10 @@ static void prepare_boot_handoff(void)
     arch_halt();
 }
 
-/* Task 47.5 composes kernel_main after this validated handoff. */
-static KERN_NORETURN void halt_after_boot_handoff(void)
+static const boot_info_t *prepare_common_bootstrap(void)
 {
-    (void)arch_boot_console_write(HANDOFF_STOP_MESSAGE);
-    arch_halt();
+    (void)arch_boot_console_write(HANDOFF_READY_MESSAGE);
+    return &boot_info;
 }
 
 static void initialize_exception_diagnostics(void)

@@ -10,6 +10,27 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
+## [v0.0.32] — 2026-10-21
+
+### [Add] — Phase 47, Task 5: Guest bootstrap composition
+
+- Return the validated, immutable image-owned handoff from architecture setup
+  and pass it to the existing `kernel_main()` through the x86_64 assembly entry.
+  Register/calling-convention details remain in `arch/`; common contracts and
+  validation/memory-selection/PMM-init/halt ordering are preserved.
+- Update the serial marker to `kernul: handoff valid; entering kernel_main`.
+- Verify actual UEFI q35 common entry, stack alignment, disabled interrupts,
+  PMM initialization arguments, and terminal CPU halt without page allocation.
+  A missing Limine response is diagnosed before common entry or PMM mutation.
+  The focused hosted bootstrap contract check also passes.
+
+This closes Phase 47's boot gate on the selected x86_64 reference target. The
+PMM remains a bump/no-op-free stub and ignores the selected range's start;
+Task 48.1 must establish correct physical ownership before allocation is used.
+Scheduler bootstrap, context switching, and userspace remain later phases.
+
+---
+
 ## [v0.0.31] — 2026-10-21
 
 ### [Add] — Phase 47, Task 4: Early diagnostic output

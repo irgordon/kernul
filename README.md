@@ -85,15 +85,18 @@ The first image build downloads and checksum-verifies pinned Limine 12.9.3.
 the variable template into `build/` before use. The image is
 `build/kernel/x86_64/kernul.iso`. Startup installs the kernel-owned stack and
 early descriptor tables, copies and validates Limine's memory map into
-kernel-owned storage, then halts before `kernel_main()`. The adapter preserves
-the 32-region boot contract and reserves the loaded image and bootloader,
-firmware, and device memory. Invalid or oversized maps halt without activating
-the PMM. `make run` prints guest diagnostics on the host terminal through COM1
+kernel-owned storage, and passes it to `kernel_main()`. Common bootstrap validates
+the handoff, selects usable memory, initializes the PMM stub, and halts. The
+adapter preserves the 32-region boot contract and reserves the image, bootloader,
+firmware, and device memory. Invalid or oversized Limine maps halt before common
+entry or PMM initialization. `make run` prints guest diagnostics through COM1
 (115200 baud, 8N1), including `kernul: boot entry (x86_64)` and
-`kernul: handoff valid; stop before kernel_main`. Protocol/handoff failures and
+`kernul: handoff valid; entering kernel_main`. Protocol/handoff failures and
 early CPU exceptions print a fatal reason before halting. Serial output uses
-bounded polling and is best effort. Common bootstrap composition is next;
-this stage does not launch userspace.
+bounded polling and is best effort. This completes the Phase 47 boot gate.
+No pages are allocated and no scheduler or userspace runs. The PMM still uses
+the kernel's end as its bump pointer rather than the selected usable range's
+start; physical ownership and allocation correctness are the next phase.
 
 ---
 

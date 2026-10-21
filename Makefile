@@ -42,7 +42,8 @@ KERNEL_CFLAGS = --target=x86_64-unknown-none-elf \
                 -DKERNUL_X86_64_TARGET
 KERNEL_LDFLAGS = -m elf_x86_64 -static --no-dynamic-linker \
                  --no-undefined --fatal-warnings -z max-page-size=0x1000
-KERNEL_SRCS = init/main.c init/boot.c mm/mm.c arch/x86_64/arch.c arch/x86_64/boot.c
+KERNEL_SRCS = init/main.c init/boot.c mm/mm.c arch/x86_64/arch.c \
+              arch/x86_64/boot.c arch/x86_64/boot_info.c
 KERNEL_ASM_SRCS = arch/x86_64/entry.S
 KERNEL_ASFLAGS = --target=x86_64-unknown-none-elf
 KERNEL_OBJS = $(addprefix $(KERNEL_BUILD_DIR)/,$(KERNEL_SRCS:.c=.o) $(KERNEL_ASM_SRCS:.S=.o))
@@ -64,6 +65,12 @@ BOOTSTRAP_TEST_BIN = build/tests/test_kernel_bootstrap
 BOOTSTRAP_TEST_SRCS = tests/test_kernel_bootstrap.c init/main.c init/boot.c
 BOOTSTRAP_TEST_HEADERS = include/kernul/boot.h include/kernul/arch.h \
                          include/kernul/mm.h include/kernul/errors.h \
+                         include/kernul/types.h include/kernul/compiler.h
+
+BOOT_INFO_TEST_BIN = build/tests/test_x86_64_boot_info
+BOOT_INFO_TEST_SRCS = tests/arch/x86_64/test_boot_info.c arch/x86_64/boot_info.c init/boot.c
+BOOT_INFO_TEST_HEADERS = arch/x86_64/boot_info.h third_party/limine-protocol/include/limine.h \
+                         include/kernul/boot.h include/kernul/mm.h include/kernul/errors.h \
                          include/kernul/types.h include/kernul/compiler.h
 
 SRCS = arch/stub/arch.c              \
@@ -158,7 +165,7 @@ GOVERNANCE_TEST_SRCS = tests/governance/test_governance_consistency.c \
 GOVERNANCE_TEST_HEADERS = $(wildcard include/kernul/lifecycle*.h) \
                          include/kernul/types.h include/kernul/compiler.h
 
-.PHONY: all kernel boot-image run test test-bootstrap test-governance clean test_sched_api.o test_cpu_state_api.o \
+.PHONY: all kernel boot-image run test test-bootstrap test-boot-info test-governance clean test_sched_api.o test_cpu_state_api.o \
         test_init_contract_compile.o \
         test_interactive_scheduler_container_contract_compile.o \
         test_interactive_scheduler_state_contract_compile.o \
@@ -316,6 +323,14 @@ $(BOOTSTRAP_TEST_BIN): $(BOOTSTRAP_TEST_SRCS) $(BOOTSTRAP_TEST_HEADERS) Makefile
 	@mkdir -p $(@D)
 	$(CC) $(TEST_CFLAGS) $(BOOTSTRAP_TEST_SRCS) -o $@
 
+test-boot-info: $(BOOT_INFO_TEST_BIN)
+	./$(BOOT_INFO_TEST_BIN)
+	@echo "test_x86_64_boot_info: passed."
+
+$(BOOT_INFO_TEST_BIN): $(BOOT_INFO_TEST_SRCS) $(BOOT_INFO_TEST_HEADERS) Makefile
+	@mkdir -p $(@D)
+	$(CC) $(TEST_CFLAGS) -Iarch/x86_64 -Ithird_party/limine-protocol/include $(BOOT_INFO_TEST_SRCS) -o $@
+
 # Phase 46 consumes immutable metadata only; it has no session or scheduler linkage.
 test-governance: $(GOVERNANCE_TEST_BIN)
 	./$(GOVERNANCE_TEST_BIN)
@@ -325,7 +340,7 @@ $(GOVERNANCE_TEST_BIN): $(GOVERNANCE_TEST_SRCS) $(GOVERNANCE_TEST_HEADERS)
 	@mkdir -p $(@D)
 	$(CC) $(TEST_CFLAGS) $(GOVERNANCE_TEST_SRCS) -o $@
 
-test: test-bootstrap test-governance tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
+test: test-bootstrap test-boot-info test-governance tests/test_boot tests/test_list tests/test_spinlock tests/test_thread \
       tests/test_runq tests/test_sched_api.o tests/test_sched \
        tests/test_cpu_state_api.o tests/test_idle \
        tests/init/test_init_contract_compile.o \
@@ -1418,7 +1433,7 @@ test_syscall_contract_compile.o: tests/syscall/test_syscall_contract_compile.o
 
 clean:
 	rm -rf $(KERNEL_ISO_ROOT)
-	rm -f $(KERNEL_BUILD_DIR)/uefi-vars.fd $(KERNEL_ISO) $(KERNEL_ELF) $(KERNEL_OBJS) $(KERNEL_OBJS:.o=.d) $(BOOTSTRAP_TEST_BIN) $(GOVERNANCE_TEST_BIN) $(OBJS) \
+	rm -f $(KERNEL_BUILD_DIR)/uefi-vars.fd $(KERNEL_ISO) $(KERNEL_ELF) $(KERNEL_OBJS) $(KERNEL_OBJS:.o=.d) $(BOOTSTRAP_TEST_BIN) $(BOOT_INFO_TEST_BIN) $(GOVERNANCE_TEST_BIN) $(OBJS) \
 	      tests/test_boot tests/test_list tests/test_spinlock \
 	      tests/test_thread tests/test_runq tests/test_sched_api.o \
 	      tests/test_sched tests/test_cpu_state_api.o tests/test_idle \

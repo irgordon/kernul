@@ -10,6 +10,25 @@ phase milestones. v0.0.0 marks the completion of Phase 0 through Phase 4.
 
 ---
 
+## [v0.0.30] — 2026-10-21
+
+### [Add] — Phase 47, Task 3: Boot-info handoff adapter
+
+- Request Limine's memory map and executable address, then copy the map into
+  image-owned `boot_info_t` storage without allocation or borrowed pointers.
+- Derive the physical image extent from the loader response and page-aligned
+  linker bounds, covering the bootstrap stack, descriptor tables, and handoff.
+- Keep only explicitly usable RAM usable. Preserve bootloader, firmware,
+  device, and other image/module reservations; round non-usable bounds outward
+  and reject overflow, overlapping/unordered ranges, or maps over 32 entries.
+- Add `make test-boot-info` for reservation/lifetime and material rejection
+  cases. Verify the real UEFI q35 guest's 32-entry handoff and kernel coverage.
+
+The architecture stage now stops after validated conversion. PMM activation,
+guest serial diagnostics, and `kernel_main()` composition remain later tasks.
+
+---
+
 ## [v0.0.29] — 2026-10-21
 
 ### [Add] — Phase 47, Task 2: x86_64 architecture boot entry

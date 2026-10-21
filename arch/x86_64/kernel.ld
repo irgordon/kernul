@@ -22,6 +22,7 @@ PHDRS
 SECTIONS
 {
     . = KERNEL_LOAD_BASE;
+    __kernel_start = .;
 
     .limine_requests ALIGN(8) :
     {
@@ -51,6 +52,8 @@ SECTIONS
         *(.bss .bss.*)
         *(COMMON)
     } :data
+
+    __kernel_end = ALIGN(KERNEL_PAGE_SIZE);
 
     /DISCARD/ :
     {

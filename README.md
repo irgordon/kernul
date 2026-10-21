@@ -84,8 +84,11 @@ The first image build downloads and checksum-verifies pinned Limine 12.9.3.
 `make run` uses QEMU and matching UEFI code/variable firmware files; it copies
 the variable template into `build/` before use. The image is
 `build/kernel/x86_64/kernul.iso`. Startup installs the kernel-owned stack and
-early descriptor tables, then halts. Memory-map handoff and kernel diagnostics
-are the next tasks; this stage does not launch userspace.
+early descriptor tables, copies and validates Limine's memory map into
+kernel-owned storage, then halts before `kernel_main()`. The adapter preserves
+the 32-region boot contract and reserves the loaded image and bootloader,
+firmware, and device memory. Invalid or oversized maps halt without activating
+the PMM. Guest serial diagnostics are next; this stage does not launch userspace.
 
 ---
 
